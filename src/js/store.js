@@ -33,16 +33,16 @@
   ];
 
   var ACHIEVEMENTS = [
-    { id: 'a1',  ico: '🖌️', t: '初筆',       d: '最初の問題に答えた',            test: function (s) { return s.answered >= 1; } },
-    { id: 'a2',  ico: '📖', t: '百問',       d: '通算100問に答えた',             test: function (s) { return s.answered >= 100; } },
-    { id: 'a3',  ico: '📚', t: '五百問',     d: '通算500問に答えた',             test: function (s) { return s.answered >= 500; } },
-    { id: 'a4',  ico: '🔥', t: '三日坊主脱出', d: '3日連続で学習した',            test: function (s) { return s.streak >= 3; } },
-    { id: 'a5',  ico: '🏮', t: '七日精進',   d: '7日連続で学習した',             test: function (s) { return s.streak >= 7; } },
-    { id: 'a6',  ico: '🎯', t: '全問正解',   d: 'いずれかのモードを全問正解',     test: function (s) { return !!s._perfect; } },
-    { id: 'a7',  ico: '⚡', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
-    { id: 'a8',  ico: '🌸', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
-    { id: 'a9',  ico: '🗝️', t: '句法通',     d: '句法クイズを5回プレイ',          test: function (s) { return (s.plays.kuho || 0) >= 5; } },
-    { id: 'a10', ico: '🏯', t: '免許皆伝',   d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
+    { id: 'a1',  ico: '初', t: '初筆',       d: '最初の問題に答えた',            test: function (s) { return s.answered >= 1; } },
+    { id: 'a2',  ico: '百', t: '百問',       d: '通算100問に答えた',             test: function (s) { return s.answered >= 100; } },
+    { id: 'a3',  ico: '五', t: '五百問',     d: '通算500問に答えた',             test: function (s) { return s.answered >= 500; } },
+    { id: 'a4',  ico: '続', t: '三日坊主脱出', d: '3日連続で学習した',            test: function (s) { return s.streak >= 3; } },
+    { id: 'a5',  ico: '精', t: '七日精進',   d: '7日連続で学習した',             test: function (s) { return s.streak >= 7; } },
+    { id: 'a6',  ico: '全', t: '全問正解',   d: 'いずれかのモードを全問正解',     test: function (s) { return !!s._perfect; } },
+    { id: 'a7',  ico: '連', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
+    { id: 'a8',  ico: '詩', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
+    { id: 'a9',  ico: '句', t: '句法通',     d: '句法クイズを5回プレイ',          test: function (s) { return (s.plays.kuho || 0) >= 5; } },
+    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
   ];
 
   var state = null;

@@ -38,17 +38,17 @@
 
   /* ============================ モード定義 ============================ */
   var MODES = [
-    { id: 'kundoku', ico: '📐', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
-    { id: 'saidoku', ico: '🔁', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎' },
-    { id: 'kuho', ico: '⚔️', t: '句法バトル', d: '制限時間つき。三回まちがえると道場破り', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--shu)', hearts: 3, perQ: 25, tag: '本命' },
-    { id: 'kaeriten', ico: '🧭', t: '返り点ルート', d: '返り点に従って読む順にタップする', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
-    { id: 'okiji', ico: '👻', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル' },
-    { id: 'narabe', ico: '🧩', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル' },
-    { id: 'kanshi', ico: '🌙', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識' },
-    { id: 'koji', ico: '📜', t: '故事成語', d: '意味と出典をセットで覚える', kind: 'choice', pool: 'koji', n: 12, accent: 'var(--kin)', tag: '知識' },
-    { id: 'kanji', ico: '✍️', t: '頻出漢字の読み', d: '一問十秒。読みを瞬時に引き出す', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答' },
-    { id: 'weak', ico: '🩹', t: '弱点復習', d: 'まちがえた問題だけを狙って出し直す', kind: 'choice', pool: 'weak', n: 12, accent: 'var(--shu)', tag: '復習' },
-    { id: 'mogi', ico: '🏯', t: '実力テスト', d: '全範囲から20問。百点満点で判定', kind: 'choice', pool: 'mogi', n: 20, accent: 'var(--ink)', total: 600, tag: '総合' }
+    { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
+    { id: 'saidoku', ico: '再', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎' },
+    { id: 'kuho', ico: '句', t: '句法バトル', d: '制限時間つき。三回まちがえると道場破り', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--shu)', hearts: 3, perQ: 25, tag: '本命' },
+    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '返り点に従って読む順にタップする', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'okiji', ico: '置', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'narabe', ico: '序', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識' },
+    { id: 'koji', ico: '故', t: '故事成語', d: '意味と出典をセットで覚える', kind: 'choice', pool: 'koji', n: 12, accent: 'var(--kin)', tag: '知識' },
+    { id: 'kanji', ico: '字', t: '頻出漢字の読み', d: '一問十秒。読みを瞬時に引き出す', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答' },
+    { id: 'weak', ico: '弱', t: '弱点復習', d: 'まちがえた問題だけを狙って出し直す', kind: 'choice', pool: 'weak', n: 12, accent: 'var(--shu)', tag: '復習' },
+    { id: 'mogi', ico: '試', t: '実力テスト', d: '全範囲から20問。百点満点で判定', kind: 'choice', pool: 'mogi', n: 20, accent: 'var(--ink)', total: 600, tag: '総合' }
   ];
   function modeById(id) {
     for (var i = 0; i < MODES.length; i++) if (MODES[i].id === id) return MODES[i];
@@ -98,10 +98,10 @@
       '<div class="modes">' + cards + '</div>' +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
-        '<button class="mode" data-act="go" data-to="lessons" style="--accent:var(--ai)"><div class="m-ico">📕</div><div class="m-t">基礎講座</div><div class="m-d">訓読・句法・漢詩のルールを読んで理解する</div></button>' +
-        '<button class="mode" data-act="go" data-to="zukan" style="--accent:var(--midori)"><div class="m-ico">🗂️</div><div class="m-t">句法図鑑</div><div class="m-d">' + window.KUHO.length + 'の句形を検索・分類して確認</div></button>' +
-        '<button class="mode" data-act="go" data-to="shishu" style="--accent:var(--murasaki)"><div class="m-ico">🌸</div><div class="m-t">漢詩集</div><div class="m-d">' + window.KANSHI.length + '首の名詩を書き下し・訳つきで</div></button>' +
-        '<button class="mode" data-act="go" data-to="ach" style="--accent:var(--kin)"><div class="m-ico">🏅</div><div class="m-t">実績</div><div class="m-d">称号を集めて学習の記録を残す</div></button>' +
+        '<button class="mode" data-act="go" data-to="lessons" style="--accent:var(--ai)"><div class="m-ico">講</div><div class="m-t">基礎講座</div><div class="m-d">訓読・句法・漢詩のルールを読んで理解する</div></button>' +
+        '<button class="mode" data-act="go" data-to="zukan" style="--accent:var(--midori)"><div class="m-ico">図</div><div class="m-t">句法図鑑</div><div class="m-d">' + window.KUHO.length + 'の句形を検索・分類して確認</div></button>' +
+        '<button class="mode" data-act="go" data-to="shishu" style="--accent:var(--murasaki)"><div class="m-ico">詩</div><div class="m-t">漢詩集</div><div class="m-d">' + window.KANSHI.length + '首の名詩を書き下し・訳つきで</div></button>' +
+        '<button class="mode" data-act="go" data-to="ach" style="--accent:var(--kin)"><div class="m-ico">賞</div><div class="m-t">実績</div><div class="m-d">称号を集めて学習の記録を残す</div></button>' +
       '</div>' +
       '<div class="footer">出典表記のある例文はすべて古典からの引用です。学習用に書き下し文・現代語訳を付しています。</div>'
     );
@@ -753,7 +753,7 @@
     if (t) document.documentElement.setAttribute('data-theme', t);
     else document.documentElement.removeAttribute('data-theme');
     var btn = el('theme-btn');
-    if (btn) btn.textContent = t === 'dark' ? '☀' : t === 'light' ? '☾' : '◑';
+    if (btn) btn.textContent = t === 'dark' ? '暗' : t === 'light' ? '明' : '自';
   }
   function toggleTheme() {
     var order = ['', 'light', 'dark'];
