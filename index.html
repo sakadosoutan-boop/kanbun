@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>漢文道場 — 句法と訓読をゲームで鍛える</title>
+<meta name="description" content="高校生のための漢文トレーニングアプリ。再読文字・句法・返り点・置き字・漢詩・故事成語を、ゲーム感覚で復習できます。">
+<meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16151a" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23b8443a'/><text x='32' y='45' font-size='40' text-anchor='middle' fill='%23fff8f0' font-family='serif'>漢</text></svg>">
+<link rel="stylesheet" href="src/styles/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="brand" data-act="go" data-to="home" style="text-align:left">
+      <span class="seal">漢文<br>道場</span>
+      <span><b>漢文道場</b><small>KANBUN DOJO</small></span>
+    </button>
+    <span class="spacer"></span>
+    <button class="icon-btn" data-act="go" data-to="zukan" title="句法図鑑">🗂️</button>
+    <button class="icon-btn" data-act="go" data-to="lessons" title="基礎講座">📕</button>
+    <button class="icon-btn" id="theme-btn" data-act="theme" title="テーマ切替">◑</button>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="src/data/kuho.js"></script>
+<script src="src/data/mondai.js"></script>
+<script src="src/data/kaeriten.js"></script>
+<script src="src/data/okiji.js"></script>
+<script src="src/data/narabekae.js"></script>
+<script src="src/data/kanshi.js"></script>
+<script src="src/data/koji.js"></script>
+<script src="src/data/kanji.js"></script>
+<script src="src/data/lessons.js"></script>
+<script src="src/js/store.js"></script>
+<script src="src/js/quizgen.js"></script>
+<script src="src/js/app.js"></script>
+</body>
+</html>

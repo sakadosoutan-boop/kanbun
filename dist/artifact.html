@@ -1,0 +1,3195 @@
+<title>漢文道場 — 句法と訓読をゲームで鍛える</title>
+<style>
+/* ============================================================
+   漢文道場 — stylesheet
+   和モダン：墨・生成り・朱・金
+   ============================================================ */
+
+:root {
+  --paper:      #f4efe4;
+  --paper-2:    #ece5d6;
+  --card:       #fffdf8;
+  --ink:        #1f1d1a;
+  --ink-2:      #4a453d;
+  --ink-3:      #7d766a;
+  --line:       #d9d0bd;
+  --shu:        #b8443a;   /* 朱 */
+  --shu-soft:   #e8c3bd;
+  --kin:        #b7913f;   /* 金 */
+  --ai:         #2f5069;   /* 藍 */
+  --midori:     #4a7a5c;
+  --murasaki:   #6b5b8e;
+  --ok:         #2f7d54;
+  --ng:         #b8443a;
+  --shadow:     0 1px 2px rgba(31,29,26,.06), 0 6px 20px rgba(31,29,26,.08);
+  --shadow-lg:  0 2px 6px rgba(31,29,26,.08), 0 18px 48px rgba(31,29,26,.14);
+  --radius:     16px;
+  --radius-sm:  10px;
+  --mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Songti SC", serif;
+  --gothic: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper:    #16151a;
+    --paper-2:  #1d1c22;
+    --card:     #23222a;
+    --ink:      #eee9df;
+    --ink-2:    #c3bcae;
+    --ink-3:    #8d8578;
+    --line:     #383641;
+    --shu:      #e0685c;
+    --shu-soft: #5a2f2c;
+    --kin:      #d5b062;
+    --ai:       #7aa5c4;
+    --midori:   #7bb392;
+    --murasaki: #a696cc;
+    --ok:       #6cc294;
+    --ng:       #e0685c;
+    --shadow:   0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+    --shadow-lg:0 2px 6px rgba(0,0,0,.45), 0 18px 48px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="light"] {
+  --paper: #f4efe4; --paper-2:#ece5d6; --card:#fffdf8; --ink:#1f1d1a; --ink-2:#4a453d;
+  --ink-3:#7d766a; --line:#d9d0bd; --shu:#b8443a; --shu-soft:#e8c3bd; --kin:#b7913f;
+  --ai:#2f5069; --midori:#4a7a5c; --murasaki:#6b5b8e; --ok:#2f7d54; --ng:#b8443a;
+  --shadow:0 1px 2px rgba(31,29,26,.06), 0 6px 20px rgba(31,29,26,.08);
+  --shadow-lg:0 2px 6px rgba(31,29,26,.08), 0 18px 48px rgba(31,29,26,.14);
+}
+:root[data-theme="dark"] {
+  --paper:#16151a; --paper-2:#1d1c22; --card:#23222a; --ink:#eee9df; --ink-2:#c3bcae;
+  --ink-3:#8d8578; --line:#383641; --shu:#e0685c; --shu-soft:#5a2f2c; --kin:#d5b062;
+  --ai:#7aa5c4; --midori:#7bb392; --murasaki:#a696cc; --ok:#6cc294; --ng:#e0685c;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+  --shadow-lg:0 2px 6px rgba(0,0,0,.45), 0 18px 48px rgba(0,0,0,.5);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--gothic);
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(1200px 600px at 15% -10%, color-mix(in srgb, var(--kin) 10%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--ai) 10%, transparent), transparent 55%);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
+
+/* ---------- layout ---------- */
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 16px 96px; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-in {
+  max-width: 880px; margin: 0 auto; padding: 10px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--mincho); }
+.seal {
+  width: 34px; height: 34px; flex: none; border-radius: 7px;
+  background: var(--shu); color: #fff8f0;
+  display: grid; place-items: center;
+  font-family: var(--mincho); font-size: 13px; font-weight: 700; letter-spacing: -1px;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--shu) 40%, transparent);
+  line-height: 1.05; text-align: center;
+}
+.brand b { font-size: 17px; letter-spacing: .06em; font-weight: 600; }
+.brand small { display: block; font-family: var(--gothic); font-size: 10px; color: var(--ink-3); letter-spacing: .18em; }
+.topbar .spacer { flex: 1; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  color: var(--ink-2); border: 1px solid transparent; font-size: 17px;
+}
+.icon-btn:hover { background: var(--paper-2); border-color: var(--line); }
+
+/* ---------- hero ---------- */
+.hero { padding: 26px 0 6px; }
+.hero h1 { font-family: var(--mincho); font-size: clamp(26px, 6vw, 38px); letter-spacing: .06em; }
+.hero p { color: var(--ink-2); margin: 8px 0 0; font-size: 14px; }
+
+.rankbar {
+  margin-top: 18px; background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+  display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
+}
+.rank-badge {
+  width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--mincho); font-size: 20px; color: #fff;
+  background: linear-gradient(145deg, var(--kin), color-mix(in srgb, var(--kin) 65%, #7a5a1e));
+  box-shadow: inset 0 -2px 6px rgba(0,0,0,.2), 0 3px 12px color-mix(in srgb, var(--kin) 35%, transparent);
+}
+.rank-meta { min-width: 0; }
+.rank-meta .r-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.rank-meta b { font-family: var(--mincho); font-size: 19px; letter-spacing: .05em; }
+.rank-meta .r-xp { font-size: 12px; color: var(--ink-3); }
+.bar { height: 8px; border-radius: 99px; background: var(--paper-2); overflow: hidden; margin-top: 8px; border: 1px solid var(--line); }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--kin), var(--shu)); border-radius: 99px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; text-align: center; }
+.stat b { display: block; font-family: var(--mincho); font-size: 22px; line-height: 1.2; }
+.stat span { font-size: 11px; color: var(--ink-3); letter-spacing: .08em; }
+
+/* ---------- section ---------- */
+.sec-h { display: flex; align-items: center; gap: 10px; margin: 30px 0 12px; }
+.sec-h h2 { font-family: var(--mincho); font-size: 17px; letter-spacing: .14em; }
+.sec-h .rule { flex: 1; height: 1px; background: var(--line); }
+
+/* ---------- mode cards ---------- */
+.modes { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.mode {
+  position: relative; text-align: left; background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s, border-color .18s;
+  display: block; width: 100%; overflow: hidden;
+}
+.mode:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: color-mix(in srgb, var(--accent, var(--kin)) 45%, var(--line)); }
+.mode:active { transform: translateY(-1px); }
+.mode::after {
+  content: ""; position: absolute; inset: auto -30px -30px auto; width: 90px; height: 90px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent, var(--kin)) 12%, transparent);
+}
+.mode .m-ico { font-size: 22px; }
+.mode .m-t { font-family: var(--mincho); font-size: 17px; letter-spacing: .05em; margin-top: 6px; }
+.mode .m-d { font-size: 12px; color: var(--ink-3); margin-top: 4px; line-height: 1.6; position: relative; z-index: 1; }
+.mode .m-tag {
+  position: absolute; top: 12px; right: 12px; font-size: 10px; letter-spacing: .1em;
+  padding: 2px 8px; border-radius: 99px; color: var(--accent, var(--kin));
+  background: color-mix(in srgb, var(--accent, var(--kin)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--kin)) 30%, transparent);
+}
+.mode .m-prog { margin-top: 10px; font-size: 11px; color: var(--ink-3); position: relative; z-index: 1; }
+
+/* ---------- generic card / buttons ---------- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 20px; border-radius: 99px; font-size: 14px; font-weight: 600;
+  background: var(--ink); color: var(--paper); transition: transform .12s, opacity .12s, background .15s;
+}
+.btn:hover { opacity: .9; }
+.btn:active { transform: scale(.97); }
+.btn.ghost { background: transparent; color: var(--ink-2); border: 1px solid var(--line); }
+.btn.ghost:hover { background: var(--paper-2); }
+.btn.shu { background: var(--shu); color: #fff; }
+.btn.block { width: 100%; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- game HUD ---------- */
+.hud {
+  position: sticky; top: 55px; z-index: 30; margin: 0 -16px 14px; padding: 10px 16px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+}
+.hud-row { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--ink-2); }
+.hud-row .q-no { font-family: var(--mincho); font-size: 14px; letter-spacing: .05em; }
+.hud-row .sp { flex: 1; }
+.hud-score { font-family: var(--mincho); font-size: 18px; }
+.combo { color: var(--shu); font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; transform: translateY(4px); }
+.combo.on { opacity: 1; transform: none; }
+.timer { height: 5px; border-radius: 99px; background: var(--paper-2); overflow: hidden; margin-top: 8px; border: 1px solid var(--line); }
+.timer > i { display: block; height: 100%; background: linear-gradient(90deg, var(--midori), var(--kin)); transition: width .25s linear; }
+.timer.warn > i { background: linear-gradient(90deg, var(--kin), var(--shu)); }
+.hearts { letter-spacing: 2px; font-size: 14px; }
+
+/* ---------- question ---------- */
+.q-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.q-cat { display: inline-block; font-size: 11px; letter-spacing: .12em; color: var(--ai); background: color-mix(in srgb, var(--ai) 12%, transparent); border: 1px solid color-mix(in srgb, var(--ai) 28%, transparent); padding: 2px 10px; border-radius: 99px; }
+.q-stem {
+  font-family: var(--mincho); font-size: clamp(20px, 5.2vw, 27px); letter-spacing: .09em;
+  margin: 14px 0 6px; line-height: 1.85; text-align: center;
+}
+.q-stem .mark { color: var(--shu); font-size: .62em; vertical-align: super; margin: 0 1px; font-style: normal; }
+.q-src { text-align: center; font-size: 11px; color: var(--ink-3); }
+.q-text { margin: 14px 0 0; font-size: 15px; }
+
+.choices { display: grid; gap: 9px; margin-top: 16px; }
+.choice {
+  display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%;
+  padding: 13px 15px; border-radius: var(--radius-sm); border: 1.5px solid var(--line);
+  background: var(--card); font-size: 15px; transition: border-color .14s, background .14s, transform .1s;
+}
+.choice:hover:not(:disabled) { border-color: var(--ink-3); background: var(--paper-2); }
+.choice:active:not(:disabled) { transform: scale(.995); }
+.choice .k {
+  flex: none; width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center;
+  background: var(--paper-2); border: 1px solid var(--line); font-size: 12px; font-family: var(--mincho); color: var(--ink-2);
+}
+.choice.correct { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, var(--card)); }
+.choice.correct .k { background: var(--ok); color: #fff; border-color: var(--ok); }
+.choice.wrong { border-color: var(--ng); background: color-mix(in srgb, var(--ng) 12%, var(--card)); }
+.choice.wrong .k { background: var(--ng); color: #fff; border-color: var(--ng); }
+.choice:disabled { cursor: default; }
+
+.verdict { margin-top: 14px; border-radius: var(--radius-sm); padding: 14px 16px; border: 1px solid var(--line); background: var(--paper-2); animation: pop .25s cubic-bezier(.2,.8,.2,1); }
+.verdict .v-h { font-family: var(--mincho); font-size: 16px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; }
+.verdict.ok .v-h { color: var(--ok); }
+.verdict.ng .v-h { color: var(--ng); }
+.verdict p { margin: 8px 0 0; font-size: 13.5px; color: var(--ink-2); }
+@keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.shake { animation: shake .32s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(3px)} }
+
+/* ---------- 返り点パズル ---------- */
+.kt-stage { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 18px 0 6px; }
+.kt-char {
+  position: relative; width: 60px; height: 74px; border-radius: 10px; border: 1.5px solid var(--line);
+  background: var(--card); font-family: var(--mincho); font-size: 28px; display: grid; place-items: center;
+  transition: transform .12s, border-color .14s, background .14s;
+}
+.kt-char:hover:not(:disabled):not(.done) { border-color: var(--ink-3); transform: translateY(-2px); }
+.kt-char .mk { position: absolute; left: 3px; bottom: 2px; font-size: 11px; color: var(--shu); font-family: var(--gothic); letter-spacing: -.5px; }
+.kt-char .ord {
+  position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ai); color: #fff; font-size: 11px; font-family: var(--gothic);
+  display: grid; place-items: center; box-shadow: var(--shadow);
+}
+.kt-char.done { background: color-mix(in srgb, var(--ai) 10%, var(--card)); border-color: var(--ai); color: var(--ink-2); }
+.kt-char.bad { border-color: var(--ng); background: color-mix(in srgb, var(--ng) 12%, var(--card)); }
+
+/* ---------- 置き字ハンター ---------- */
+.ok-stage { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 18px 0; }
+.ok-char {
+  width: 54px; height: 62px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card);
+  font-family: var(--mincho); font-size: 26px; display: grid; place-items: center; transition: all .14s;
+}
+.ok-char:hover:not(:disabled) { border-color: var(--ink-3); transform: translateY(-2px); }
+.ok-char.sel { border-color: var(--kin); background: color-mix(in srgb, var(--kin) 16%, var(--card)); }
+.ok-char.hit { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 16%, var(--card)); }
+.ok-char.miss { border-color: var(--ng); background: color-mix(in srgb, var(--ng) 16%, var(--card)); text-decoration: line-through; }
+
+/* ---------- 並べ替え ---------- */
+.nb-slot {
+  min-height: 58px; border: 1.5px dashed var(--line); border-radius: var(--radius-sm);
+  padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;
+  background: color-mix(in srgb, var(--paper-2) 60%, transparent);
+}
+.nb-pool { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip {
+  padding: 8px 14px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--card);
+  font-family: var(--mincho); font-size: 16px; letter-spacing: .04em; transition: all .13s;
+}
+.chip:hover:not(:disabled) { border-color: var(--ink-3); transform: translateY(-2px); }
+.chip.placed { background: color-mix(in srgb, var(--ai) 12%, var(--card)); border-color: var(--ai); }
+.chip.ok { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, var(--card)); }
+.chip.ng { border-color: var(--ng); background: color-mix(in srgb, var(--ng) 14%, var(--card)); }
+.chip:disabled { opacity: .35; }
+
+/* ---------- result ---------- */
+.result { text-align: center; padding: 26px 18px; }
+.result .r-rank { font-family: var(--mincho); font-size: 56px; line-height: 1; color: var(--kin); }
+.result .r-score { font-family: var(--mincho); font-size: 40px; margin-top: 6px; }
+.result .r-sub { color: var(--ink-3); font-size: 13px; }
+.result .r-msg { margin-top: 12px; font-size: 14px; color: var(--ink-2); }
+.r-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 18px; }
+
+.review { margin-top: 20px; text-align: left; }
+.review-item { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 13px 15px; margin-bottom: 9px; background: var(--card); }
+.review-item .ri-q { font-size: 13.5px; }
+.review-item .ri-stem { font-family: var(--mincho); font-size: 17px; margin-bottom: 4px; letter-spacing: .06em; }
+.review-item .ri-a { font-size: 13px; color: var(--ok); margin-top: 6px; }
+.review-item .ri-y { font-size: 13px; color: var(--ng); }
+.review-item .ri-e { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; }
+
+/* ---------- 図鑑 ---------- */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; }
+.pill {
+  padding: 6px 13px; border-radius: 99px; border: 1px solid var(--line); font-size: 12.5px;
+  background: var(--card); color: var(--ink-2); transition: all .13s;
+}
+.pill:hover { border-color: var(--ink-3); }
+.pill.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.search {
+  width: 100%; padding: 11px 15px; border-radius: 99px; border: 1px solid var(--line);
+  background: var(--card); font-size: 14px; outline: none;
+}
+.search:focus { border-color: var(--kin); box-shadow: 0 0 0 3px color-mix(in srgb, var(--kin) 18%, transparent); }
+
+.kuho-item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); margin-bottom: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.kuho-head { width: 100%; text-align: left; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+.kuho-head:hover { background: var(--paper-2); }
+.kuho-head .kh-main { flex: 1; min-width: 0; }
+.kuho-head .kh-form { display: block; font-family: var(--mincho); font-size: 19px; letter-spacing: .06em; line-height: 1.5; }
+.kuho-head .kh-read { display: block; font-size: 12.5px; color: var(--ink-3); margin-top: 2px; line-height: 1.5; }
+.kuho-head .kh-cat { font-size: 10.5px; letter-spacing: .1em; padding: 2px 9px; border-radius: 99px; background: var(--paper-2); border: 1px solid var(--line); color: var(--ink-2); flex: none; }
+.lv { flex: none; font-size: 10px; letter-spacing: .06em; color: var(--kin); }
+.kuho-body { padding: 0 16px 16px; border-top: 1px dashed var(--line); }
+.kuho-body .kb-mean { margin: 12px 0 0; font-size: 15px; }
+.kuho-body .kb-note { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-3); background: var(--paper-2); border-radius: var(--radius-sm); padding: 10px 12px; }
+.ex { margin-top: 12px; border-left: 3px solid var(--shu-soft); padding-left: 12px; }
+.ex .ex-k { font-family: var(--mincho); font-size: 17px; letter-spacing: .08em; }
+.ex .ex-y { font-size: 13.5px; color: var(--ink-2); margin-top: 2px; }
+.ex .ex-t { font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
+.ex .ex-s { font-size: 11px; color: var(--kin); margin-top: 3px; }
+
+/* ---------- lessons ---------- */
+.lesson-body { font-size: 15px; }
+.lesson-body p { margin: 0 0 14px; }
+.l-tip { background: color-mix(in srgb, var(--kin) 10%, transparent); border: 1px solid color-mix(in srgb, var(--kin) 30%, transparent); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13.5px; }
+.l-table { width: 100%; border-collapse: collapse; margin: 4px 0 16px; font-size: 13.5px; }
+.l-table th, .l-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+.l-table th { background: var(--paper-2); font-weight: 600; font-size: 12.5px; letter-spacing: .04em; }
+.l-table i { color: var(--shu); font-style: normal; font-size: .8em; vertical-align: super; }
+.l-ol { padding-left: 1.3em; margin: 0 0 14px; }
+.l-ol li { margin-bottom: 9px; font-size: 14.5px; }
+.l-flow { display: grid; gap: 10px; margin: 4px 0 16px; }
+.l-step { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; background: var(--paper-2); }
+.l-step b { display: inline-block; font-size: 11px; letter-spacing: .12em; color: var(--shu); }
+.l-step span { display: block; font-family: var(--mincho); font-size: 20px; letter-spacing: .1em; margin: 3px 0; }
+.l-step i { color: var(--shu); font-style: normal; font-size: .65em; vertical-align: super; }
+.l-step small { color: var(--ink-3); font-size: 11.5px; }
+.l-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 16px; }
+.l-cmp > div { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; background: var(--card); }
+.l-cmp > div > b { display: block; font-family: var(--mincho); letter-spacing: .05em; margin-bottom: 6px; color: var(--ai); }
+.l-cmp p { margin: 0; font-size: 13.5px; }
+@media (max-width: 520px) { .l-cmp { grid-template-columns: 1fr; } }
+
+/* ---------- poem ---------- */
+.poem { text-align: center; font-family: var(--mincho); }
+.poem .p-line { font-size: clamp(17px, 4.6vw, 21px); letter-spacing: .16em; margin: 3px 0; }
+.poem .p-line.rhy { color: var(--shu); }
+.poem .p-line .rh { border-bottom: 2px solid var(--shu); }
+.poem .p-yomi { font-size: 13px; color: var(--ink-3); font-family: var(--gothic); margin-top: 12px; line-height: 1.9; }
+.poem-meta { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.tagl { font-size: 11px; letter-spacing: .08em; padding: 3px 10px; border-radius: 99px; background: var(--paper-2); border: 1px solid var(--line); color: var(--ink-2); }
+
+/* ---------- misc ---------- */
+.center { text-align: center; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.mt { margin-top: 16px; }
+.mt-l { margin-top: 26px; }
+.empty { text-align: center; padding: 46px 20px; color: var(--ink-3); }
+.empty .e-ico { font-size: 34px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 16px);
+  background: var(--ink); color: var(--paper); padding: 11px 20px; border-radius: 99px;
+  font-size: 13.5px; box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s; z-index: 90; max-width: calc(100% - 32px); text-align: center;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+.ach { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px; }
+.ach-item { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; background: var(--card); text-align: center; opacity: .42; filter: grayscale(1); transition: all .2s; }
+.ach-item.got { opacity: 1; filter: none; border-color: color-mix(in srgb, var(--kin) 45%, var(--line)); }
+.ach-item .a-ico { font-size: 24px; }
+.ach-item .a-t { font-family: var(--mincho); font-size: 13.5px; margin-top: 4px; }
+.ach-item .a-d { font-size: 11px; color: var(--ink-3); margin-top: 2px; line-height: 1.5; }
+
+.fade { animation: fade .3s cubic-bezier(.2,.8,.2,1); }
+@keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+.footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--ink-3); text-align: center; }
+
+</style>
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="brand" data-act="go" data-to="home" style="text-align:left">
+      <span class="seal">漢文<br>道場</span>
+      <span><b>漢文道場</b><small>KANBUN DOJO</small></span>
+    </button>
+    <span class="spacer"></span>
+    <button class="icon-btn" data-act="go" data-to="zukan" title="句法図鑑">🗂️</button>
+    <button class="icon-btn" data-act="go" data-to="lessons" title="基礎講座">📕</button>
+    <button class="icon-btn" id="theme-btn" data-act="theme" title="テーマ切替">◑</button>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* 漢文句法データベース
+ * cat   : 分類
+ * form  : 句形（訓点付き表記／カタカナは送り仮名）
+ * read  : 読み（書き下し文の形）
+ * mean  : 意味
+ * level : 1=基礎 / 2=標準 / 3=発展
+ * note  : 補足・入試のポイント
+ * ex    : 例文 { k:白文, y:書き下し文, t:現代語訳, s:出典 }
+ */
+window.KUHO = [
+
+  /* ===================== 再読文字 ===================== */
+  {
+    id: 'sd01', cat: '再読文字', level: 1,
+    form: '未ダ〜（未然形）ズ', read: 'いまダ〜ず', mean: 'まだ〜しない／まだ〜していない',
+    note: '一度目は副詞「未だ」、二度目は打消の助動詞「ず」。二度目はひらがなで書く。',
+    ex: [
+      { k: '未知生、焉知死。', y: '未だ生を知らず、焉くんぞ死を知らん。', t: 'まだ生のことも分からないのに、どうして死のことが分かろうか。', s: '論語・先進' },
+      { k: '未嘗有顕者来。', y: '未だ嘗て顕者の来たること有らず。', t: '今まで身分の高い人が来たことは一度もない。', s: '孟子・離婁下' }
+    ]
+  },
+  {
+    id: 'sd02', cat: '再読文字', level: 1,
+    form: '将ニ〜（未然形）ントす', read: 'まさニ〜んとす', mean: '今にも〜しようとする／〜するつもりだ',
+    note: '近い未来・意志を表す。「且」も同じ読み・同じ意味。',
+    ex: [
+      { k: '日将暮。', y: '日将に暮れんとす。', t: '日が今にも暮れようとしている。', s: '' },
+      { k: '天将降大任於是人也。', y: '天将に大任を是の人に降さんとするや。', t: '天がまさに大任をこの人に下そうとするときは。', s: '孟子・告子下' }
+    ]
+  },
+  {
+    id: 'sd03', cat: '再読文字', level: 1,
+    form: '且ニ〜（未然形）ントす', read: 'まさニ〜んとす', mean: '今にも〜しようとする',
+    note: '「将」と同義。ただし「且」は「かツ（その上）」と読む用法もあるので文脈で判断する。',
+    ex: [
+      { k: '城且抜矣。', y: '城且に抜かれんとす。', t: '城は今にも攻め落とされようとしている。', s: '史記' }
+    ]
+  },
+  {
+    id: 'sd04', cat: '再読文字', level: 1,
+    form: '当ニ〜（終止形）ベシ', read: 'まさニ〜べし', mean: '当然〜すべきだ／きっと〜のはずだ',
+    note: '義務・当然。「應（応）」が推量寄りなのに対し「当」は義務寄り。',
+    ex: [
+      { k: '当仁不譲於師。', y: '仁に当たりては師にも譲らず。', t: '仁を行うにあたっては師にも遠慮しない。', s: '論語・衛霊公' },
+      { k: '人当勉学。', y: '人当に勉学すべし。', t: '人は当然学問に励むべきだ。', s: '' }
+    ]
+  },
+  {
+    id: 'sd05', cat: '再読文字', level: 2,
+    form: '応ニ〜（終止形）ベシ', read: 'まさニ〜べし', mean: 'きっと〜だろう／〜のはずだ',
+    note: '推量。読みは「当」と同じ「まさに〜べし」だが、意味は当然より推量が強い。',
+    ex: [
+      { k: '応知故郷事。', y: '応に故郷の事を知るべし。', t: 'きっと故郷のことを知っているだろう。', s: '王維・雑詩' }
+    ]
+  },
+  {
+    id: 'sd06', cat: '再読文字', level: 1,
+    form: '宜シク〜（終止形）ベシ', read: 'よろシク〜べし', mean: '〜するのがよい／〜するのが適当だ',
+    note: '適当・勧告。「よろしく」は「宜」だけ。',
+    ex: [
+      { k: '宜有以教我。', y: '宜しく以て我に教ふること有るべし。', t: '私に教えてくださるのがよい。', s: '' }
+    ]
+  },
+  {
+    id: 'sd07', cat: '再読文字', level: 1,
+    form: '須ラク〜（終止形）ベシ', read: 'すべかラク〜べし', mean: 'ぜひ〜する必要がある／〜しなければならない',
+    note: '必要。「宜シク」（〜するのがよい）との訳し分けが頻出。',
+    ex: [
+      { k: '須惜少年時。', y: '須らく少年の時を惜しむべし。', t: 'ぜひ若い時を大切にする必要がある。', s: '' },
+      { k: '満酌不須辞。', y: '満酌辞するを須ひず。', t: 'なみなみと注いだ酒を辞退する必要はない。', s: '于武陵・勧酒' }
+    ]
+  },
+  {
+    id: 'sd08', cat: '再読文字', level: 1,
+    form: '猶ホ〜ノ（ガ）ごとシ', read: 'なホ〜のごとシ', mean: 'ちょうど〜のようだ／〜と同じだ',
+    note: '比況。「由」も同じ読み・意味で用いられる。',
+    ex: [
+      { k: '過猶不及。', y: '過ぎたるは猶ほ及ばざるがごとし。', t: 'やりすぎることは、足りないのと同じである。', s: '論語・先進' },
+      { k: '民帰之、猶水之就下。', y: '民の之に帰するは、猶ほ水の下きに就くがごとし。', t: '民が彼に従うのは、ちょうど水が低い方へ流れるようなものだ。', s: '孟子・梁恵王上' }
+    ]
+  },
+  {
+    id: 'sd09', cat: '再読文字', level: 2,
+    form: '由ホ〜ノ（ガ）ごとシ', read: 'なホ〜のごとシ', mean: 'ちょうど〜のようだ',
+    note: '「猶」と全く同じ働き。「由」は他に「よル」「よリ」とも読む。',
+    ex: [
+      { k: '民之帰仁也、由水之就下。', y: '民の仁に帰するや、猶ほ水の下きに就くがごとし。', t: '民が仁になびくのは、水が低い方へ流れるようなものだ。', s: '孟子・離婁上' }
+    ]
+  },
+  {
+    id: 'sd10', cat: '再読文字', level: 2,
+    form: '盍ゾ〜（未然形）ざル', read: 'なんゾ〜ざル', mean: 'どうして〜しないのか（〜すればよいのに）',
+    note: '「何不」の合字。相手に行動を促す反語的な問いかけ。二度目は打消の「ざる」。',
+    ex: [
+      { k: '盍各言爾志。', y: '盍ぞ各々爾の志を言はざる。', t: 'どうしてそれぞれ自分の志を言わないのか（言ってみなさい）。', s: '論語・公冶長' }
+    ]
+  },
+
+  /* ===================== 否定 ===================== */
+  {
+    id: 'hi01', cat: '否定', level: 1,
+    form: '不〜（弗〜）', read: '〜ず', mean: '〜しない',
+    note: '用言（動詞・形容詞）を打ち消す最も基本の否定字。「弗」も同じ。',
+    ex: [
+      { k: '学而不思則罔。', y: '学びて思はざれば則ち罔し。', t: '学んでも自分で考えなければ、はっきりと理解できない。', s: '論語・為政' }
+    ]
+  },
+  {
+    id: 'hi02', cat: '否定', level: 1,
+    form: '非〜（匪〜）', read: '〜ニあらズ', mean: '〜ではない',
+    note: '体言（名詞）を打ち消す。「不」は用言、「非」は体言、と押さえる。',
+    ex: [
+      { k: '是非君子之道。', y: '是れ君子の道に非ず。', t: 'これは君子の道ではない。', s: '' },
+      { k: '子非魚、安知魚之楽。', y: '子は魚に非ず、安くんぞ魚の楽しみを知らんや。', t: 'あなたは魚ではない、どうして魚の楽しみが分かろうか。', s: '荘子・秋水' }
+    ]
+  },
+  {
+    id: 'hi03', cat: '否定', level: 1,
+    form: '無〜（莫〜・毋〜）', read: '〜なシ', mean: '〜がない／〜するものがない',
+    note: '存在を打ち消す。「有」の対。',
+    ex: [
+      { k: '国無盗賊。', y: '国に盗賊無し。', t: '国に盗賊がいない。', s: '' },
+      { k: '西出陽関無故人。', y: '西のかた陽関を出づれば故人無からん。', t: '西へ陽関を出てしまえば、もう昔なじみはいないだろう。', s: '王維・送元二使安西' }
+    ]
+  },
+  {
+    id: 'hi04', cat: '否定', level: 2,
+    form: '不可〜', read: '〜ベカラず', mean: '〜できない／〜してはいけない',
+    note: '不可能・禁止。文脈で訳し分ける。',
+    ex: [
+      { k: '不可得而聞也。', y: '得て聞くべからざるなり。', t: '聞くことができないのである。', s: '論語・公冶長' }
+    ]
+  },
+  {
+    id: 'hi05', cat: '否定', level: 2,
+    form: '不能〜', read: '〜（スル）あたハず', mean: '〜できない',
+    note: '能力がなくてできない。「不得」（〜を得ず）も近い。',
+    ex: [
+      { k: '不能自已。', y: '自ら已むこと能はず。', t: '自分でやめることができない。', s: '' }
+    ]
+  },
+  {
+    id: 'hi06', cat: '否定', level: 2,
+    form: '不得〜', read: '〜（スル）ヲえず', mean: '〜することができない',
+    note: '状況が許さずできない。',
+    ex: [
+      { k: '不入虎穴、不得虎子。', y: '虎穴に入らずんば、虎子を得ず。', t: '虎の穴に入らなければ、虎の子を得ることはできない。', s: '後漢書・班超伝' }
+    ]
+  },
+
+  /* ===================== 禁止 ===================== */
+  {
+    id: 'kn01', cat: '禁止', level: 1,
+    form: '勿カレ〜（毋・莫・無）', read: '〜（スル）なカレ', mean: '〜してはいけない／〜するな',
+    note: '「なシ」（存在の否定）と「なカレ」（禁止）の読み分けが頻出。命令の相手がいれば禁止。',
+    ex: [
+      { k: '己所不欲、勿施於人。', y: '己の欲せざる所、人に施すこと勿かれ。', t: '自分が望まないことを、人に対して行ってはならない。', s: '論語・衛霊公' },
+      { k: '過則勿憚改。', y: '過ちては則ち改むるに憚ること勿かれ。', t: '過ちを犯したら、改めることをためらってはならない。', s: '論語・学而' }
+    ]
+  },
+
+  /* ===================== 二重否定 ===================== */
+  {
+    id: 'nj01', cat: '二重否定', level: 2,
+    form: '無シ〜（未然形）ざルハ', read: '〜（セ）ざルハなシ', mean: '〜しないものはない（＝みな〜する）',
+    note: '「無不」「莫不」。否定を二つ重ねて強い肯定を表す。',
+    ex: [
+      { k: '無不称善。', y: '善しと称せざるは無し。', t: 'よいと言わない者はいない。', s: '' }
+    ]
+  },
+  {
+    id: 'nj02', cat: '二重否定', level: 2,
+    form: '莫シ〜（未然形）ざルハ', read: '〜（セ）ざルハなシ', mean: '〜しないものはない',
+    note: '「無不」と同義。',
+    ex: [
+      { k: '莫不飲食也。', y: '飲食せざるは莫きなり。', t: '飲み食いしない者はいない。', s: '中庸' }
+    ]
+  },
+  {
+    id: 'nj03', cat: '二重否定', level: 2,
+    form: '無シ〜ニあらザルハ', read: '〜ニあらザルハなシ', mean: '〜でないものはない（＝すべて〜だ）',
+    note: '「無非」。体言を受けるので「非」を用いる。',
+    ex: [
+      { k: '無非事者。', y: '事に非ざる者無し。', t: '仕事でないものはない。', s: '' }
+    ]
+  },
+  {
+    id: 'nj04', cat: '二重否定', level: 2,
+    form: '非ズ〜（未然形）ざルニ', read: '〜（セ）ざルニあらズ', mean: '〜しないわけではない',
+    note: '「非不」。部分的な肯定を含む、ややぼかした言い方。',
+    ex: [
+      { k: '非不説子之道。', y: '子の道を説ばざるに非ず。', t: '先生の道を喜ばないわけではない。', s: '論語・雍也' }
+    ]
+  },
+  {
+    id: 'nj05', cat: '二重否定', level: 2,
+    form: '未ダ嘗テ〜（未然形）ずンバあらズ', read: 'いまダかつテ〜ずンバあらズ', mean: '今まで〜しなかったことはない（いつも必ず〜した）',
+    note: '「未嘗不」。再読文字「未」＋二重否定の複合。頻出。',
+    ex: [
+      { k: '未嘗不嘆息痛恨也。', y: '未だ嘗て嘆息痛恨せずんばあらざるなり。', t: '嘆きくやしがらなかったことは一度もない。', s: '諸葛亮・出師表' }
+    ]
+  },
+  {
+    id: 'nj06', cat: '二重否定', level: 1,
+    form: '〜（未然形）ざルベカラず', read: '〜（セ）ざルベカラず', mean: '〜しなければならない',
+    note: '「不可不」。「〜しないことは許されない」→「〜すべきだ」。',
+    ex: [
+      { k: '学不可以已。', y: '学は以て已むべからず。', t: '学問は途中でやめてはならない。', s: '荀子・勧学' },
+      { k: '不可不慎。', y: '慎まざるべからず。', t: '慎重にしなければならない。', s: '' }
+    ]
+  },
+  {
+    id: 'nj07', cat: '二重否定', level: 2,
+    form: '〜（未然形）ざルヲえず', read: '〜（セ）ざルヲえず', mean: '〜しないわけにはいかない／どうしても〜してしまう',
+    note: '「不得不」。やむを得ずそうする、という含み。',
+    ex: [
+      { k: '不得不去。', y: '去らざるを得ず。', t: '立ち去らないわけにはいかない。', s: '' }
+    ]
+  },
+  {
+    id: 'nj08', cat: '二重否定', level: 3,
+    form: '敢ヘテ〜（未然形）ずンバあらズ', read: 'あへテ〜ずンバあらズ', mean: 'どうしても〜しないではいられない',
+    note: '「不敢不」。強い意志・義務感。',
+    ex: [
+      { k: '不敢不告也。', y: '敢へて告げずんばあらざるなり。', t: '報告しないわけにはいかないのだ。', s: '論語・憲問' }
+    ]
+  },
+  {
+    id: 'nj09', cat: '二重否定', level: 3,
+    form: 'A無シBセざル', read: 'AトシテBセざルハなシ', mean: 'AでBしないものはない',
+    note: '「無A不B」。全面肯定の強調形。',
+    ex: [
+      { k: '無事不成。', y: '事として成らざるは無し。', t: '成し遂げられないことは一つもない。', s: '' }
+    ]
+  },
+  {
+    id: 'nj10', cat: '二重否定', level: 3,
+    form: '非ザレバA、B（未然形）ず', read: 'Aニあらザレバ、Bセず', mean: 'Aでなければ、Bしない（AしてはじめてBする）',
+    note: '「非A不B」。条件つきの強い限定。',
+    ex: [
+      { k: '非其人不伝。', y: '其の人に非ざれば伝へず。', t: '適任者でなければ伝授しない。', s: '' }
+    ]
+  },
+
+  /* ===================== 部分否定・全部否定 ===================== */
+  {
+    id: 'bb01', cat: '部分否定', level: 2,
+    form: '不必〜', read: 'かならズシモ〜ず', mean: '必ずしも〜とは限らない',
+    note: '【部分否定】「不＋副詞」の語順。全部否定の「必不（必ず〜しない）」と区別する。',
+    ex: [
+      { k: '弟子不必不如師。', y: '弟子必ずしも師に如かずんばあらず。', t: '弟子は必ずしも師に及ばないとは限らない。', s: '韓愈・師説' }
+    ]
+  },
+  {
+    id: 'bb02', cat: '部分否定', level: 2,
+    form: '必不〜', read: 'かならズ〜ず', mean: '必ず〜しない／決して〜しない',
+    note: '【全部否定】「副詞＋不」の語順。「不必」との違いは語順だけ。',
+    ex: [
+      { k: '必不然矣。', y: '必ず然らず。', t: '決してそうではない。', s: '' }
+    ]
+  },
+  {
+    id: 'bb03', cat: '部分否定', level: 2,
+    form: '不常〜', read: 'つねニハ〜ず', mean: 'いつも〜するとは限らない',
+    note: '【部分否定】読みに「は」が入るのが目印。',
+    ex: [
+      { k: '千里馬常有、而伯楽不常有。', y: '千里の馬は常に有れども、伯楽は常には有らず。', t: '名馬はいつでもいるが、それを見抜く伯楽はいつもいるとは限らない。', s: '韓愈・雑説' }
+    ]
+  },
+  {
+    id: 'bb04', cat: '部分否定', level: 2,
+    form: '常不〜', read: 'つねニ〜ず', mean: 'いつも〜しない',
+    note: '【全部否定】「は」が入らない。',
+    ex: [
+      { k: '常不飲酒。', y: '常に酒を飲まず。', t: 'いつも酒を飲まない。', s: '' }
+    ]
+  },
+  {
+    id: 'bb05', cat: '部分否定', level: 3,
+    form: '不倶〜', read: 'ともニハ〜ず', mean: '両方とも〜するわけではない',
+    note: '【部分否定】全部否定は「倶不〜（倶に〜ず）＝どちらも〜しない」。',
+    ex: [
+      { k: '不倶生。', y: '倶には生きず。', t: '両方ともは生きられない。', s: '' }
+    ]
+  },
+  {
+    id: 'bb06', cat: '部分否定', level: 3,
+    form: '不甚〜', read: 'はなはダシクハ〜ず', mean: 'それほど〜ではない',
+    note: '【部分否定】全部否定は「甚不〜（甚だしく〜ず）」。',
+    ex: [
+      { k: '不甚寒。', y: '甚だしくは寒からず。', t: 'それほど寒くはない。', s: '' }
+    ]
+  },
+  {
+    id: 'bb07', cat: '部分否定', level: 3,
+    form: '不復〜', read: 'まタ〜ず', mean: '二度とは〜しない',
+    note: '【部分否定】読みは全部否定「復不」と同じ「復た〜ず」だが、語順で意味が変わる。「復不」は「またもや〜しない」。',
+    ex: [
+      { k: '不復見。', y: '復た見えず。', t: '二度と会わない。', s: '' }
+    ]
+  },
+  {
+    id: 'bb08', cat: '部分否定', level: 3,
+    form: '不尽〜', read: 'ことごとクハ〜ず', mean: 'すべてが〜するわけではない',
+    note: '【部分否定】全部否定は「尽不〜」。',
+    ex: [
+      { k: '尽信書、則不如無書。', y: '尽く書を信ずれば、則ち書無きに如かず。', t: '書物を全部信じるくらいなら、書物などない方がましだ。', s: '孟子・尽心下' }
+    ]
+  },
+
+  /* ===================== 疑問 ===================== */
+  {
+    id: 'gm01', cat: '疑問', level: 1,
+    form: '〜（連体形）乎（哉・耶・邪・与・歟）', read: '〜（スル）か／〜や', mean: '〜か',
+    note: '文末の疑問の助字。「乎・哉・耶・邪・与・歟」。体言・連体形を受けるときは「か」。',
+    ex: [
+      { k: '有朋自遠方来、不亦楽乎。', y: '朋遠方より来たる有り、亦た楽しからずや。', t: '友が遠方から訪ねてくる、なんと楽しいことではないか。', s: '論語・学而' }
+    ]
+  },
+  {
+    id: 'gm02', cat: '疑問', level: 1,
+    form: '何ゾ〜（連体形）（乎）', read: 'なんゾ〜（スル）や', mean: 'どうして〜か（理由）',
+    note: '理由を問う。「胡・奚・曷・寧」も「なんゾ」と読む。',
+    ex: [
+      { k: '何不去也。', y: '何ぞ去らざるや。', t: 'どうして立ち去らないのか。', s: '' }
+    ]
+  },
+  {
+    id: 'gm03', cat: '疑問', level: 1,
+    form: '安クンゾ〜（連体形）（乎）', read: 'いづクンゾ〜（スル）や', mean: 'どうして〜か',
+    note: '「焉・悪」も「いづクンゾ」。場所を問うときは「いづクニカ」と読む。反語に使われることが非常に多い。',
+    ex: [
+      { k: '燕雀安知鴻鵠之志哉。', y: '燕雀安くんぞ鴻鵠の志を知らんや。', t: 'ツバメやスズメにどうして大鳥の志が分かろうか、いや分からない。', s: '史記・陳渉世家' }
+    ]
+  },
+  {
+    id: 'gm04', cat: '疑問', level: 2,
+    form: '何為レゾ〜（連体形）（乎）', read: 'なんすレゾ〜（スル）や', mean: 'どうして〜か（理由）',
+    note: '「何ゾ」より理由を強く問う。読みが独特なので狙われやすい。',
+    ex: [
+      { k: '何為不去也。', y: '何為れぞ去らざるや。', t: 'どうして立ち去らないのか。', s: '' }
+    ]
+  },
+  {
+    id: 'gm05', cat: '疑問', level: 2,
+    form: '誰カ〜（孰カ〜）', read: 'たれカ〜', mean: '誰が〜か',
+    note: '人を問う。「孰」は「いづレカ」（どちらが）とも読み、選択に用いる。',
+    ex: [
+      { k: '誰能為之。', y: '誰か能く之を為さん。', t: '誰がこれをできようか。', s: '' }
+    ]
+  },
+  {
+    id: 'gm06', cat: '疑問', level: 2,
+    form: '何レノ〜カ／何ヲカ〜', read: 'いづレノ〜カ／なにヲカ〜', mean: 'どの〜か／何を〜か',
+    note: '疑問詞が目的語のとき、動詞の前に置かれる（倒置）。',
+    ex: [
+      { k: '何日是帰年。', y: '何れの日か是れ帰年ならん。', t: 'いつになったら故郷へ帰れる年になるのだろう。', s: '杜甫・絶句' }
+    ]
+  },
+  {
+    id: 'gm07', cat: '疑問', level: 2,
+    form: '幾何ゾ', read: 'いくばくゾ', mean: 'どれくらいか（数量）',
+    note: '数量・程度を問う。「幾許」も同じ。',
+    ex: [
+      { k: '人生幾何。', y: '人生幾何ぞ。', t: '人の一生はどれほどのものか。', s: '曹操・短歌行' }
+    ]
+  },
+  {
+    id: 'gm08', cat: '疑問', level: 2,
+    form: '何如（何若）', read: 'いかん', mean: 'どうであるか（状態・程度）',
+    note: '【最重要の区別】「何如」は状態・様子を問う。疑問のみで反語にはならない。',
+    ex: [
+      { k: '以子之矛、陥子之盾、何如。', y: '子の矛を以て、子の盾を陥さば、何如。', t: 'あなたの矛であなたの盾を突いたら、どうなるのか。', s: '韓非子・難一' }
+    ]
+  },
+  {
+    id: 'gm09', cat: '疑問', level: 2,
+    form: '如何（奈何・若何）', read: 'いかんセン／いかんゾ', mean: 'どうしようか（手段）／どうして〜か（理由）',
+    note: '【最重要の区別】「如何」は手段・方法を問い、反語にもなる。「〜ヲ如何セン」の形で目的語を挟むこともある。',
+    ex: [
+      { k: '力抜山兮気蓋世、時不利兮騅不逝。騅不逝兮可奈何。', y: '騅の逝かざる奈何すべき。', t: '愛馬騅が進まないのをどうしたらよいのか。', s: '史記・項羽本紀' }
+    ]
+  },
+
+  /* ===================== 反語 ===================== */
+  {
+    id: 'hg01', cat: '反語', level: 1,
+    form: '豈ニ〜（未然形）ンヤ', read: 'あニ〜んや', mean: 'どうして〜だろうか、いや〜ない',
+    note: '反語の最頻出。文末が「ン（ヤ）」（推量・意志）になるのが反語の目印。',
+    ex: [
+      { k: '王侯将相寧有種乎。', y: '王侯将相寧くんぞ種有らんや。', t: '王侯や将軍・大臣に、生まれつきの血筋などあろうか、いやない。', s: '史記・陳渉世家' }
+    ]
+  },
+  {
+    id: 'hg02', cat: '反語', level: 1,
+    form: '何ゾ〜（未然形）ンヤ', read: 'なんゾ〜んや', mean: 'どうして〜だろうか、いや〜ない',
+    note: '疑問と同じ字だが、文末が「ンヤ」なら反語。「〜か」で終われば疑問。',
+    ex: [
+      { k: '何必曰利。', y: '何ぞ必ずしも利と曰はん。', t: 'どうして利益ばかりを口にする必要があろうか。', s: '孟子・梁恵王上' }
+    ]
+  },
+  {
+    id: 'hg03', cat: '反語', level: 2,
+    form: '安クンゾ〜（未然形）ンヤ', read: 'いづクンゾ〜んや', mean: 'どうして〜だろうか、いや〜ない',
+    note: '「焉・悪・寧」も同じ。反語で使われる率が非常に高い。',
+    ex: [
+      { k: '未知生、焉知死。', y: '未だ生を知らず、焉くんぞ死を知らん。', t: 'まだ生も分からないのに、どうして死が分かろうか。', s: '論語・先進' }
+    ]
+  },
+  {
+    id: 'hg04', cat: '反語', level: 2,
+    form: '誰カ〜（未然形）ンヤ', read: 'たれカ〜んや', mean: '誰が〜だろうか、いや誰も〜ない',
+    note: '',
+    ex: [
+      { k: '誰能出不由戸。', y: '誰か能く出づるに戸に由らざらん。', t: '誰が戸を通らずに外へ出られようか。', s: '論語・雍也' }
+    ]
+  },
+  {
+    id: 'hg05', cat: '反語', level: 3,
+    form: '独リ〜（未然形）ンヤ', read: 'ひとリ〜んや', mean: 'どうして〜だろうか、いや〜ない',
+    note: '限定の「独」が反語文中に入ると強い反語になる。',
+    ex: [
+      { k: '相如雖駑、独畏廉将軍哉。', y: '相如駑なりと雖も、独り廉将軍を畏れんや。', t: '私が愚か者だとしても、どうして廉将軍を恐れようか。', s: '史記・廉頗藺相如列伝' }
+    ]
+  },
+
+  /* ===================== 使役 ===================== */
+  {
+    id: 'si01', cat: '使役', level: 1,
+    form: '使ムA（ヲシテ）B（未然形）', read: 'AヲシテB（セ）しム', mean: 'AにBさせる',
+    note: '使役の助字は「使・令・教・遣・俾」。Bは未然形で受けて「しむ」に続く。',
+    ex: [
+      { k: '天帝使我長百獣。', y: '天帝我をして百獣に長たらしむ。', t: '天帝は私を百獣の長にならせた。', s: '戦国策・楚策' }
+    ]
+  },
+  {
+    id: 'si02', cat: '使役', level: 2,
+    form: '令ムA（ヲシテ）B（未然形）', read: 'AヲシテB（セ）しム', mean: 'AにBさせる',
+    note: '「使」と同じ。「令」は命令のニュアンス。',
+    ex: [
+      { k: '令人望之。', y: '人をして之を望ましむ。', t: '人にそれを眺めさせる。', s: '' }
+    ]
+  },
+  {
+    id: 'si03', cat: '使役', level: 2,
+    form: '遣ハシテA（ヲシテ）B（未然形）シム', read: 'AヲシテB（セ）しム', mean: 'AをやってBさせる',
+    note: '「遣」は人を派遣して〜させる、という具体的な使役。',
+    ex: [
+      { k: '遣使者告之。', y: '使者を遣はして之に告げしむ。', t: '使者をやってこれを告げさせた。', s: '' }
+    ]
+  },
+  {
+    id: 'si04', cat: '使役', level: 3,
+    form: '命ジテA（ニ）B（未然形）シム', read: 'AニめいジテB（セ）しム', mean: 'AにBするよう命じる',
+    note: '「命・召・説・勧」など、意味の上で使役を含む動詞。使役の助字がなくても「しむ」を補って読む。',
+    ex: [
+      { k: '命子路問之。', y: '子路に命じて之を問はしむ。', t: '子路に命じてこれを尋ねさせた。', s: '' }
+    ]
+  },
+
+  /* ===================== 受身 ===================== */
+  {
+    id: 'uk01', cat: '受身', level: 1,
+    form: '見ル〜（未然形）', read: '〜（セ）らル', mean: '〜される',
+    note: '「見」が動詞の前にあれば受身の助字。「みる」と読まない。',
+    ex: [
+      { k: '信而見疑、忠而被謗。', y: '信にして疑はれ、忠にして謗らる。', t: '誠実なのに疑われ、忠義なのに悪口を言われる。', s: '史記・屈原賈生列伝' }
+    ]
+  },
+  {
+    id: 'uk02', cat: '受身', level: 1,
+    form: '被ル〜（未然形）', read: '〜（セ）らル', mean: '〜される',
+    note: '「見」と同じ受身の助字。',
+    ex: [
+      { k: '被害。', y: '害せらる。', t: '害される。', s: '' }
+    ]
+  },
+  {
+    id: 'uk03', cat: '受身', level: 2,
+    form: '為ルA（ノ）B（スル）ところト', read: 'AノB（スル）ところトなル', mean: 'AにBされる',
+    note: '「為A所B」。この「所」は「ところ」と読む（「る」とは読まない）。動作主Aが明示される。',
+    ex: [
+      { k: '先即制人、後則為人所制。', y: '先んずれば即ち人を制し、後るれば則ち人の制する所と為る。', t: '先手を打てば人を制するが、遅れれば人に制せられる。', s: '史記・項羽本紀' }
+    ]
+  },
+  {
+    id: 'uk04', cat: '受身', level: 2,
+    form: '〜（未然形）ル於A', read: 'Aニ〜（セ）らル', mean: 'Aに〜される',
+    note: '「於（于・乎）」の下が動作主なら受身。「於」自体は読まない置き字。',
+    ex: [
+      { k: '労力者治於人。', y: '力を労する者は人に治めらる。', t: '肉体労働をする者は人に治められる。', s: '孟子・滕文公上' }
+    ]
+  },
+
+  /* ===================== 比較 ===================== */
+  {
+    id: 'hk01', cat: '比較', level: 1,
+    form: 'A不如B（不若B）', read: 'AハBニしカず', mean: 'AはBに及ばない（Bの方がよい）',
+    note: '後ろにくるBの方が優れている。「如かず」＝及ばない。',
+    ex: [
+      { k: '百聞不如一見。', y: '百聞は一見に如かず。', t: '百回聞くことは一回見ることに及ばない。', s: '漢書・趙充国伝' }
+    ]
+  },
+  {
+    id: 'hk02', cat: '比較', level: 2,
+    form: '莫如A（莫若A・無如A）', read: 'AニしクハなシA', mean: 'Aに及ぶものはない（Aが一番だ）',
+    note: '最上級。「不如」が二者比較なのに対し、「莫如」は全体の中での最上を表す。',
+    ex: [
+      { k: '知子莫若父。', y: '子を知るは父に若くは莫し。', t: '子を知る点では父に及ぶ者はない。', s: '' }
+    ]
+  },
+  {
+    id: 'hk03', cat: '比較', level: 1,
+    form: 'A（形容詞）於B', read: 'AハBヨリ（モ）〜', mean: 'AはBより〜だ',
+    note: '形容詞の下の「於（于・乎）」は比較の基準を示す置き字。「〜より（も）」と送る。',
+    ex: [
+      { k: '青取之於藍、而青於藍。', y: '青は之を藍より取りて、藍よりも青し。', t: '青色は藍から取るが、藍よりも青い。（＝出藍の誉れ）', s: '荀子・勧学' },
+      { k: '霜葉紅於二月花。', y: '霜葉は二月の花よりも紅なり。', t: '霜にあたった紅葉は、春の花よりも赤い。', s: '杜牧・山行' }
+    ]
+  },
+  {
+    id: 'hk04', cat: '比較', level: 3,
+    form: '莫〜焉（莫〜於是）', read: 'これヨリ〜ハなシ', mean: 'これより〜なものはない',
+    note: '文末の「焉」は「於是（これより）」の意を含む。',
+    ex: [
+      { k: '過莫大焉。', y: '過ち焉より大なるは莫し。', t: 'これより大きな過ちはない。', s: '' }
+    ]
+  },
+
+  /* ===================== 選択 ===================== */
+  {
+    id: 'sn01', cat: '選択', level: 2,
+    form: '与其A、寧B', read: 'そノAセンヨリハ、むしロBセヨ', mean: 'AするよりはむしろBせよ',
+    note: '前より後（B）を選ぶ。「寧」は「むしろ」。',
+    ex: [
+      { k: '与其奢也、寧倹。', y: '其の奢らんよりは、寧ろ倹せよ。', t: 'ぜいたくをするくらいなら、むしろ質素にせよ。', s: '論語・八佾' }
+    ]
+  },
+  {
+    id: 'sn02', cat: '選択', level: 3,
+    form: '与其A、不如B（不若B）', read: 'そノAセンヨリハ、Bニしカず', mean: 'AするよりはBの方がよい',
+    note: '「与其〜」に「不如」が呼応する形。',
+    ex: [
+      { k: '与其有楽於身、孰若無憂於其心。', y: '其の身に楽しみ有らんよりは、孰若ぞ其の心に憂ひ無からんには。', t: '体が楽なのと心に憂いがないのとでは、どちらがよいか。', s: '韓愈・送李愿帰盤谷序' }
+    ]
+  },
+  {
+    id: 'sn03', cat: '選択', level: 3,
+    form: '孰与A（孰若A）', read: 'AニいづレゾA', mean: 'Aと比べてどちらがよいか（Aの方がよいのではないか）',
+    note: '形は疑問だが、後者を選ばせる含みを持つ。',
+    ex: [
+      { k: '救趙孰与勿救。', y: '趙を救ふは救ふ勿きに孰与れぞ。', t: '趙を救うのと救わないのと、どちらがよいか。', s: '戦国策' }
+    ]
+  },
+
+  /* ===================== 仮定 ===================== */
+  {
+    id: 'kt01', cat: '仮定', level: 1,
+    form: '如シ〜（若シ〜）', read: 'もシ〜ば', mean: 'もし〜ならば',
+    note: '順接の仮定。「如・若」は「ごとシ」（比況）とも読むので文脈で判断。',
+    ex: [
+      { k: '如有王者、必世而後仁。', y: '如し王者有らば、必ず世にして後に仁ならん。', t: 'もし王者が現れたとしても、一世代を経てはじめて仁の世になろう。', s: '論語・子路' }
+    ]
+  },
+  {
+    id: 'kt02', cat: '仮定', level: 2,
+    form: '苟モ〜', read: 'いやしクモ〜ば', mean: 'かりにも〜ならば',
+    note: '「苟」は「いやしクモ」。読みが問われやすい。',
+    ex: [
+      { k: '苟志於仁矣、無悪也。', y: '苟くも仁に志せば、悪しきこと無きなり。', t: 'かりにも仁を志すならば、悪事を行うことはない。', s: '論語・里仁' }
+    ]
+  },
+  {
+    id: 'kt03', cat: '仮定', level: 2,
+    form: '縦ヒ〜トモ', read: 'たとヒ〜トモ', mean: 'たとえ〜としても',
+    note: '逆接の仮定。「仮令・縦令」も同じ。',
+    ex: [
+      { k: '縦江東父兄憐而王我、我何面目見之。', y: '縦ひ江東の父兄憐れみて我を王とするも、我何の面目ありて之を見ん。', t: 'たとえ江東の人々が私を王としてくれても、どんな顔をして会えようか。', s: '史記・項羽本紀' }
+    ]
+  },
+  {
+    id: 'kt04', cat: '仮定', level: 1,
+    form: '〜ト雖モ', read: '〜トいへどモ', mean: '〜だけれども／たとえ〜でも',
+    note: '確定条件（〜だが）と仮定条件（たとえ〜でも）の両方がある。文末に置くのではなく句の切れ目に置く。',
+    ex: [
+      { k: '雖有嘉肴、弗食不知其旨也。', y: '嘉肴有りと雖も、食らはずんば其の旨きを知らざるなり。', t: 'ごちそうがあっても、食べなければそのうまさは分からない。', s: '礼記・学記' }
+    ]
+  },
+  {
+    id: 'kt05', cat: '仮定', level: 3,
+    form: '使メバ〜（令バ〜）', read: 'もシ〜シメバ', mean: 'もし〜であったなら',
+    note: '「使・令」が文頭にあり仮定を表す用法。使役と紛らわしい。',
+    ex: [
+      { k: '使天下無農夫、挙世皆餓死。', y: '使し天下に農夫無からしめば、挙世皆餓死せん。', t: 'もし世に農民がいなかったら、世界中みな餓死するだろう。', s: '' }
+    ]
+  },
+  {
+    id: 'kt06', cat: '仮定', level: 3,
+    form: '微カリセバ〜', read: '〜なカリセバ', mean: 'もし〜がなかったら',
+    note: '「微」は反実仮想。読みが難しく差がつく。',
+    ex: [
+      { k: '微管仲、吾其被髪左衽矣。', y: '管仲微かりせば、吾其れ髪を被り衽を左にせん。', t: '管仲がいなかったら、我々は蛮族の風習になっていただろう。', s: '論語・憲問' }
+    ]
+  },
+
+  /* ===================== 限定 ===================== */
+  {
+    id: 'gt01', cat: '限定', level: 1,
+    form: '唯ダA（惟・只・但・徒・独・特・直）', read: 'たダA（ノミ）', mean: 'ただAだけ',
+    note: '限定の副詞。文末の「のみ」と呼応することが多い。',
+    ex: [
+      { k: '但聞人語響。', y: '但だ人語の響くを聞くのみ。', t: 'ただ人の話し声が響くのが聞こえるだけだ。', s: '王維・鹿柴' }
+    ]
+  },
+  {
+    id: 'gt02', cat: '限定', level: 1,
+    form: 'A耳（爾・已・而已・而已矣）', read: 'AノミA', mean: 'Aだけだ／Aにすぎない',
+    note: '文末の限定。「而已」は「のみ」の二字表記。',
+    ex: [
+      { k: '直不百歩耳、是亦走也。', y: '直だ百歩ならざるのみ、是も亦た走るなり。', t: 'ただ百歩でなかっただけで、これも逃げたことに変わりはない。', s: '孟子・梁恵王上' }
+    ]
+  },
+
+  /* ===================== 累加 ===================== */
+  {
+    id: 'ru01', cat: '累加', level: 2,
+    form: '非ズ唯ダA（ノミ）ニ、B', read: 'たダニAノミナラず、B', mean: 'ただAだけでなく、（その上）Bだ',
+    note: '「否定＋限定」で累加。「非独」「不唯」「不独」も同じ。',
+    ex: [
+      { k: '非独賢者有是心也。', y: '独り賢者のみ是の心有るに非ざるなり。', t: '賢者だけがこの心を持っているのではない。', s: '孟子・告子上' }
+    ]
+  },
+  {
+    id: 'ru02', cat: '累加', level: 3,
+    form: '豈ニ唯ダA（ノミ）ナランヤ', read: 'あニたダニAノミナランや', mean: 'どうしてただAだけであろうか（Aだけではない）',
+    note: '反語＋限定。累加の強調形。',
+    ex: [
+      { k: '豈唯民哉。', y: '豈に唯だに民のみならんや。', t: 'どうして民だけであろうか。', s: '' }
+    ]
+  },
+
+  /* ===================== 抑揚 ===================== */
+  {
+    id: 'yy01', cat: '抑揚', level: 2,
+    form: 'Aスラ且ツB、況ンヤCヲヤ', read: 'AスラかツB、いはンヤCヲや', mean: 'AでさえBなのだ、ましてCならなおさらだ',
+    note: '軽いものを挙げて（抑）、重いものを強調する（揚）。前半は「スラ」、後半は「いはンヤ〜ヲヤ」。',
+    ex: [
+      { k: '死馬且買之、況生者乎。', y: '死馬すら且つ之を買ふ、況んや生ける者をや。', t: '死んだ馬でさえ買うのだ、まして生きている馬ならなおさらだ。', s: '戦国策・燕策' }
+    ]
+  },
+  {
+    id: 'yy02', cat: '抑揚', level: 3,
+    form: 'Aスラ猶ホB、況ンヤCヲヤ', read: 'AスラなホB、いはンヤCヲや', mean: 'AでさえBだ、ましてCはなおさらだ',
+    note: '「且」の代わりに「猶」を使う形。ここでの「猶」は再読しない。',
+    ex: [
+      { k: '臣猶不欺、況大国乎。', y: '臣すら猶ほ欺かず、況んや大国をや。', t: '臣下でさえ欺かない、まして大国ならなおさらだ。', s: '' }
+    ]
+  },
+
+  /* ===================== 詠嘆 ===================== */
+  {
+    id: 'et01', cat: '詠嘆', level: 1,
+    form: '不亦〜ずや（不亦A乎）', read: 'まタA（セ）ずや', mean: 'なんとAではないか',
+    note: '「亦（また）」を読み、「豈」とは読まない。論語で頻出。',
+    ex: [
+      { k: '学而時習之、不亦説乎。', y: '学びて時に之を習ふ、亦た説ばしからずや。', t: '学んで折にふれて復習する、なんと喜ばしいことではないか。', s: '論語・学而' }
+    ]
+  },
+  {
+    id: 'et02', cat: '詠嘆', level: 2,
+    form: '豈ニ不〜ズヤ（豈不A哉）', read: 'あニA（セ）ずや', mean: 'なんとAではないか',
+    note: '反語の形を借りた詠嘆。',
+    ex: [
+      { k: '豈不痛哉。', y: '豈に痛ましからずや。', t: 'なんと痛ましいことではないか。', s: '' }
+    ]
+  },
+  {
+    id: 'et03', cat: '詠嘆', level: 2,
+    form: '何ゾ其レA也', read: 'なんゾそレA（スル）や', mean: 'なんとまあAなことよ',
+    note: '疑問の形を借りた詠嘆。文末「也」を「や」と読む。',
+    ex: [
+      { k: '何其久也。', y: '何ぞ其れ久しきや。', t: 'なんとまあ長いことよ。', s: '詩経' }
+    ]
+  },
+  {
+    id: 'et04', cat: '詠嘆', level: 1,
+    form: '嗚呼（嗟乎・嗟夫・噫）', read: 'ああ', mean: 'ああ（感動詞）',
+    note: '文頭に置かれる感嘆。',
+    ex: [
+      { k: '嗚呼、哀哉。', y: '嗚呼、哀しいかな。', t: 'ああ、悲しいことだ。', s: '' }
+    ]
+  },
+  {
+    id: 'et05', cat: '詠嘆', level: 2,
+    form: 'A哉（A夫・A矣）', read: 'AかなA', mean: 'Aだなあ',
+    note: '文末の詠嘆。連体形・体言を受けて「かな」。',
+    ex: [
+      { k: '賢哉回也。', y: '賢なるかな回や。', t: '賢いなあ、顔回は。', s: '論語・雍也' }
+    ]
+  },
+
+  /* ===================== 願望 ===================== */
+  {
+    id: 'gn01', cat: '願望', level: 1,
+    form: '願ハクハ〜（セヨ／セン）', read: 'ねがハクハ〜', mean: '（自分の希望として）どうか〜したい',
+    note: '文末が命令形なら相手への願い、「ン」なら自分の希望。「請」が相手に許しを求めるのに対し、「願」は自分の望みを述べる。',
+    ex: [
+      { k: '願聞其詳。', y: '願はくは其の詳らかなるを聞かん。', t: 'どうかその詳細をお聞きしたい。', s: '孟子・梁恵王上' }
+    ]
+  },
+  {
+    id: 'gn02', cat: '願望', level: 2,
+    form: '請フ〜（セヨ／セン）', read: 'こフ〜', mean: '（相手に許しを求めて）どうか〜させてください',
+    note: '「請」は相手に許可を求める丁寧な願望。「請ふ〜せよ」なら相手への依頼、「請ふ〜せん」なら自分がすることへの許可願い。',
+    ex: [
+      { k: '請従隗始。', y: '請ふ隗より始めよ。', t: 'どうか、まずこの隗から始めてください。', s: '戦国策・燕策' }
+    ]
+  },
+  {
+    id: 'gn03', cat: '願望', level: 2,
+    form: '欲ス〜（未然形）ント', read: '〜（セ）んとほつス', mean: '〜しようとする／〜したい',
+    note: '意志・願望。',
+    ex: [
+      { k: '渾欲不勝簪。', y: '渾べて簪に勝へざらんと欲す。', t: '（白髪が薄くなり）まったく冠留めも挿せなくなりそうだ。', s: '杜甫・春望' }
+    ]
+  },
+  {
+    id: 'gn04', cat: '願望', level: 3,
+    form: '庶幾ハクハ〜', read: 'こひねがハクハ〜', mean: 'どうか〜してほしい',
+    note: '読みが難しい語。「庶幾」だけで「こひねがフ」とも。',
+    ex: [
+      { k: '庶幾無過矣。', y: '庶幾はくは過ち無からん。', t: 'どうか過ちがないようにありたい。', s: '' }
+    ]
+  },
+
+  /* ===================== 重要語・句 ===================== */
+  {
+    id: 'jy01', cat: '重要語', level: 1,
+    form: '所以', read: 'ゆゑん', mean: '理由／方法・手段',
+    note: '「〜する理由」「〜するための方法」。文脈で訳し分ける。',
+    ex: [
+      { k: '所以遣将守関者、備他盗之出入也。', y: '将を遣はして関を守らしめし所以の者は、他盗の出入りに備へしなり。', t: '将軍を派遣して関所を守らせた理由は、他の盗賊の出入りに備えたからだ。', s: '史記・項羽本紀' }
+    ]
+  },
+  {
+    id: 'jy02', cat: '重要語', level: 1,
+    form: '是以', read: 'ここヲもつテ', mean: 'こういうわけで／だから',
+    note: '順接の接続。「是」が「以」の目的語で倒置している。',
+    ex: [
+      { k: '是以君子遠庖厨也。', y: '是を以て君子は庖厨を遠ざくるなり。', t: 'こういうわけで君子は料理場を遠ざけるのだ。', s: '孟子・梁恵王上' }
+    ]
+  },
+  {
+    id: 'jy03', cat: '重要語', level: 2,
+    form: '於是', read: 'ここニおイテ', mean: 'そこで／こうして',
+    note: '場面転換の接続。置き字の「於」とは違い、ここでは読む。',
+    ex: [
+      { k: '於是項王乃悲歌慷慨。', y: '是に於いて項王乃ち悲歌慷慨す。', t: 'そこで項王は悲しげに歌い嘆いた。', s: '史記・項羽本紀' }
+    ]
+  },
+  {
+    id: 'jy04', cat: '重要語', level: 2,
+    form: '以為（謂）', read: 'おもヘラク／〜ヲもつテ〜トなス', mean: '〜と思う／〜を〜とみなす',
+    note: '「以為」＝「以〜為〜」の省略形。',
+    ex: [
+      { k: '以為神。', y: '以て神と為す。', t: '神だと思った。', s: '戦国策・楚策' }
+    ]
+  },
+  {
+    id: 'jy05', cat: '重要語', level: 2,
+    form: '然則', read: 'しかラバすなはチ', mean: 'それならば',
+    note: '',
+    ex: [
+      { k: '然則何時而楽耶。', y: '然らば則ち何れの時にして楽しまんや。', t: 'それならばいつになったら楽しめるのか。', s: '范仲淹・岳陽楼記' }
+    ]
+  },
+  {
+    id: 'jy06', cat: '重要語', level: 2,
+    form: '雖然', read: 'しかリトいへどモ', mean: 'そうではあるが',
+    note: '逆接。「然りと雖も」と読む。',
+    ex: [
+      { k: '雖然、猶有未也。', y: '然りと雖も、猶ほ未だしき有り。', t: 'そうではあるが、まだ十分でない点がある。', s: '' }
+    ]
+  },
+  {
+    id: 'jy07', cat: '重要語', level: 2,
+    form: '所謂', read: 'いはゆル', mean: 'いわゆる／世に言う',
+    note: '',
+    ex: [
+      { k: '此所謂戦勝於朝廷。', y: '此れ所謂朝廷に戦ひ勝つなり。', t: 'これがいわゆる「朝廷にいながら戦に勝つ」ということだ。', s: '戦国策・斉策' }
+    ]
+  },
+  {
+    id: 'jy08', cat: '重要語', level: 2,
+    form: '蓋シ', read: 'けだシ', mean: '思うに／おそらく',
+    note: '推量の副詞。「蓋」は再読文字「盍」と字が似るので注意。',
+    ex: [
+      { k: '蓋有之矣、我未之見也。', y: '蓋し之有らん、我未だ之を見ざるなり。', t: 'おそらくそういう人はいるのだろうが、私はまだ見たことがない。', s: '論語・里仁' }
+    ]
+  },
+  {
+    id: 'jy09', cat: '重要語', level: 2,
+    form: '未幾', read: 'いくばくモなクシテ', mean: 'まもなく／いくらもたたないうちに',
+    note: '時間を表す頻出語。',
+    ex: [
+      { k: '未幾而卒。', y: '未だ幾ばくもなくして卒す。', t: 'まもなく亡くなった。', s: '' }
+    ]
+  },
+  {
+    id: 'jy10', cat: '重要語', level: 2,
+    form: '俄而', read: 'にはカニシテ', mean: 'まもなく／突然',
+    note: '「既而（すでニシテ）＝そうこうするうちに」とセットで覚える。',
+    ex: [
+      { k: '俄而雨止。', y: '俄にして雨止む。', t: 'まもなく雨がやんだ。', s: '' }
+    ]
+  },
+  {
+    id: 'jy11', cat: '重要語', level: 3,
+    form: '少焉', read: 'しばらクシテ', mean: 'しばらくして',
+    note: 'この「焉」は置き字ではない。',
+    ex: [
+      { k: '少焉、月出於東山之上。', y: '少焉くして、月東山の上に出づ。', t: 'しばらくして、月が東の山の上に出た。', s: '蘇軾・赤壁賦' }
+    ]
+  },
+  {
+    id: 'jy12', cat: '重要語', level: 1,
+    form: '可以〜', read: 'もつテ〜ベシ', mean: '〜することができる／〜してよい',
+    note: '「以」は読むが訳出しないことが多い。',
+    ex: [
+      { k: '温故而知新、可以為師矣。', y: '故きを温めて新しきを知れば、以て師と為るべし。', t: '古いことを学び直して新しい知識を得れば、人の師となれる。', s: '論語・為政' }
+    ]
+  },
+  {
+    id: 'jy13', cat: '重要語', level: 2,
+    form: '足以〜', read: 'もつテ〜ニたル', mean: '〜するのに十分だ',
+    note: '',
+    ex: [
+      { k: '是心足以王矣。', y: '是の心以て王たるに足る。', t: 'この心があれば王者となるのに十分だ。', s: '孟子・梁恵王上' }
+    ]
+  },
+  {
+    id: 'jy14', cat: '重要語', level: 3,
+    form: '得無〜乎（無乃〜乎）', read: '〜なカランや', mean: '〜ではあるまいか',
+    note: 'やわらかい推量。反語の形で推量を表す。',
+    ex: [
+      { k: '得無楚之水土使民善盗耶。', y: '楚の水土民をして盗みを善くせしむること無からんや。', t: '楚の風土が民を盗み上手にさせるのではあるまいか。', s: '晏子春秋' }
+    ]
+  },
+  {
+    id: 'jy15', cat: '重要語', level: 2,
+    form: '与A（共ニ）', read: 'AトともニA', mean: 'Aと一緒に',
+    note: '「与」は「と／ともニ／くみス／あづかル／か（疑問）」と多義。',
+    ex: [
+      { k: '与朋友交而不信乎。', y: '朋友と交はりて信ならざるか。', t: '友人と交際して誠実でなかったか。', s: '論語・学而' }
+    ]
+  }
+];
+
+</script>
+<script>
+/* 厳選・記述式選択問題（手作り）
+ * cat  : 分類（タグ）
+ * level: 1=基礎 2=標準 3=発展
+ * stem : 提示する漢文（省略可）
+ * q    : 問い
+ * choices / a(正解index) / exp(解説)
+ */
+window.MONDAI = [
+  /* ========== 訓読の基礎 ========== */
+  { id: 'm001', cat: '訓読', level: 1, stem: '読^レ書', q: '返り点に従って読む順序として正しいものはどれか。', choices: ['書 → 読', '読 → 書', '読 → 書 → 読', 'どちらでもよい'], a: 0, exp: 'レ点は「すぐ下の一字を先に読んで、上へ一字返る」印。よって「書を読む」となる。' },
+  { id: 'm002', cat: '訓読', level: 1, q: '一二点と上中下点がともに使われているとき、先に処理するのはどちらか。', choices: ['上中下点', '一二点', '同時に読む', '文によって変わる'], a: 1, exp: '内側の小さいまとまり（一二点）を先に処理し、そのかたまりをまたいでさらに返るときに上中下点を使う。順序は「レ点→一二点→上中下点→甲乙丙点」。' },
+  { id: 'm003', cat: '訓読', level: 2, q: '「一レ点」がついた字の読み方として正しいものはどれか。', choices: ['一点だけを処理する', 'レ点を先に処理し、そのあと一→二で返る', '一とレを同時に処理する', '上下点に読み替える'], a: 1, exp: '複合返り点は必ず影響範囲の小さいレ点から処理する。「使二子路問一レ之」は 子→路→之→問→使 の順。' },
+  { id: 'm004', cat: '訓読', level: 1, q: '書き下し文を作るときのきまりとして誤っているものはどれか。', choices: ['助動詞にあたる漢字はひらがなに直す', '送り仮名は歴史的仮名遣いで書く', '置き字も必ず書き下し文に書く', '再読文字の二度目の読みはひらがなにする'], a: 2, exp: '置き字（而・於・于・乎・矣・焉・兮など）は書き下し文には書かない。その働きは送り仮名に表れている。' },
+  { id: 'm005', cat: '訓読', level: 2, stem: '青取^二之於藍^一', q: '傍線部「於」の説明として正しいものはどれか。', choices: ['「おいて」と読み、場所を示す', '読まない置き字で、起点（〜より）を示す', '「ああ」と読む詠嘆', '受身を示し「らル」と読む'], a: 1, exp: '「青は之を藍より取る」。「於」は読まないが、下の語が起点であることを示し、その働きは送り仮名「より」に表れる。' },
+  { id: 'm006', cat: '訓読', level: 2, q: '次のうち、置き字になることが「ない」ものはどれか。', choices: ['而', '矣', '則', '兮'], a: 2, exp: '「則」は「すなはチ」と読む字で置き字ではない。置き字の代表は「而・於・于・乎・矣・焉・兮」。' },
+  { id: 'm007', cat: '訓読', level: 3, stem: '三人行、必有^二我師^一焉。', q: '文末の「焉」の説明として正しいものはどれか。', choices: ['「いづくんぞ」と読む反語', '読まない置き字で強意・断定を表す', '「ここに」と読む指示語', '「なんぞ」と読む疑問'], a: 1, exp: '文末の「焉」は語調を強める置き字。文頭・動詞の前にあれば「いづクンゾ」と読む疑問・反語の字になる。位置で判断する。' },
+
+  /* ========== 再読文字 ========== */
+  { id: 'm010', cat: '再読文字', level: 1, stem: '未^レ聞^二其名^一。', q: '書き下し文として正しいものはどれか。', choices: ['未だ其の名を聞かず。', '未だ其の名を聞かん。', '其の名を聞くこと未だし。', '其の名を未だ聞くべし。'], a: 0, exp: '「未」は「いまダ〜ず」。一度目は副詞「未だ」（漢字のまま）、二度目は打消の助動詞「ず」（ひらがな）。' },
+  { id: 'm011', cat: '再読文字', level: 1, stem: '日将^レ暮。', q: '書き下し文として正しいものはどれか。', choices: ['日将に暮るべし。', '日将に暮れんとす。', '日将た暮る。', '日暮れんことを将る。'], a: 1, exp: '「将」は「まさニ〜（未然形）ントす」。「今にも〜しようとする」の意。「且」も同じ読み・意味。' },
+  { id: 'm012', cat: '再読文字', level: 2, q: '「宜シク〜ベシ」の意味として最も適当なものはどれか。', choices: ['ぜひ〜する必要がある', '〜するのがよい', '当然〜すべきだ', 'きっと〜だろう'], a: 1, exp: '宜＝適当・勧告「〜するのがよい」／須＝必要「ぜひ〜する必要がある」／当＝当然／応＝推量。訳し分けが頻出。' },
+  { id: 'm013', cat: '再読文字', level: 2, q: '「須ラク〜ベシ」の意味として最も適当なものはどれか。', choices: ['ぜひ〜する必要がある', '〜するのがよい', 'ちょうど〜のようだ', 'まだ〜しない'], a: 0, exp: '「須」は必要を表す。「宜シク（〜するのがよい）」との区別が問われやすい。' },
+  { id: 'm014', cat: '再読文字', level: 2, stem: '過猶^レ不^レ及。', q: '書き下し文として正しいものはどれか。', choices: ['過ぎたるは猶ほ及ばず。', '過ぎたるは猶ほ及ばざるがごとし。', '過ぎたるは猶ほ及ばんとす。', '過ぎたるは猶ほ及ぶべし。'], a: 1, exp: '再読文字「猶」は「なホ〜ノ（ガ）ごとシ」。「やりすぎるのは足りないのと同じだ」の意。' },
+  { id: 'm015', cat: '再読文字', level: 2, stem: '盍^三各言^二爾志^一。', q: '傍線部「盍」の読みとして正しいものはどれか。', choices: ['けだシ', 'なんゾ〜ざル', 'まさニ〜ベシ', 'よろシク〜ベシ'], a: 1, exp: '「盍」は「何不」の合字で「なんゾ〜ざル」。「どうして〜しないのか（すればよいのに）」と相手に促す。字の似た「蓋（けだシ）」と混同しないこと。' },
+  { id: 'm016', cat: '再読文字', level: 3, q: '再読文字の書き下し方として正しいものはどれか。', choices: ['一度目も二度目も漢字で書く', '一度目はひらがな、二度目は漢字', '一度目は漢字、二度目はひらがな', '一度目も二度目もひらがな'], a: 2, exp: '例えば「未」は「未だ〜ず」。一度目の副詞は漢字のまま、二度目の助動詞はひらがなに直す。' },
+  { id: 'm017', cat: '再読文字', level: 3, q: '「当」と「応」の意味の違いとして正しいものはどれか。', choices: ['当＝当然・義務、応＝推量', '当＝推量、応＝当然・義務', '当＝必要、応＝適当', 'まったく同じで違いはない'], a: 0, exp: 'どちらも読みは「まさニ〜ベシ」だが、「当」は「当然〜すべきだ」、「応」は「きっと〜だろう」という推量寄り。' },
+
+  /* ========== 否定 ========== */
+  { id: 'm020', cat: '否定', level: 1, q: '「不」と「非」の使い分けとして正しいものはどれか。', choices: ['不は体言を、非は用言を打ち消す', '不は用言を、非は体言を打ち消す', 'どちらも用言だけを打ち消す', '意味に違いはない'], a: 1, exp: '「不」は動詞・形容詞（用言）を打ち消して「〜ず」、「非」は名詞（体言）を打ち消して「〜にあらズ」。' },
+  { id: 'm021', cat: '否定', level: 1, stem: '己所^レ不^レ欲、勿^レ施^二於人^一。', q: '「勿」の読みとして正しいものはどれか。', choices: ['なシ', 'なカレ', 'あらズ', 'ず'], a: 1, exp: '「勿・毋・莫・無」が禁止を表すときは「〜（スル）なカレ」と読む。存在の否定なら「なシ」。命令の相手がいるかで判断する。' },
+  { id: 'm022', cat: '否定', level: 2, stem: '不^レ可^レ不^レ慎。', q: '現代語訳として最も適当なものはどれか。', choices: ['慎むことができない', '慎まなくてもよい', '慎まなければならない', '慎むとは限らない'], a: 2, exp: '「不可不」は二重否定で「〜ざルベカラず」。「〜しないことは許されない」→「〜しなければならない」。' },
+  { id: 'm023', cat: '否定', level: 2, stem: '無^レ不^レ称^レ善。', q: '現代語訳として最も適当なものはどれか。', choices: ['よいと言う者はいない', 'よいと言わない者はいない', 'よいと言うとは限らない', 'よいと言ってはならない'], a: 1, exp: '「無不」＝「〜ざルハなシ」。二重否定なので強い肯定「みなよいと言う」となる。' },
+  { id: 'm024', cat: '否定', level: 2, stem: '未^三嘗不^二嘆息^一。', q: '書き下し文として正しいものはどれか。', choices: ['未だ嘗て嘆息せず。', '未だ嘗て嘆息せずんばあらず。', '嘗て嘆息するを未だせず。', '未だ嘗て嘆息するなかれ。'], a: 1, exp: '「未嘗不」は再読文字＋二重否定。「今まで〜しなかったことは一度もない」という強い肯定。' },
+  { id: 'm025', cat: '否定', level: 2, q: '「不必」と「必不」の違いとして正しいものはどれか。', choices: ['不必＝必ず〜しない、必不＝必ずしも〜ない', '不必＝必ずしも〜とは限らない、必不＝必ず〜しない', '意味は同じで語順だけ違う', 'どちらも全部否定'], a: 1, exp: '「不＋副詞」＝部分否定、「副詞＋不」＝全部否定。「不必（必ずしも〜ず）」は部分否定、「必不（必ず〜ず）」は全部否定。' },
+  { id: 'm026', cat: '否定', level: 2, stem: '伯楽不^二常有^一。', q: '傍線部の読みと意味の組み合わせとして正しいものはどれか。', choices: ['常に有らず／いつもいない', '常には有らず／いつもいるとは限らない', '常に有らんや／どうしているだろうか', '常に有るなかれ／いてはならない'], a: 1, exp: '「不常」は部分否定で「常ニハ〜ず」。読みに「は」が入るのが目印。全部否定「常不（常に〜ず）」と区別する。' },
+  { id: 'm027', cat: '否定', level: 3, q: '部分否定の書き下しで、副詞のあとに「は」を入れないのが原則の語はどれか。', choices: ['常', '倶', '必', '尽'], a: 2, exp: '「不必」は「必ずしも〜ず」となり「は」ではなく「しも」が入る。「不常＝常には」「不倶＝倶には」「不尽＝尽くは」。' },
+  { id: 'm028', cat: '否定', level: 2, stem: '不^レ能^二自已^一。', q: '傍線部「不能」の読みとして正しいものはどれか。', choices: ['あたハず', 'ベカラず', 'えず', 'なシ'], a: 0, exp: '「不能」は「〜（スル）あたハず」で能力的な不可能。「不可（ベカラず）」は不可能・禁止、「不得（えず）」は状況的な不可能。' },
+  { id: 'm029', cat: '否定', level: 3, stem: '非^レ不^レ説^二子之道^一。', q: '現代語訳として最も適当なものはどれか。', choices: ['先生の道を喜んではいけない', '先生の道を喜ばないわけではない', '先生の道を喜ぶ者はいない', '先生の道を喜ぶに違いない'], a: 1, exp: '「非不」は「〜ざルニあらズ」。二重否定だが、全面肯定ではなく「〜しないわけではない」とやわらげた肯定になる。' },
+
+  /* ========== 疑問・反語 ========== */
+  { id: 'm030', cat: '疑問反語', level: 1, q: '疑問形と反語形を見分ける最大の手がかりはどれか。', choices: ['文頭の字の種類', '文末が「ン（ヤ）」で結ばれているかどうか', '返り点の数', '置き字の有無'], a: 1, exp: '同じ「何ゾ」「安クンゾ」でも、文末が推量・意志の「ン（ヤ）」なら反語、連体形＋「や・か」なら疑問。' },
+  { id: 'm031', cat: '疑問反語', level: 2, stem: '燕雀安知^二鴻鵠之志^一哉。', q: 'この文の意味として最も適当なものはどれか。', choices: ['ツバメやスズメはどうやって大鳥の志を知るのか', 'ツバメやスズメにどうして大鳥の志が分かろうか、いや分からない', 'ツバメやスズメも大鳥の志を知っている', 'ツバメやスズメよ、大鳥の志を知りなさい'], a: 1, exp: '「安くんぞ〜知らんや」と文末が「ンヤ」なので反語。「どうして〜か、いや〜ない」と訳す。' },
+  { id: 'm032', cat: '疑問反語', level: 2, q: '「何如」と「如何」の違いとして正しいものはどれか。', choices: ['何如＝手段を問う、如何＝状態を問う', '何如＝状態を問う、如何＝手段を問う', 'どちらも状態を問う', 'どちらも手段を問う'], a: 1, exp: '「何如（いかん）」は様子・状態・程度を問い、疑問にしか使わない。「如何（いかんセン／いかんゾ）」は手段・方法や理由を問い、反語にもなる。' },
+  { id: 'm033', cat: '疑問反語', level: 2, q: '「何為レゾ」の読みとして正しいものはどれか。', choices: ['なんすレゾ', 'なにためニ', 'いかんゾ', 'なんタリ'], a: 0, exp: '「何為」は「なんすレゾ」と読み、理由を問う。読みが独特なので狙われやすい。' },
+  { id: 'm034', cat: '疑問反語', level: 1, q: '「安」を「いづクンゾ」と読むとき、問うているのは何か。', choices: ['場所', '理由', '人物', '数量'], a: 1, exp: '「いづクンゾ」は理由を問う（多くは反語）。場所を問うときは「いづクニカ」と読む。同じ字で読み分ける。' },
+  { id: 'm035', cat: '疑問反語', level: 2, stem: '王侯将相寧有^レ種乎。', q: '傍線部「寧」の読みと働きの組み合わせとして正しいものはどれか。', choices: ['むしロ／選択', 'いづクンゾ／反語', 'なんゾ／詠嘆', 'やすシ／形容詞'], a: 1, exp: '「寧」は「いづクンゾ」と読んで反語を表す用法と、「むしロ」と読んで選択を表す用法がある。ここは文末「乎」と呼応する反語。' },
+  { id: 'm036', cat: '疑問反語', level: 3, stem: '何必曰^レ利。', q: '書き下し文として正しいものはどれか。', choices: ['何ぞ必ず利と曰ふ。', '何ぞ必ずしも利と曰はん。', '必ずしも何ぞ利と曰はず。', '何ぞ利と曰ふ必要あらん。'], a: 1, exp: '反語なので文末は「ン」。「不必」でなくても「何ぞ必ずしも」と「しも」を入れて読むのが慣例。' },
+  { id: 'm037', cat: '疑問反語', level: 2, q: '数量を問う「幾何」の読みとして正しいものはどれか。', choices: ['いくばく', 'いかん', 'いくたび', 'きか'], a: 0, exp: '「幾何」「幾許」は「いくばく」。「人生幾何ぞ（人生はどれほどのものか）」のように使う。' },
+
+  /* ========== 使役・受身 ========== */
+  { id: 'm040', cat: '使役', level: 1, stem: '天帝使^三我長^二百獣^一。', q: '書き下し文として正しいものはどれか。', choices: ['天帝我をして百獣に長たらしむ。', '天帝我に使ひして百獣に長たり。', '天帝我の百獣に長たるを使ふ。', '天帝我をして百獣に長たらんとす。'], a: 0, exp: '「使AB」は「AヲシテB（セ）しム」。Bは未然形で受けて助動詞「しむ」に続く。' },
+  { id: 'm041', cat: '使役', level: 2, q: '使役の助字として用いられ「しム」と読む字の組み合わせとして正しいものはどれか。', choices: ['使・令・教・遣・俾', '使・被・見・為・所', '使・雖・苟・縦・若', '使・唯・但・独・徒'], a: 0, exp: '「使・令・教・遣・俾」が使役の助字。「被・見・為〜所」は受身、「雖・苟・縦」は仮定、「唯・但・独・徒」は限定。' },
+  { id: 'm042', cat: '使役', level: 3, q: '使役の助字がないのに使役に読むのはどのような場合か。', choices: ['文末に「矣」があるとき', '「命・召・遣・説・勧」など意味の上で使役を含む動詞があるとき', '返り点が三つ以上あるとき', '置き字が二つ以上あるとき'], a: 1, exp: '「命ジテ〜シム」のように、命令・派遣・説得などの動詞は使役の助字がなくても「しむ」を補って読む。' },
+  { id: 'm043', cat: '受身', level: 1, stem: '信而見^レ疑、忠而被^レ謗。', q: '傍線部「見」「被」の読みとして正しいものはどれか。', choices: ['みル／こうむル', 'らル（受身）', 'しム（使役）', 'あらズ（否定）'], a: 1, exp: '動詞の上に置かれた「見」「被」は受身の助字で「〜（セ）らル」。「見」を「みる」と読まない点が要注意。' },
+  { id: 'm044', cat: '受身', level: 2, stem: '後則為^二人所^一レ制。', q: '傍線部「所」の読みとして正しいものはどれか。', choices: ['ところ', 'る', 'ゆゑ', 'しょ'], a: 0, exp: '「為A所B」は「AノB（スル）ところトなル」。この「所」は必ず「ところ」と読み、「る」とは読まない。' },
+  { id: 'm045', cat: '受身', level: 2, stem: '労^レ力者治^二於人^一。', q: 'この文の意味として最も適当なものはどれか。', choices: ['肉体労働をする者は人を治める', '肉体労働をする者は人に治められる', '肉体労働をする者は人より優れている', '肉体労働をする者は人と治める'], a: 1, exp: '「於」の下が動作主のときは受身。「人に治めらる」と読み、送り仮名「らル」に受身の働きが表れる。' },
+
+  /* ========== 比較・選択 ========== */
+  { id: 'm050', cat: '比較', level: 1, stem: '百聞不^レ如^二一見^一。', q: 'この文の意味として最も適当なものはどれか。', choices: ['百回聞けば一回見たのと同じだ', '百回聞くことは一回見ることに及ばない', '百回聞いても一回も見ない', '百回聞くほうが一回見るよりよい'], a: 1, exp: '「A不如B」は「AハBニしカず」で、後ろのBのほうが優れている。' },
+  { id: 'm051', cat: '比較', level: 2, q: '「莫如A（Aニしクハなシ）」が表す意味として正しいものはどれか。', choices: ['AはBに及ばない（二者比較）', 'Aに及ぶものはない（最上級）', 'AでもBでもない（全否定）', 'AかBかどちらかだ（選択）'], a: 1, exp: '「不如」は二者の比較、「莫如・莫若・無如」は「Aが一番だ」という最上級を表す。' },
+  { id: 'm052', cat: '比較', level: 2, stem: '霜葉紅^二於二月花^一。', q: '傍線部「於」の働きとして正しいものはどれか。', choices: ['受身の動作主を示す', '比較の基準を示す', '場所を示す', '使役の対象を示す'], a: 1, exp: '形容詞の下の「於（于・乎）」は比較の基準を示す置き字。「二月の花よりも紅なり」と「より（も）」を送る。' },
+  { id: 'm053', cat: '選択', level: 2, stem: '与^二其奢^一也、寧倹。', q: 'この文の意味として最も適当なものはどれか。', choices: ['ぜいたくと質素の両方がよい', 'ぜいたくをするくらいなら、むしろ質素にせよ', '質素にするよりぜいたくがよい', 'ぜいたくも質素もしてはならない'], a: 1, exp: '「与其A、寧B」は「そノAセンヨリハ、むしロBセヨ」。前を捨てて後ろを選ぶ形。' },
+  { id: 'm054', cat: '選択', level: 3, q: '「孰与A（Aニいづレゾ）」の含みとして最も適当なものはどれか。', choices: ['Aのほうが劣ると言外に示す', 'どちらでもよいと示す', '後者のほうがよいのではないかと言外に示す', '両方とも否定する'], a: 2, exp: '「孰与・孰若」は形は疑問だが、多くは「むしろ後者のほうがよいのではないか」という選択の含みをもつ。' },
+
+  /* ========== 仮定 ========== */
+  { id: 'm060', cat: '仮定', level: 1, stem: '雖^レ有^二嘉肴^一、弗^レ食不^レ知^二其旨^一也。', q: '傍線部「雖」の読みとして正しいものはどれか。', choices: ['いへどモ', 'いやしクモ', 'たとヒ', 'もシ'], a: 0, exp: '「雖」は「〜ト いへどモ」。「〜だけれども」（確定条件）と「たとえ〜でも」（仮定条件）の両方がある。' },
+  { id: 'm061', cat: '仮定', level: 2, q: '「苟」の読みとして正しいものはどれか。', choices: ['もシ', 'いやしクモ', 'たとヒ', 'なホ'], a: 1, exp: '「苟」は「いやしクモ〜ば」で「かりにも〜ならば」。読みが問われやすい語。' },
+  { id: 'm062', cat: '仮定', level: 2, q: '「縦」を仮定に読むときの読みとして正しいものはどれか。', choices: ['たとヒ〜トモ', 'もシ〜ば', 'いやしクモ〜ば', 'なカリセバ'], a: 0, exp: '「縦（縦令・仮令）」は逆接の仮定「たとえ〜としても」。順接の「如・若・苟」と区別する。' },
+  { id: 'm063', cat: '仮定', level: 3, stem: '微^二管仲^一、吾其被^レ髪左^レ衽矣。', q: '傍線部「微」の読みと意味の組み合わせとして正しいものはどれか。', choices: ['かすカニ／わずかに', 'なカリセバ／もし〜がなかったら', 'びニ／細かく', 'なシ／〜がない'], a: 1, exp: '「微A」は反実仮想で「Aなカリセバ（もしAがなかったら）」。読みが難しく差がつく語。' },
+  { id: 'm064', cat: '仮定', level: 3, q: '文頭の「使」が仮定を表すとき、どう読むか。', choices: ['〜をして〜しむ', 'もシ〜シメバ', 'つかヒす', 'しム（命令）'], a: 1, exp: '「使・令」が文頭にあり、後半に結論が続く場合は「もシ〜シメバ」と仮定に読む。使役との識別が必要。' },
+
+  /* ========== 限定・累加・抑揚 ========== */
+  { id: 'm070', cat: '限定', level: 1, stem: '但聞^二人語響^一。', q: '傍線部「但」の読みとして正しいものはどれか。', choices: ['たダ', 'まさニ', 'すなはチ', 'しかシ'], a: 0, exp: '限定の副詞「唯・惟・只・但・徒・独・特・直」はすべて「たダ」。文末の「のみ」と呼応することが多い。' },
+  { id: 'm071', cat: '限定', level: 1, q: '文末で「のみ」と読む字（語）の組み合わせとして正しいものはどれか。', choices: ['耳・爾・已・而已・而已矣', '乎・哉・耶・邪・与', '而・於・于・矣・焉', '則・乃・即・便・輒'], a: 0, exp: '「耳・爾・已・而已・而已矣」が文末の限定「〜だけだ」。「乎・哉」は疑問・反語・詠嘆。' },
+  { id: 'm072', cat: '累加', level: 2, stem: '非^三独賢者有^二是心^一也。', q: 'この文の意味として最も適当なものはどれか。', choices: ['賢者だけがこの心を持っている', '賢者だけがこの心を持っているのではない', '賢者はこの心を持っていない', '賢者はこの心を持つべきだ'], a: 1, exp: '「非独A」＝「ひとリAノミニあらズ」。否定＋限定で「Aだけではない（他にもある）」という累加を表す。' },
+  { id: 'm073', cat: '抑揚', level: 2, stem: '死馬且買^レ之、況生者乎。', q: 'この文の意味として最も適当なものはどれか。', choices: ['死んだ馬は買うが、生きた馬は買わない', '死んだ馬でさえ買うのだ、まして生きた馬ならなおさらだ', '死んだ馬も生きた馬も買わない', '死んだ馬を買うのと生きた馬を買うのとどちらがよいか'], a: 1, exp: '「Aスラ且ツB、況ンヤCヲヤ」は抑揚形。軽いものを挙げて重いものを強調する。「すら」「いはンヤ〜ヲヤ」がセット。' },
+  { id: 'm074', cat: '抑揚', level: 3, q: '抑揚形の後半「況ンヤ〜ヲヤ」はどのような形か。', choices: ['命令形', '反語の形', '仮定の形', '受身の形'], a: 1, exp: '「まして〜はなおさらだ」は「まして〜でないはずがあろうか」という反語の形を借りた強調表現。' },
+
+  /* ========== 詠嘆・願望 ========== */
+  { id: 'm080', cat: '詠嘆', level: 1, stem: '学而時習^レ之、不^二亦説^一乎。', q: '傍線部「不亦説乎」の書き下し文として正しいものはどれか。', choices: ['亦た説ばしからずや。', '豈に説ばしからずや。', '亦た説ばざるか。', '説ばしきこと亦たなし。'], a: 0, exp: '「不亦A乎」は「まタA（セ）ずや」＝「なんとAではないか」。「亦」を「あに」と読まない点に注意。' },
+  { id: 'm081', cat: '詠嘆', level: 2, q: '「豈不レA哉」の読みとして正しいものはどれか。', choices: ['あニAセンや', 'あニAセずや', 'まタAセずや', 'なんゾAセざル'], a: 1, exp: '「豈不〜哉」は「あニ〜ずや」で詠嘆「なんと〜ではないか」。反語の形を借りた強い感動表現。' },
+  { id: 'm082', cat: '願望', level: 2, stem: '請従^レ隗始。', q: 'この文の意味として最も適当なものはどれか。', choices: ['隗に頼んで始めさせよう', 'どうか、まずこの隗から始めてください', '隗より先に始めてはならない', '隗はどこから始めたのか'], a: 1, exp: '「請フ〜（セヨ）」は相手への丁寧な願望。故事成語「隗より始めよ」の出典（戦国策・燕策）。' },
+  { id: 'm083', cat: '願望', level: 3, q: '「庶幾ハクハ」の読みとして正しいものはどれか。', choices: ['ねがハクハ', 'こひねがハクハ', 'こフ', 'ほつス'], a: 1, exp: '「庶幾」は「こひねがハクハ」。「願（ねがハクハ）」「請（こフ）」とあわせて願望の語をまとめて覚える。' },
+
+  /* ========== 重要語 ========== */
+  { id: 'm090', cat: '重要語', level: 1, q: '「所以」の読みとして正しいものはどれか。', choices: ['ゆゑん', 'ゆゑ', 'ところもつて', 'しょい'], a: 0, exp: '「所以」は「ゆゑん」。「〜する理由」「〜するための方法」の意で、文脈により訳し分ける。' },
+  { id: 'm091', cat: '重要語', level: 2, q: '「是以」の読みと意味の組み合わせとして正しいものはどれか。', choices: ['ここニおイテ／そこで', 'ここヲもつテ／こういうわけで', 'これヲもつテ／これを使って', 'ぜい／正しさ'], a: 1, exp: '「是以」は「ここヲもつテ」＝「だから」。「於是（ここニおイテ）＝そこで」と混同しやすいので対で覚える。' },
+  { id: 'm092', cat: '重要語', level: 2, q: '「蓋シ」の意味として最も適当なものはどれか。', choices: ['どうして〜しないのか', '思うに、おそらく', 'ちょうど〜のようだ', 'まったく〜ない'], a: 1, exp: '「蓋（けだシ）」は推量の副詞。再読文字「盍（なんゾ〜ざル）」と字形が似るので要注意。' },
+  { id: 'm093', cat: '重要語', level: 2, q: '「雖然」の読みとして正しいものはどれか。', choices: ['しかリトいへどモ', 'しかラバすなはチ', 'しかうシテ', 'しかリ'], a: 0, exp: '「雖然」は「しかリトいへどモ」＝「そうではあるが」。「然則（しかラバすなはチ）＝それならば」と対で覚える。' },
+  { id: 'm094', cat: '重要語', level: 3, q: '「未幾」の読みとして正しいものはどれか。', choices: ['いまダいくばくならず', 'いくばくモなクシテ', 'みき', 'いまダきならず'], a: 1, exp: '「未幾」は「いくばくモなクシテ」＝「まもなく」。「俄而（にはカニシテ）」「既而（すでニシテ）」「少焉（しばらクシテ）」と一緒に覚える。' },
+  { id: 'm095', cat: '重要語', level: 2, stem: '温^レ故而知^レ新、可^二以為^一レ師矣。', q: '傍線部「可以」の読みとして正しいものはどれか。', choices: ['もつテベシ', 'かいもつテ', 'ベクもつテ', 'もつテすベシ'], a: 0, exp: '「可以〜」は「もつテ〜ベシ」＝「〜することができる」。ここは「以て師と為るべし」。' },
+
+  /* ========== 漢詩 ========== */
+  { id: 'm100', cat: '漢詩', level: 1, q: '一句が五字で全部で八句からなる近体詩の形式はどれか。', choices: ['五言絶句', '五言律詩', '七言絶句', '七言律詩'], a: 1, exp: '四句なら絶句、八句なら律詩。一句の字数が五字なら五言、七字なら七言。' },
+  { id: 'm101', cat: '漢詩', level: 1, q: '五言詩の押韻の原則として正しいものはどれか。', choices: ['すべての句末', '偶数句末', '奇数句末', '第一句末と偶数句末'], a: 1, exp: '五言詩は偶数句末で押韻するのが原則。七言詩は第一句末と偶数句末で押韻する。' },
+  { id: 'm102', cat: '漢詩', level: 2, q: '律詩で必ず対句にしなければならないのはどの聯か。', choices: ['首聯と尾聯', '頷聯と頸聯', '首聯と頷聯', '頸聯と尾聯'], a: 1, exp: '律詩は八句を二句ずつ「首聯・頷聯・頸聯・尾聯」と呼び、第三・四句（頷聯）と第五・六句（頸聯）を必ず対句にする。' },
+  { id: 'm103', cat: '漢詩', level: 1, q: '絶句の四句をそれぞれ何と呼ぶか。', choices: ['首聯・頷聯・頸聯・尾聯', '起句・承句・転句・結句', '序・破・急・結', '上句・中句・下句・結句'], a: 1, exp: '絶句は「起承転結」。転句で場面や視点が大きく変わるのが読解のポイント。' },
+  { id: 'm104', cat: '漢詩', level: 2, stem: '国破山河在／城春草木深／感時花濺涙／恨別鳥驚心／烽火連三月／家書抵万金／白頭掻更短／渾欲不勝簪', q: '杜甫「春望」の詩の形式として正しいものはどれか。', choices: ['五言絶句', '七言絶句', '五言律詩', '七言律詩'], a: 2, exp: '一句五字×八句なので五言律詩。押韻は偶数句末の「深・心・金・簪」。' },
+  { id: 'm105', cat: '漢詩', level: 2, stem: '渭城朝雨浥軽塵／客舎青青柳色新／勧君更尽一杯酒／西出陽関無故人', q: '王維「送元二使安西」で押韻している字の組み合わせはどれか。', choices: ['塵・新・人', '雨・舎・君', '城・青・関', '塵・酒・人'], a: 0, exp: '七言絶句は第一句末と偶数句末で押韻する。ここは「塵（1句）・新（2句）・人（4句）」。' },
+
+  /* ========== 総合・識別 ========== */
+  { id: 'm110', cat: '識別', level: 2, q: '「所」を「る（受身）」ではなく「ところ」と読むのはどのような形のときか。', choices: ['「見所〜」の形', '「為A所B」の形', '「所以」の形', '「所謂」の形'], a: 1, exp: '「為A所B」の受身では「AのBするところとなる」と読む。「所」は名詞化の働きなので、必ず「ところ」。' },
+  { id: 'm111', cat: '識別', level: 2, q: '「無」を「なカレ」と読むのはどのような場合か。', choices: ['存在を否定するとき', '相手に禁止を命じるとき', '比較を表すとき', '疑問を表すとき'], a: 1, exp: '「無・莫・勿・毋」は、存在の否定なら「なシ」、相手への禁止命令なら「なカレ」。文脈で判断する。' },
+  { id: 'm112', cat: '識別', level: 3, q: '「如」を「ごとシ」ではなく「しク」と読むのはどのような場合か。', choices: ['「如A」で比況を表すとき', '「不如A」で比較を表すとき', '「如何」で疑問を表すとき', '文頭で仮定を表すとき'], a: 1, exp: '「不如A」＝「Aニしカず」（及ばない）。比況なら「〜ノごとシ」、仮定なら「もシ」。三つの読みを使い分ける。' },
+  { id: 'm113', cat: '識別', level: 3, stem: '之', q: '「之」を「の」と読むのはどのような位置にあるときか。', choices: ['動詞の下にあるとき', '名詞と名詞の間にあるとき', '文頭にあるとき', '文末にあるとき'], a: 1, exp: '動詞の下なら目的語の代名詞「これ」、名詞の間なら連体修飾の「の」、単独の動詞なら「ゆク」。' },
+  { id: 'm114', cat: '識別', level: 2, q: '「而」が置き字になるのはどのような位置にあるときか。', choices: ['文頭', '文中（語と語の間）', '文末', 'どの位置でも必ず読む'], a: 1, exp: '文中の「而」は接続を示すだけで読まない置き字。文頭にあれば「しかうシテ」「しかルニ」などと読むことがある。' },
+  { id: 'm115', cat: '識別', level: 3, q: '「見」が受身の助字だと判断できるのはどのような場合か。', choices: ['「見」が動詞の上にあるとき', '「見」が文末にあるとき', '「見」に返り点がないとき', '「見」の上に「所」があるとき'], a: 0, exp: '動詞の上にある「見」「被」は受身で「〜（セ）らル」。動詞として使われていれば「みル」「まみユ」と読む。' }
+];
+
+</script>
+<script>
+/* 返り点パズル
+ * chars : [{ c:漢字, m:返り点（'' なし / 'レ' / '一'…） }]
+ * order : 読む順（chars のインデックスを読む順に並べたもの）
+ * yomi  : 書き下し文
+ * tip   : 解説
+ */
+window.KAERITEN = [
+  {
+    id: 'kt01', level: 1, label: 'レ点①',
+    chars: [{ c: '読', m: 'レ' }, { c: '書', m: '' }],
+    order: [1, 0],
+    yomi: '書を読む。',
+    tip: 'レ点は「すぐ下の一字を先に読み、その上へ返る」。「読レ書」は 書→読 の順。'
+  },
+  {
+    id: 'kt02', level: 1, label: 'レ点②',
+    chars: [{ c: '不', m: 'レ' }, { c: '知', m: '' }],
+    order: [1, 0],
+    yomi: '知らず。',
+    tip: '否定の「不」は下の動詞を先に読んでから返る。だから必ずレ点や一二点がつく。'
+  },
+  {
+    id: 'kt03', level: 1, label: 'レ点の連続',
+    chars: [{ c: '我', m: '' }, { c: '不', m: 'レ' }, { c: '食', m: 'レ' }, { c: '肉', m: '' }],
+    order: [0, 3, 2, 1],
+    yomi: '我肉を食らはず。',
+    tip: 'レ点が続くときは、いちばん下からドミノ倒しのように上へ返る。我→肉→食→不。'
+  },
+  {
+    id: 'kt04', level: 1, label: '一二点①',
+    chars: [{ c: '登', m: '二' }, { c: '高', m: '' }, { c: '山', m: '一' }],
+    order: [1, 2, 0],
+    yomi: '高山に登る。',
+    tip: '二字以上を隔てて返るときは一二点。「一」のついた字まで読んでから「二」の字へ返る。'
+  },
+  {
+    id: 'kt05', level: 2, label: '一二点②',
+    chars: [{ c: '学', m: '二' }, { c: '漢', m: '' }, { c: '文', m: '' }, { c: '法', m: '一' }],
+    order: [1, 2, 3, 0],
+    yomi: '漢文法を学ぶ。',
+    tip: '「一」は返り読みを始める字、「二」は返っていく先の字。間は何字あってもよい。'
+  },
+  {
+    id: 'kt06', level: 2, label: 'レ点＋一二点',
+    chars: [{ c: '不', m: 'レ' }, { c: '如', m: '二' }, { c: '一', m: '' }, { c: '見', m: '一' }],
+    order: [2, 3, 1, 0],
+    yomi: '一見に如かず。',
+    tip: '一二点のかたまり（一見→如）を先に処理し、最後にレ点で「不」へ返る。'
+  },
+  {
+    id: 'kt07', level: 2, label: '上下点',
+    chars: [{ c: '有', m: '下' }, { c: '朋', m: '' }, { c: '自', m: '二' }, { c: '遠', m: '' }, { c: '方', m: '一' }, { c: '来', m: '上' }],
+    order: [1, 3, 4, 2, 5, 0],
+    yomi: '朋遠方より来たる有り。',
+    tip: '一二点のかたまりをまたいでさらに返るときに上下点を使う。順序は必ず「一→二」→「上→下」。'
+  },
+  {
+    id: 'kt08', level: 3, label: '一レ点',
+    chars: [{ c: '使', m: '二' }, { c: '子', m: '' }, { c: '路', m: '' }, { c: '問', m: '一レ' }, { c: '之', m: '' }],
+    order: [1, 2, 4, 3, 0],
+    yomi: '子路をして之を問はしむ。',
+    tip: '「一レ」は一点とレ点の合体。まずレ点の処理（之→問）を行い、そのあと一→二で「使」へ返る。'
+  },
+  {
+    id: 'kt09', level: 3, label: '上中下点',
+    chars: [{ c: '不', m: '下' }, { c: '為', m: '二' }, { c: '児', m: '' }, { c: '孫', m: '一' }, { c: '買', m: '中' }, { c: '美', m: '' }, { c: '田', m: '上' }],
+    order: [2, 3, 1, 5, 6, 4, 0],
+    yomi: '児孫の為に美田を買はず。',
+    tip: '上下点で足りないときは上・中・下と三段階。内側（一二点）から外側（上中下点）へ処理する。'
+  },
+  {
+    id: 'kt10', level: 3, label: '入れ子の返り',
+    chars: [{ c: '己', m: '' }, { c: '所', m: 'レ' }, { c: '不', m: 'レ' }, { c: '欲', m: '' }],
+    order: [0, 3, 2, 1],
+    yomi: '己の欲せざる所。',
+    tip: '「所」も返って読む字。レ点が二つ続くので、下から順に 欲→不→所 と返る。'
+  }
+];
+
+</script>
+<script>
+/* 置き字ハンター用データ
+ * chars : 一字ずつ
+ * okiji : 置き字のインデックス
+ */
+window.OKIJI = [
+  { id: 'ok01', chars: '学而時習之'.split(''), okiji: [1], yomi: '学びて時に之を習ふ。', tip: '「而」は文中で接続を示すだけで読まない。送り仮名「て」に働きが表れている。', src: '論語・学而' },
+  { id: 'ok02', chars: '青取之於藍'.split(''), okiji: [3], yomi: '青は之を藍より取る。', tip: '「於」は起点を示す置き字。「藍より」の「より」に働きが出ている。', src: '荀子・勧学' },
+  { id: 'ok03', chars: '学而不思則罔'.split(''), okiji: [1], yomi: '学びて思はざれば則ち罔し。', tip: '「而」は置き字。「則」は「すなはち」と読むので置き字ではない。', src: '論語・為政' },
+  { id: 'ok04', chars: '己所不欲勿施於人'.split(''), okiji: [6], yomi: '己の欲せざる所、人に施すこと勿かれ。', tip: '「於」は対象を示す置き字。「人に」の「に」がその働き。', src: '論語・衛霊公' },
+  { id: 'ok05', chars: '苛政猛於虎也'.split(''), okiji: [3], yomi: '苛政は虎よりも猛なり。', tip: '形容詞の下の「於」は比較の置き字。「也」は「なり」と読むので置き字ではない。', src: '礼記・檀弓下' },
+  { id: 'ok06', chars: '死而後已'.split(''), okiji: [1], yomi: '死して後已む。', tip: '「而」は置き字。「已」は「やム」と読む動詞。', src: '論語・泰伯' },
+  { id: 'ok07', chars: '温故而知新'.split(''), okiji: [2], yomi: '故きを温めて新しきを知る。', tip: '順接を示す「而」。書き下し文には書かない。', src: '論語・為政' },
+  { id: 'ok08', chars: '三人行必有我師焉'.split(''), okiji: [7], yomi: '三人行けば必ず我が師有り。', tip: '文末の「焉」は語調を強める置き字。文頭にあれば「いづクンゾ」と読む。', src: '論語・述而' },
+  { id: 'ok09', chars: '過而不改是謂過矣'.split(''), okiji: [1, 7], yomi: '過ちて改めざる、是を過ちと謂ふ。', tip: '「而」と「矣」の二つが置き字。「矣」は断定・強意を示す。', src: '論語・衛霊公' },
+  { id: 'ok10', chars: '敏於事而慎於言'.split(''), okiji: [1, 3, 5], yomi: '事に敏にして言に慎む。', tip: '置き字が三つ。「於」は対象、「而」は接続を示す。', src: '論語・学而' },
+  { id: 'ok11', chars: '力抜山兮気蓋世'.split(''), okiji: [3], yomi: '力は山を抜き気は世を蓋ふ。', tip: '「兮」は韻文でリズムを整えるための置き字。訓読では読まない。', src: '史記・項羽本紀' },
+  { id: 'ok12', chars: '労力者治於人'.split(''), okiji: [4], yomi: '力を労する者は人に治めらる。', tip: '「於」の下が動作主なので受身。「〜らル」と送り仮名で表す。', src: '孟子・滕文公上' }
+];
+
+</script>
+<script>
+/* 書き下し並べ替え用データ（意味のかたまりごとに分割済み） */
+window.NARABEKAE = [
+  { id: 'nb01', level: 1, kanbun: '学而時習之', parts: ['学びて', '時に', '之を', '習ふ'], trans: '学んで折にふれて復習する。', src: '論語・学而' },
+  { id: 'nb02', level: 1, kanbun: '百聞不如一見', parts: ['百聞は', '一見に', '如かず'], trans: '百回聞くことは一回見ることに及ばない。', src: '漢書・趙充国伝' },
+  { id: 'nb03', level: 1, kanbun: '三人行必有我師', parts: ['三人', '行けば', '必ず', '我が師', '有り'], trans: '三人で行動すれば必ず自分の師となる人がいる。', src: '論語・述而' },
+  { id: 'nb04', level: 1, kanbun: '歳月不待人', parts: ['歳月', '人を', '待たず'], trans: '歳月は人を待ってはくれない。', src: '陶淵明・雑詩' },
+  { id: 'nb05', level: 2, kanbun: '不入虎穴、不得虎子', parts: ['虎穴に', '入らずんば', '虎子を', '得ず'], trans: '虎の穴に入らなければ虎の子は得られない。', src: '後漢書・班超伝' },
+  { id: 'nb06', level: 2, kanbun: '学而不思則罔', parts: ['学びて', '思はざれば', '則ち', '罔し'], trans: '学んでも自分で考えなければ、はっきり理解できない。', src: '論語・為政' },
+  { id: 'nb07', level: 2, kanbun: '過猶不及', parts: ['過ぎたるは', '猶ほ', '及ばざるが', 'ごとし'], trans: 'やりすぎることは、足りないのと同じである。', src: '論語・先進' },
+  { id: 'nb08', level: 2, kanbun: '未知生、焉知死', parts: ['未だ', '生を', '知らず', '焉くんぞ', '死を', '知らん'], trans: 'まだ生も分からないのに、どうして死が分かろうか。', src: '論語・先進' },
+  { id: 'nb09', level: 2, kanbun: '温故而知新、可以為師矣', parts: ['故きを', '温めて', '新しきを', '知れば', '以て', '師と', '為るべし'], trans: '古いことを学び直して新しい知識を得れば、人の師となれる。', src: '論語・為政' },
+  { id: 'nb10', level: 2, kanbun: '有朋自遠方来', parts: ['朋', '遠方より', '来たる', '有り'], trans: '友が遠方から訪ねてくる。', src: '論語・学而' },
+  { id: 'nb11', level: 2, kanbun: '天帝使我長百獣', parts: ['天帝', '我をして', '百獣に', '長たらしむ'], trans: '天帝は私を百獣の長にならせた。', src: '戦国策・楚策' },
+  { id: 'nb12', level: 2, kanbun: '青取之於藍、而青於藍', parts: ['青は', '之を', '藍より', '取りて', '藍よりも', '青し'], trans: '青色は藍から取るが、藍よりも青い。', src: '荀子・勧学' },
+  { id: 'nb13', level: 2, kanbun: '学不可以已', parts: ['学は', '以て', '已むべからず'], trans: '学問は途中でやめてはならない。', src: '荀子・勧学' },
+  { id: 'nb14', level: 3, kanbun: '与其奢也、寧倹', parts: ['其の', '奢らんよりは', '寧ろ', '倹せよ'], trans: 'ぜいたくをするくらいなら、むしろ質素にせよ。', src: '論語・八佾' },
+  { id: 'nb15', level: 3, kanbun: '死馬且買之、況生者乎', parts: ['死馬すら', '且つ', '之を', '買ふ', '況んや', '生ける者を', 'や'], trans: '死んだ馬でさえ買うのだ、まして生きた馬ならなおさらだ。', src: '戦国策・燕策' },
+  { id: 'nb16', level: 3, kanbun: '盍各言爾志', parts: ['盍ぞ', '各々', '爾の志を', '言はざる'], trans: 'どうしてそれぞれ自分の志を言わないのか。', src: '論語・公冶長' },
+  { id: 'nb17', level: 3, kanbun: '苟志於仁矣、無悪也', parts: ['苟くも', '仁に', '志せば', '悪しきこと', '無きなり'], trans: 'かりにも仁を志すならば、悪事を行うことはない。', src: '論語・里仁' },
+  { id: 'nb18', level: 3, kanbun: '己所不欲、勿施於人', parts: ['己の', '欲せざる', '所', '人に', '施すこと', '勿かれ'], trans: '自分が望まないことを、人に対して行ってはならない。', src: '論語・衛霊公' },
+  { id: 'nb19', level: 3, kanbun: '欲窮千里目、更上一層楼', parts: ['千里の目を', '窮めんと', '欲し', '更に', '上る', '一層の楼'], trans: '千里のかなたまで見きわめたいと思い、さらにもう一階上へ登る。', src: '王之渙・登鸛鵲楼' },
+  { id: 'nb20', level: 3, kanbun: '良薬苦於口而利於病', parts: ['良薬は', '口に', '苦けれども', '病に', '利あり'], trans: 'よく効く薬は口に苦いが、病気には効き目がある。', src: '孔子家語' }
+];
+
+</script>
+<script>
+/* 漢詩データ
+ * form   : 詩の形式
+ * rhyme  : 押韻している字
+ * rhymeLines : 押韻している句の番号（1始まり）
+ * regular: true=原則どおりの押韻 / false=例外を含む（押韻の設問には使わない）
+ * tsuiku : 対句になっている句の組（番号）
+ */
+window.KANSHI = [
+  {
+    id: 'ks01', title: '春暁', author: '孟浩然', era: '盛唐',
+    form: '五言絶句', rhyme: ['暁', '鳥', '少'], rhymeLines: [1, 2, 4], regular: false,
+    lines: ['春眠不覚暁', '処処聞啼鳥', '夜来風雨声', '花落知多少'],
+    yomi: ['春眠暁を覚えず', '処処啼鳥を聞く', '夜来風雨の声', '花落つること知る多少ぞ'],
+    trans: '春の眠りは心地よく、夜明けにも気づかない。あちこちで鳥の鳴く声が聞こえる。ゆうべは風雨の音がしていたが、花はどれほど散ったことだろう。',
+    tsuiku: [],
+    note: '五言詩は原則として偶数句末で押韻するが、この詩は第一句末「暁」でも韻を踏む例外。起承転結の「転句」で夜の記憶に転じる構成が見どころ。'
+  },
+  {
+    id: 'ks02', title: '静夜思', author: '李白', era: '盛唐',
+    form: '五言絶句', rhyme: ['光', '霜', '郷'], rhymeLines: [1, 2, 4], regular: false,
+    lines: ['牀前明月光', '疑是地上霜', '挙頭望明月', '低頭思故郷'],
+    yomi: ['牀前明月の光', '疑ふらくは是れ地上の霜かと', '頭を挙げて明月を望み', '頭を低れて故郷を思ふ'],
+    trans: '寝台の前にさしこむ明るい月の光。地上におりた霜かと見まちがえるほどだ。頭を上げて明月をながめ、頭を垂れて故郷を思う。',
+    tsuiku: [[3, 4]],
+    note: '第三句と第四句が「挙頭↔低頭」「望明月↔思故郷」で対になっている。テキストによっては「牀前月光を看る／頭を挙げて山月を望み」とする本文もある。'
+  },
+  {
+    id: 'ks03', title: '春望', author: '杜甫', era: '盛唐',
+    form: '五言律詩', rhyme: ['深', '心', '金', '簪'], rhymeLines: [2, 4, 6, 8], regular: true,
+    lines: ['国破山河在', '城春草木深', '感時花濺涙', '恨別鳥驚心', '烽火連三月', '家書抵万金', '白頭掻更短', '渾欲不勝簪'],
+    yomi: ['国破れて山河在り', '城春にして草木深し', '時に感じては花にも涙を濺ぎ', '別れを恨んでは鳥にも心を驚かす', '烽火三月に連なり', '家書万金に抵る', '白頭掻けば更に短く', '渾べて簪に勝へざらんと欲す'],
+    trans: '国都は破壊されたが山や河は昔のまま。町には春が来て草木が生い茂る。時局を思えば花を見ても涙がこぼれ、別れを嘆けば鳥の声にも心が痛む。戦火は三か月も続き、家族からの手紙は万金にも値する。白髪頭をかけばいっそう薄くなり、まるで冠留めも挿せないほどだ。',
+    tsuiku: [[3, 4], [5, 6]],
+    note: '律詩は八句を二句ずつ「首聯・頷聯・頸聯・尾聯」と呼び、頷聯（3・4句）と頸聯（5・6句）は必ず対句にする。安史の乱で長安に幽閉された杜甫の作。'
+  },
+  {
+    id: 'ks04', title: '絶句', author: '杜甫', era: '盛唐',
+    form: '五言絶句', rhyme: ['然', '年'], rhymeLines: [2, 4], regular: true,
+    lines: ['江碧鳥逾白', '山青花欲然', '今春看又過', '何日是帰年'],
+    yomi: ['江碧にして鳥逾よ白く', '山青くして花然えんと欲す', '今春看す又過ぐ', '何れの日か是れ帰年ならん'],
+    trans: '川は深緑で、鳥はいっそう白く見える。山は青々として、花は燃え立つように赤い。今年の春もみるみる過ぎてゆく。いつになったら故郷へ帰れる年になるのだろう。',
+    tsuiku: [[1, 2]],
+    note: '五言絶句の押韻は偶数句末（第二句・第四句）が原則で、この詩はその典型。結句の「何れの日か〜ん」は疑問形。'
+  },
+  {
+    id: 'ks05', title: '登鸛鵲楼', author: '王之渙', era: '盛唐',
+    form: '五言絶句', rhyme: ['流', '楼'], rhymeLines: [2, 4], regular: true,
+    lines: ['白日依山尽', '黄河入海流', '欲窮千里目', '更上一層楼'],
+    yomi: ['白日山に依りて尽き', '黄河海に入りて流る', '千里の目を窮めんと欲し', '更に上る一層の楼'],
+    trans: '白く輝く太陽は山にそって沈み、黄河は海へと流れ込む。千里のかなたまで見きわめたいと思い、さらにもう一階上へ登る。',
+    tsuiku: [[1, 2], [3, 4]],
+    note: '四句すべてが二組の対句になっている珍しい構成。「更に上る一層の楼」は向上心のたとえとして有名。'
+  },
+  {
+    id: 'ks06', title: '送元二使安西', author: '王維', era: '盛唐',
+    form: '七言絶句', rhyme: ['塵', '新', '人'], rhymeLines: [1, 2, 4], regular: true,
+    lines: ['渭城朝雨浥軽塵', '客舎青青柳色新', '勧君更尽一杯酒', '西出陽関無故人'],
+    yomi: ['渭城の朝雨軽塵を浥す', '客舎青青柳色新たなり', '君に勧む更に尽くせ一杯の酒', '西のかた陽関を出づれば故人無からん'],
+    trans: '渭城の朝の雨が軽い土ぼこりをしっとりと湿らせる。宿屋の柳は青々と色あざやかだ。君よ、もう一杯の酒を飲みほしてくれ。西へ陽関を出てしまえば、もう昔なじみはいないのだから。',
+    tsuiku: [],
+    note: '七言詩は第一句末と偶数句末で押韻するのが原則で、この詩はその典型。送別詩の代表作で「陽関三畳」とも呼ばれる。'
+  },
+  {
+    id: 'ks07', title: '黄鶴楼送孟浩然之広陵', author: '李白', era: '盛唐',
+    form: '七言絶句', rhyme: ['楼', '州', '流'], rhymeLines: [1, 2, 4], regular: true,
+    lines: ['故人西辞黄鶴楼', '煙花三月下揚州', '孤帆遠影碧空尽', '唯見長江天際流'],
+    yomi: ['故人西のかた黄鶴楼を辞し', '煙花三月揚州に下る', '孤帆の遠影碧空に尽き', '唯だ見る長江の天際に流るるを'],
+    trans: '古なじみの友は西の黄鶴楼に別れを告げ、花がすみの三月に揚州へ下ってゆく。ぽつんと一つの帆かげは青空のかなたに消え、ただ長江が天のはてへ流れてゆくのが見えるばかりだ。',
+    tsuiku: [],
+    note: '「故人」は「古い友人」の意味で、死んだ人のことではない。結句の「唯だ見る」は限定の表現。'
+  },
+  {
+    id: 'ks08', title: '早発白帝城', author: '李白', era: '盛唐',
+    form: '七言絶句', rhyme: ['間', '還', '山'], rhymeLines: [1, 2, 4], regular: true,
+    lines: ['朝辞白帝彩雲間', '千里江陵一日還', '両岸猿声啼不住', '軽舟已過万重山'],
+    yomi: ['朝に辞す白帝彩雲の間', '千里の江陵一日にして還る', '両岸の猿声啼いて住まざるに', '軽舟已に過ぐ万重の山'],
+    trans: '朝焼け雲のたなびく白帝城を朝早く出発し、千里の道のりの江陵まで一日で帰り着く。両岸の猿の声が鳴きやまないうちに、軽やかな舟はいくえにも重なる山々を通り過ぎていた。',
+    tsuiku: [],
+    note: '流罪を赦されて長江を下ったときの詩。スピード感が全編を貫く。'
+  },
+  {
+    id: 'ks09', title: '涼州詞', author: '王翰', era: '盛唐',
+    form: '七言絶句', rhyme: ['杯', '催', '回'], rhymeLines: [1, 2, 4], regular: true,
+    lines: ['葡萄美酒夜光杯', '欲飲琵琶馬上催', '酔臥沙場君莫笑', '古来征戦幾人回'],
+    yomi: ['葡萄の美酒夜光の杯', '飲まんと欲すれば琵琶馬上に催す', '酔ひて沙場に臥すも君笑ふこと莫かれ', '古来征戦幾人か回る'],
+    trans: 'ぶどうの美酒を夜光の杯に満たす。飲もうとすると馬上の琵琶が出陣を促す。酔って砂漠に倒れ伏しても君よ笑ってくれるな。昔から戦に出て何人が生きて帰っただろうか。',
+    tsuiku: [],
+    note: '第三句に禁止「莫（なカレ）」、第四句に反語「幾人か回る」が使われている。'
+  },
+  {
+    id: 'ks10', title: '楓橋夜泊', author: '張継', era: '中唐',
+    form: '七言絶句', rhyme: ['天', '眠', '船'], rhymeLines: [1, 2, 4], regular: true,
+    lines: ['月落烏啼霜満天', '江楓漁火対愁眠', '姑蘇城外寒山寺', '夜半鐘声到客船'],
+    yomi: ['月落ち烏啼いて霜天に満つ', '江楓の漁火愁眠に対す', '姑蘇城外の寒山寺', '夜半の鐘声客船に到る'],
+    trans: '月は沈み、からすが鳴いて、霜の気配が空いっぱいに満ちる。川辺の楓と漁火が、旅の憂いに眠れぬ私と向き合う。姑蘇の町はずれの寒山寺から、真夜中の鐘の音が旅の舟まで届いてくる。',
+    tsuiku: [],
+    note: '旅愁を詠んだ七言絶句の名作。「夜半の鐘声」が印象的な結び。'
+  },
+  {
+    id: 'ks11', title: '勧酒', author: '于武陵', era: '晩唐',
+    form: '五言絶句', rhyme: ['卮', '辞', '離'], rhymeLines: [1, 2, 4], regular: false,
+    lines: ['勧君金屈卮', '満酌不須辞', '花発多風雨', '人生足別離'],
+    yomi: ['君に勧む金屈卮', '満酌辞するを須ひず', '花発けば風雨多し', '人生別離足る'],
+    trans: '君に黄金の杯をすすめよう。なみなみと注いだこの酒、遠慮する必要はない。花が咲けば風雨が多いもの。人生には別れがつきものなのだ。',
+    tsuiku: [],
+    note: '第二句に再読文字「須（すべかラク〜ベシ）」の否定形が使われている。井伏鱒二の意訳「サヨナラダケガ人生ダ」で知られる。'
+  },
+  {
+    id: 'ks12', title: '江雪', author: '柳宗元', era: '中唐',
+    form: '五言絶句', rhyme: ['絶', '滅', '雪'], rhymeLines: [1, 2, 4], regular: false,
+    lines: ['千山鳥飛絶', '万径人蹤滅', '孤舟蓑笠翁', '独釣寒江雪'],
+    yomi: ['千山鳥飛ぶこと絶え', '万径人蹤滅す', '孤舟蓑笠の翁', '独り釣る寒江の雪'],
+    trans: 'いくつもの山では鳥の飛ぶ姿が絶え、すべての小道から人の足あとが消えた。ぽつんと一艘の舟に蓑と笠の老人。ただ一人、雪の降る寒々とした川で釣り糸をたれている。',
+    tsuiku: [[1, 2]],
+    note: '第一・二句が対句。全編に「絶・滅・孤・独」と孤高の語が並ぶ。'
+  }
+];
+
+</script>
+<script>
+/* 故事成語 */
+window.KOJI = [
+  { id: 'kj01', word: '五十歩百歩', yomi: 'ごじっぽひゃっぽ', src: '孟子・梁恵王上', mean: '少しの違いはあっても、本質的には同じで大差がないこと。', story: '戦場で五十歩逃げた者が百歩逃げた者を臆病だと笑ったら、どうでしょうか——孟子が梁の恵王に、自国の政治も隣国と大差ないと諭した話。' },
+  { id: 'kj02', word: '矛盾', yomi: 'むじゅん', src: '韓非子・難一', mean: '前後のつじつまが合わないこと。', story: '「どんな盾も突き通す矛」と「どんな矛も防ぐ盾」を並べて売る楚の商人に、「その矛でその盾を突いたらどうなる」と問うと答えられなかった。' },
+  { id: 'kj03', word: '蛇足', yomi: 'だそく', src: '戦国策・斉策', mean: '余計なつけ足し。あっても益がなく、かえって害になるもの。', story: '蛇の絵を早く描く競争で、一番に描き終えた者が得意になって足まで描き加え、「蛇に足はない」と酒を取り上げられた。' },
+  { id: 'kj04', word: '漁夫の利', yomi: 'ぎょふのり', src: '戦国策・燕策', mean: '二者が争っているすきに、第三者が利益を横取りすること。', story: 'シギとハマグリが争って離れないところを、漁師が両方まとめて捕らえた。趙と燕が争えば秦が利を得ると諫めた話。' },
+  { id: 'kj05', word: '四面楚歌', yomi: 'しめんそか', src: '史記・項羽本紀', mean: '周囲がすべて敵で、まったく味方がいない状態。', story: '垓下で漢軍に囲まれた項羽が、四方の敵陣から故郷・楚の歌が聞こえるのを聞き、楚の人々がすでに漢に降ったと悟った。' },
+  { id: 'kj06', word: '臥薪嘗胆', yomi: 'がしんしょうたん', src: '十八史略', mean: '目的を遂げるために、長い間つらい苦労に耐えること。', story: '呉王夫差は薪の上に寝て父の仇を忘れまいとし、越王勾践は苦い胆を嘗めて敗戦の恥を思い起こした。' },
+  { id: 'kj07', word: '推敲', yomi: 'すいこう', src: '唐詩紀事', mean: '詩文の字句を何度も練り直すこと。', story: '賈島が「僧は推す月下の門」の「推す」を「敲く」にすべきか悩み、韓愈に相談して「敲」に決めた。' },
+  { id: 'kj08', word: '塞翁が馬', yomi: 'さいおうがうま', src: '淮南子・人間訓', mean: '人生の幸不幸は予測できないということ。', story: '国境の老人の馬が逃げたが駿馬を連れて戻り、息子が落馬して足を折ったおかげで徴兵を免れた。禍福は入れ替わる。' },
+  { id: 'kj09', word: '守株', yomi: 'しゅしゅ／くいぜをまもる', src: '韓非子・五蠹', mean: '古い習慣にこだわって融通がきかないこと。', story: '切り株にぶつかって死んだウサギを拾った農夫が、以後仕事をやめて切り株を見張り続けた。' },
+  { id: 'kj10', word: '朝三暮四', yomi: 'ちょうさんぼし', src: '荘子・斉物論／列子・黄帝', mean: '目先の違いにとらわれて、実質が同じことに気づかないこと。また、言葉巧みに人をだますこと。', story: '猿にトチの実を「朝三つ暮れ四つ」と言うと怒り、「朝四つ暮れ三つ」と言うと喜んだ。合計は同じである。' },
+  { id: 'kj11', word: '杞憂', yomi: 'きゆう', src: '列子・天瑞', mean: '無用の心配。取り越し苦労。', story: '杞の国のある人が「天が落ちてきたらどうしよう」と心配して食事も喉を通らなかった。' },
+  { id: 'kj12', word: '呉越同舟', yomi: 'ごえつどうしゅう', src: '孫子・九地', mean: '仲の悪い者同士が同じ場に居合わせること。また、共通の困難には協力すること。', story: '敵国同士の呉人と越人も、同じ舟に乗って嵐に遭えば、左右の手のように助け合う。' },
+  { id: 'kj13', word: '背水の陣', yomi: 'はいすいのじん', src: '史記・淮陰侯列伝', mean: '一歩も引けない状況に身を置いて、決死の覚悟で事にあたること。', story: '韓信が川を背にして陣を敷き、退路を断つことで兵の死力を引き出して趙軍に大勝した。' },
+  { id: 'kj14', word: '鶏口牛後', yomi: 'けいこうぎゅうご', src: '史記・蘇秦列伝', mean: '大きな組織の末端にいるより、小さな組織でも長になるほうがよい。', story: '「寧ろ鶏口と為るも、牛後と為る無かれ」——蘇秦が諸国に合従策を説いた際の言葉。' },
+  { id: 'kj15', word: '完璧', yomi: 'かんぺき', src: '史記・廉頗藺相如列伝', mean: '欠点がまったくなく、完全であること。', story: '藺相如が趙の宝玉「和氏の璧」を秦に持参し、傷一つつけずに持ち帰った（璧を完うす）。' },
+  { id: 'kj16', word: '刎頸の交わり', yomi: 'ふんけいのまじわり', src: '史記・廉頗藺相如列伝', mean: '相手のためなら首を切られても悔いないほど深い友情。', story: '対立していた廉頗と藺相如が、国を思う心で結ばれ、生死を共にする友となった。' },
+  { id: 'kj17', word: '他山の石', yomi: 'たざんのいし', src: '詩経・小雅', mean: '他人のつまらない言動も、自分をみがく助けになるということ。', story: '「他山の石、以て玉を攻むべし」——よその山から出た粗い石でも、自分の玉をみがく砥石になる。' },
+  { id: 'kj18', word: '登竜門', yomi: 'とうりゅうもん', src: '後漢書・李膺伝', mean: 'そこを通れば立身出世できるという難しい関門。', story: '黄河上流の竜門の急流を登りきった鯉は竜になるという伝説から。' },
+  { id: 'kj19', word: '虎の威を借る狐', yomi: 'とらのいをかるきつね', src: '戦国策・楚策', mean: '他人の権勢をかさに着ていばること。', story: '虎に食われそうになった狐が「私は天帝に百獣の長に任じられた」と言い、虎を後ろに従えて歩いて見せた。' },
+  { id: 'kj20', word: '三顧の礼', yomi: 'さんこのれい', src: '三国志・諸葛亮伝（出師表）', mean: '目上の人が礼を尽くして、すぐれた人材を迎え入れること。', story: '劉備が諸葛亮の草庵を三度たずねて、ついに軍師として迎えた。' },
+  { id: 'kj21', word: '泣いて馬謖を斬る', yomi: 'ないてばしょくをきる', src: '三国志・蜀志', mean: '規律を守るために、私情を捨てて処分すること。', story: '諸葛亮は、愛弟子の馬謖が命令に背いて大敗したため、涙をのんで軍法どおり処刑した。' },
+  { id: 'kj22', word: '破竹の勢い', yomi: 'はちくのいきおい', src: '晋書・杜預伝', mean: '止めようのない激しい勢い。', story: '竹は最初の数節を割れば、あとは刃を入れるだけで一気に割れる——杜預が呉攻略を進言した言葉。' },
+  { id: 'kj23', word: '蛍雪の功', yomi: 'けいせつのこう', src: '晋書（車胤・孫康の故事）', mean: '苦労して学問にはげみ、成果をあげること。', story: '車胤は灯油が買えず蛍の光で、孫康は窓の雪明かりで書を読み、ともに高位に上った。' },
+  { id: 'kj24', word: '助長', yomi: 'じょちょう', src: '孟子・公孫丑上', mean: '（本来は）不要な力添えをして、かえって害すること。', story: '宋の人が苗の伸びを助けようと引っ張ったところ、苗はみな枯れてしまった。' },
+  { id: 'kj25', word: '木に縁りて魚を求む', yomi: 'きによりてうおをもとむ', src: '孟子・梁恵王上', mean: '方法が根本的に間違っていて、目的が達せられないこと。', story: '孟子が斉の宣王に、武力で天下を得ようとするのは木に登って魚を探すようなものだと説いた。' },
+  { id: 'kj26', word: '覆水盆に返らず', yomi: 'ふくすいぼんにかえらず', src: '拾遺記', mean: '一度してしまったことは取り返しがつかない。', story: '出世した太公望のもとに、かつて去った妻が復縁を求めて来た。太公望は盆の水をこぼし「元に戻せるなら」と答えた。' },
+  { id: 'kj27', word: '大器晩成', yomi: 'たいきばんせい', src: '老子', mean: '大人物は才能の現れるのが遅く、時間をかけて完成するということ。', story: '「大方は隅無く、大器は晩成す」——大いなるものはたやすく形をなさない、という老子の言葉。' },
+  { id: 'kj28', word: '井の中の蛙', yomi: 'いのなかのかわず', src: '荘子・秋水', mean: '狭い世界しか知らず、広い世界があることを知らないこと。', story: '井戸の中の蛙に海を語ることはできない。狭い住みかにとらわれているからだ。' },
+  { id: 'kj29', word: '胡蝶の夢', yomi: 'こちょうのゆめ', src: '荘子・斉物論', mean: '現実と夢の区別がつかないこと。人生のはかなさのたとえ。', story: '荘周は蝶になった夢を見た。目覚めて、自分が蝶の夢を見たのか、蝶が自分の夢を見ているのか分からなくなった。' },
+  { id: 'kj30', word: '白眉', yomi: 'はくび', src: '三国志・蜀志馬良伝', mean: '同類の中で最もすぐれている人やもの。', story: '馬氏の五兄弟はみな優秀だったが、眉に白い毛のある馬良が最もすぐれていた。' },
+  { id: 'kj31', word: '断腸の思い', yomi: 'だんちょうのおもい', src: '世説新語', mean: 'はらわたがちぎれるほどのつらく悲しい思い。', story: '子猿を捕らえられた母猿が舟を追い続け、ついに息絶えた。腹を割くと腸がずたずたに断ち切れていた。' },
+  { id: 'kj32', word: '漱石枕流', yomi: 'そうせきちんりゅう', src: '晋書・孫楚伝（世説新語）', mean: '負け惜しみが強く、無理なこじつけをすること。', story: '孫楚が「石に漱ぎ流れに枕す」と言い間違え、指摘されると「石で歯を磨き、流れで耳を洗うのだ」と強弁した。' },
+  { id: 'kj33', word: '温故知新', yomi: 'おんこちしん', src: '論語・為政', mean: '昔のことを学び直して、そこから新しい知識や見方を得ること。', story: '「故きを温めて新しきを知れば、以て師と為るべし」——孔子の言葉。' },
+  { id: 'kj34', word: '出藍の誉れ', yomi: 'しゅつらんのほまれ', src: '荀子・勧学', mean: '弟子が師よりもすぐれた者になること。', story: '「青は之を藍より取りて、藍よりも青し」——青い染料は藍から取るが、藍よりも青い。' },
+  { id: 'kj35', word: '苛政は虎よりも猛し', yomi: 'かせいはとらよりもたけし', src: '礼記・檀弓下', mean: '過酷な政治は、人食い虎よりも人々を苦しめるということ。', story: '虎に家族を食われても山を離れない女に理由を問うと、「ここには苛酷な政治がないから」と答えた。' },
+  { id: 'kj36', word: '隗より始めよ', yomi: 'かいよりはじめよ', src: '戦国策・燕策', mean: 'まず言い出した者から始めよ。また、大事をなすには手近なところから始めよ。', story: '賢者を集めたい燕の昭王に、郭隗が「まず私のような凡人を厚遇なさい。さすれば賢者が集まる」と進言した。' },
+  { id: 'kj37', word: '画竜点睛', yomi: 'がりょうてんせい', src: '歴代名画記', mean: '物事を仕上げる最後の大切な仕上げ。', story: '張僧繇が竜の絵に瞳を描き入れると、竜は雷とともに天へ昇っていった。' },
+  { id: 'kj38', word: '傍若無人', yomi: 'ぼうじゃくぶじん', src: '史記・刺客列伝', mean: '人前をはばからず、勝手気ままにふるまうこと。', story: '荊軻と高漸離が町なかで歌い泣き、まるでそばに人がいないかのようにふるまった。' }
+];
+
+</script>
+<script>
+/* 漢文 頻出漢字の読み
+ * c    : 漢字
+ * yomi : 主な読み（第一のものが代表読み）
+ * mean : 意味
+ * grp  : ドリルの出題グループ
+ */
+window.KANJI = [
+  /* --- 指示・代名詞 --- */
+  { c: '之', yomi: ['これ', 'の', 'ゆク'], mean: '（代名詞）これ／（助詞）〜の／（動詞）行く', grp: '指示語', note: '動詞の下なら「これ」、名詞の間なら「の」。' },
+  { c: '其', yomi: ['そノ', 'それ'], mean: 'その／それ', grp: '指示語' },
+  { c: '是', yomi: ['これ', 'ここ'], mean: 'これ／正しい', grp: '指示語' },
+  { c: '此', yomi: ['これ', 'こノ'], mean: 'これ／この', grp: '指示語' },
+  { c: '斯', yomi: ['これ', 'こノ'], mean: 'これ／この', grp: '指示語' },
+  { c: '夫', yomi: ['そレ', 'かノ'], mean: '（文頭）そもそも／あの', grp: '指示語', note: '「おっと」と読む名詞用法もある。' },
+  { c: '諸', yomi: ['これヲ', 'もろもろ'], mean: '「之於」「之乎」の合字／多くの', grp: '指示語' },
+
+  /* --- 副詞（時・程度） --- */
+  { c: '嘗', yomi: ['かつテ'], mean: '以前に、かつて', grp: '副詞' },
+  { c: '曽', yomi: ['かつテ'], mean: '以前に', grp: '副詞' },
+  { c: '既', yomi: ['すでニ'], mean: 'もう、すでに', grp: '副詞' },
+  { c: '已', yomi: ['すでニ', 'やム', 'のみ'], mean: 'すでに／やめる／〜だけ', grp: '副詞' },
+  { c: '遂', yomi: ['つひニ'], mean: 'とうとう、そのまま', grp: '副詞' },
+  { c: '竟', yomi: ['つひニ'], mean: 'ついに、結局', grp: '副詞' },
+  { c: '果', yomi: ['はタシテ'], mean: '思ったとおり', grp: '副詞' },
+  { c: '俄', yomi: ['にはカニ'], mean: '急に、まもなく', grp: '副詞' },
+  { c: '適', yomi: ['たまたま', 'ゆク'], mean: 'ちょうどその時／行く', grp: '副詞' },
+  { c: '会', yomi: ['たまたま'], mean: 'ちょうどその時', grp: '副詞' },
+  { c: '固', yomi: ['もとヨリ'], mean: 'もともと、言うまでもなく', grp: '副詞' },
+  { c: '素', yomi: ['もとヨリ'], mean: 'もともと、ふだんから', grp: '副詞' },
+  { c: '甚', yomi: ['はなはダ'], mean: '非常に', grp: '副詞' },
+  { c: '頗', yomi: ['すこぶル'], mean: 'たいそう', grp: '副詞' },
+  { c: '益', yomi: ['ますます'], mean: 'ますます', grp: '副詞' },
+  { c: '弥', yomi: ['いよいよ'], mean: 'ますます', grp: '副詞' },
+  { c: '稍', yomi: ['やや'], mean: '少しずつ', grp: '副詞' },
+  { c: '亦', yomi: ['まタ'], mean: '〜もまた', grp: '副詞' },
+  { c: '復', yomi: ['まタ'], mean: '再び', grp: '副詞' },
+  { c: '尚', yomi: ['なホ'], mean: 'それでもやはり', grp: '副詞' },
+  { c: '相', yomi: ['あひ'], mean: '互いに／相手に対して', grp: '副詞' },
+  { c: '倶', yomi: ['ともニ'], mean: '一緒に、両方とも', grp: '副詞' },
+  { c: '悉', yomi: ['ことごとク'], mean: '残らず全部', grp: '副詞' },
+  { c: '咸', yomi: ['みな'], mean: 'みんな', grp: '副詞' },
+  { c: '各', yomi: ['おのおの'], mean: 'それぞれ', grp: '副詞' },
+  { c: '或', yomi: ['あルヒハ', 'あルひと'], mean: 'あるいは／ある人', grp: '副詞' },
+  { c: '自', yomi: ['みづかラ', 'おのづかラ', 'よリ'], mean: '自分で／自然に／〜から', grp: '副詞' },
+  { c: '敢', yomi: ['あへテ'], mean: '思いきって、むりに', grp: '副詞' },
+  { c: '蓋', yomi: ['けだシ'], mean: '思うに、おそらく', grp: '副詞' },
+  { c: '凡', yomi: ['およソ'], mean: 'だいたい、総じて', grp: '副詞' },
+  { c: '方', yomi: ['まさニ', 'あタリテ'], mean: 'ちょうど今／〜のとき', grp: '副詞' },
+
+  /* --- 接続 --- */
+  { c: '乃', yomi: ['すなはチ'], mean: 'そこで、なんと', grp: '接続語' },
+  { c: '即', yomi: ['すなはチ'], mean: 'すぐに、〜こそ', grp: '接続語' },
+  { c: '則', yomi: ['すなはチ'], mean: '〜ならば', grp: '接続語' },
+  { c: '輒', yomi: ['すなはチ'], mean: 'そのたびに', grp: '接続語' },
+  { c: '而', yomi: ['しかうシテ', 'しかルニ'], mean: '（接続）そして／しかし', grp: '接続語', note: '文中では読まない置き字になることが多い。' },
+  { c: '且', yomi: ['かツ', 'まさニ'], mean: 'その上／今にも〜しようとする', grp: '接続語' },
+  { c: '抑', yomi: ['そもそも'], mean: 'いったい、それとも', grp: '接続語' },
+
+  /* --- 助字・句法の字 --- */
+  { c: '於', yomi: ['おイテ', 'よリ'], mean: '場所・対象・比較・受身を示す', grp: '助字', note: '多くは読まない置き字。' },
+  { c: '以', yomi: ['もつテ'], mean: '〜で、〜によって、〜を', grp: '助字' },
+  { c: '為', yomi: ['なス', 'たリ', 'ためニ', 'つくル'], mean: 'する／である／〜のために', grp: '助字' },
+  { c: '与', yomi: ['と', 'ともニ', 'くみス', 'あづかル'], mean: '〜と／味方する／関与する', grp: '助字' },
+  { c: '所', yomi: ['ところ'], mean: '〜するもの・こと', grp: '助字' },
+  { c: '者', yomi: ['もノ', 'は'], mean: '〜する人・もの／〜というものは', grp: '助字' },
+  { c: '也', yomi: ['なり', 'や'], mean: '（断定）〜である／（疑問）〜か', grp: '助字' },
+  { c: '矣', yomi: ['—'], mean: '断定・完了・強意を表す置き字', grp: '助字' },
+  { c: '焉', yomi: ['—', 'いづクンゾ', 'ここニ'], mean: '文末では置き字／文頭では「どうして」', grp: '助字' },
+  { c: '兮', yomi: ['—'], mean: '調子を整える置き字（韻文に多い）', grp: '助字' },
+  { c: '乎', yomi: ['や', 'か', 'かな'], mean: '疑問・反語・詠嘆／文中では置き字', grp: '助字' },
+  { c: '哉', yomi: ['や', 'かな'], mean: '疑問・反語・詠嘆', grp: '助字' },
+  { c: '耳', yomi: ['のみ'], mean: '〜だけだ', grp: '助字' },
+
+  /* --- 句法の核になる字 --- */
+  { c: '未', yomi: ['いまダ'], mean: 'まだ〜ない（再読文字）', grp: '句法字' },
+  { c: '将', yomi: ['まさニ', 'ひきゐル'], mean: '今にも〜しようとする（再読文字）／率いる', grp: '句法字' },
+  { c: '当', yomi: ['まさニ', 'あタル'], mean: '当然〜すべきだ（再読文字）', grp: '句法字' },
+  { c: '応', yomi: ['まさニ', 'こたフ'], mean: 'きっと〜だろう（再読文字）', grp: '句法字' },
+  { c: '宜', yomi: ['よろシク'], mean: '〜するのがよい（再読文字）', grp: '句法字' },
+  { c: '須', yomi: ['すべかラク', 'もちフ'], mean: 'ぜひ〜する必要がある（再読文字）', grp: '句法字' },
+  { c: '猶', yomi: ['なホ'], mean: 'ちょうど〜のようだ（再読文字）／それでもなお', grp: '句法字' },
+  { c: '盍', yomi: ['なんゾ'], mean: 'どうして〜しないのか（再読文字・「何不」の合字）', grp: '句法字' },
+  { c: '莫', yomi: ['なシ', 'なカレ'], mean: '〜がない／〜するな', grp: '句法字' },
+  { c: '勿', yomi: ['なカレ'], mean: '〜してはいけない', grp: '句法字' },
+  { c: '毋', yomi: ['なカレ', 'なシ'], mean: '〜するな／〜がない', grp: '句法字' },
+  { c: '弗', yomi: ['ず'], mean: '〜しない（「不」と同じ）', grp: '句法字' },
+  { c: '非', yomi: ['あらズ'], mean: '〜ではない（体言を否定）', grp: '句法字' },
+  { c: '使', yomi: ['しム', 'つかヒ'], mean: '〜させる（使役）／使者', grp: '句法字' },
+  { c: '令', yomi: ['しム'], mean: '〜させる（使役）', grp: '句法字' },
+  { c: '見', yomi: ['らル', 'みル', 'まみユ'], mean: '〜される（受身）／見る／お目にかかる', grp: '句法字' },
+  { c: '被', yomi: ['らル', 'こうむル'], mean: '〜される（受身）', grp: '句法字' },
+  { c: '如', yomi: ['ごとシ', 'しク', 'もシ', 'ゆク'], mean: '〜のようだ／及ぶ／もし', grp: '句法字' },
+  { c: '若', yomi: ['ごとシ', 'しク', 'もシ', 'なんぢ'], mean: '〜のようだ／及ぶ／もし／おまえ', grp: '句法字' },
+  { c: '雖', yomi: ['いへどモ'], mean: '〜だけれども、たとえ〜でも', grp: '句法字' },
+  { c: '苟', yomi: ['いやしクモ'], mean: 'かりにも〜ならば', grp: '句法字' },
+  { c: '縦', yomi: ['たとヒ'], mean: 'たとえ〜でも', grp: '句法字' },
+  { c: '豈', yomi: ['あニ'], mean: 'どうして〜か（反語）', grp: '句法字' },
+  { c: '安', yomi: ['いづクンゾ', 'いづクニカ'], mean: 'どうして／どこに', grp: '句法字' },
+  { c: '孰', yomi: ['たれカ', 'いづレカ'], mean: '誰が／どちらが', grp: '句法字' },
+  { c: '寧', yomi: ['むしロ', 'いづクンゾ'], mean: 'むしろ／どうして', grp: '句法字' },
+  { c: '幾', yomi: ['いくばク'], mean: 'どれほど', grp: '句法字' },
+  { c: '能', yomi: ['よク', 'あたハず'], mean: '〜できる／（不能で）できない', grp: '句法字' },
+  { c: '唯', yomi: ['たダ'], mean: 'ただ〜だけ', grp: '句法字' },
+  { c: '独', yomi: ['ひとリ'], mean: 'ただ〜だけ／どうして〜か', grp: '句法字' },
+  { c: '況', yomi: ['いはンヤ'], mean: 'まして〜はなおさらだ', grp: '句法字' },
+
+  /* --- 動詞・その他 --- */
+  { c: '曰', yomi: ['いはク'], mean: '言うことには', grp: 'その他' },
+  { c: '謂', yomi: ['いフ'], mean: '言う、評する', grp: 'その他' },
+  { c: '云', yomi: ['いフ'], mean: '言う', grp: 'その他' },
+  { c: '対', yomi: ['こたヘテ'], mean: '（目上に）お答えして', grp: 'その他' },
+  { c: '請', yomi: ['こフ'], mean: 'どうか〜してください', grp: 'その他' },
+  { c: '願', yomi: ['ねがハクハ'], mean: 'どうか〜したい', grp: 'その他' },
+  { c: '欲', yomi: ['ほつス'], mean: '〜したい、〜しようとする', grp: 'その他' },
+  { c: '悪', yomi: ['にくム', 'いづクンゾ', 'あシ'], mean: '憎む／どうして／悪い', grp: 'その他' },
+  { c: '走', yomi: ['はしル', 'にグ'], mean: '走る、逃げる', grp: 'その他' },
+  { c: '去', yomi: ['さル'], mean: '立ち去る、離れる', grp: 'その他' },
+  { c: '故', yomi: ['ゆゑ', 'ふるキ', 'ことさらニ'], mean: '理由／古い／わざと', grp: 'その他' },
+  { c: '卒', yomi: ['つひニ', 'にはカニ', 'そつ'], mean: 'ついに／急に／兵士', grp: 'その他' }
+];
+
+</script>
+<script>
+/* 基礎講座（読み物） body は自前で書いた安全な HTML */
+window.LESSONS = [
+  {
+    id: 'ls01', title: '訓読のしくみ', sub: '漢文は「外国語を日本語の語順で読む技術」',
+    body: `
+<p>漢文とは、古代中国の文章を、日本語の語順に組みかえて読む方法のことです。もとの中国語は英語に似た語順（主語→動詞→目的語）ですが、日本語は「主語→目的語→動詞」。そこで、返り点で読む順序を指示し、送り仮名で日本語の文法を補うわけです。</p>
+<div class="l-flow">
+  <div class="l-step"><b>白文</b><span>学而時習之</span><small>返り点も送り仮名もない、もとの漢文</small></div>
+  <div class="l-step"><b>訓読文</b><span>学ビテ時ニ習フ<i>レ</i>之ヲ</span><small>返り点・送り仮名をつけたもの</small></div>
+  <div class="l-step"><b>書き下し文</b><span>学びて時に之を習ふ</span><small>日本語の文として書き直したもの</small></div>
+</div>
+<p class="l-tip"><b>ここが大事</b>　入試で問われるのはほぼ「白文または訓読文 → 書き下し文 → 現代語訳」の橋渡しです。逆に言えば、この三段階を往復できるようになれば、漢文は一気に得点源になります。</p>
+`
+  },
+  {
+    id: 'ls02', title: '返り点', sub: '読む順序を指示する記号',
+    body: `
+<p>返り点は漢字の<b>左下</b>に書かれ、下から上へ返って読む順序を示します。種類は「返る距離」で使い分けます。</p>
+<table class="l-table">
+  <tr><th>記号</th><th>働き</th><th>例</th></tr>
+  <tr><td>レ点</td><td>すぐ下の一字を読んでから、一字上へ返る</td><td>読<i>レ</i>書 → 書・読</td></tr>
+  <tr><td>一・二・三点</td><td>二字以上へだてて下から上へ返る</td><td>登<i>二</i>高山<i>一</i> → 高・山・登</td></tr>
+  <tr><td>上・中・下点</td><td>一二点をはさんで、さらに外側へ返る</td><td>有<i>下</i>朋自<i>二</i>遠方<i>一</i>来<i>上</i></td></tr>
+  <tr><td>甲・乙・丙点</td><td>上中下点でも足りないときに使う</td><td>（きわめてまれ）</td></tr>
+  <tr><td>一レ・上レ など</td><td>レ点と他の返り点の合体。<b>必ずレ点から処理</b></td><td>使<i>二</i>子路問<i>一レ</i>之</td></tr>
+</table>
+<p class="l-tip"><b>順序の鉄則</b>　内側から外側へ。<b>レ点 → 一二点 → 上中下点 → 甲乙丙点</b>の順に処理します。「近いほど内側、遠いほど外側」と覚えましょう。</p>
+`
+  },
+  {
+    id: 'ls03', title: '書き下し文の四つのきまり', sub: 'ここを外すと減点される',
+    body: `
+<ol class="l-ol">
+  <li><b>送り仮名はひらがな・歴史的仮名遣いで書く。</b>「習フ」→「習ふ」。</li>
+  <li><b>助動詞・助詞にあたる漢字はひらがなに直す。</b>「不」→「ず」、「也」→「なり」、「之」（〜の）→「の」。ただし、その字が助詞・助動詞として使われているときだけです。</li>
+  <li><b>置き字は書かない。</b>「而・於・于・乎・矣・焉・兮」は書き下し文に登場しません。</li>
+  <li><b>再読文字の二度目の読みはひらがなにする。</b>「未」→「未だ〜ず」。一度目は漢字のまま、二度目だけひらがな。</li>
+</ol>
+<p class="l-tip"><b>判定のコツ</b>　その漢字が<b>実質的な意味</b>を持っていれば漢字のまま、<b>文法的な働き</b>しかしていなければひらがな。「之」を例にすると、「これ（代名詞）」なら漢字、「の（助詞）」ならひらがなです。</p>
+`
+  },
+  {
+    id: 'ls04', title: '置き字', sub: '書いてあるのに読まない字',
+    body: `
+<p>置き字は、訓読では読まないけれど、文法的な働きは送り仮名として残る字です。代表は次の七字（＋「也」が加わることもあります）。</p>
+<table class="l-table">
+  <tr><th>字</th><th>働き</th><th>送り仮名に出る形</th></tr>
+  <tr><td>而</td><td>接続（順接・逆接）</td><td>〜て／〜して／〜ども</td></tr>
+  <tr><td>於・于・乎</td><td>場所・対象・起点・比較・受身の動作主</td><td>〜に／〜より／〜において</td></tr>
+  <tr><td>矣</td><td>断定・完了・強意</td><td>（訳に「〜のだ」の気分が出る）</td></tr>
+  <tr><td>焉</td><td>文末で強意・断定</td><td>—</td></tr>
+  <tr><td>兮</td><td>韻文でリズムを整える</td><td>—</td></tr>
+</table>
+<p class="l-tip"><b>位置で判断</b>　「焉」は文末なら置き字ですが、動詞の上にあれば「いづクンゾ」と読む反語の字です。「乎」も文末なら「や・か」と読み、文中なら「於」と同じ置き字。<b>同じ字でも位置で役割が変わる</b>のが漢文です。</p>
+`
+  },
+  {
+    id: 'ls05', title: '再読文字', sub: '一つの字を二回読む',
+    body: `
+<p>再読文字は、一度目に<b>副詞</b>として読み、下まで読み進めてからもう一度<b>助動詞・動詞</b>として読む字です。全部で十字。まとめて暗記してしまいましょう。</p>
+<table class="l-table">
+  <tr><th>字</th><th>読み</th><th>意味</th></tr>
+  <tr><td>未</td><td>いまダ〜ず</td><td>まだ〜しない</td></tr>
+  <tr><td>将・且</td><td>まさニ〜ントす</td><td>今にも〜しようとする</td></tr>
+  <tr><td>当</td><td>まさニ〜ベシ</td><td>当然〜すべきだ</td></tr>
+  <tr><td>応</td><td>まさニ〜ベシ</td><td>きっと〜だろう</td></tr>
+  <tr><td>宜</td><td>よろシク〜ベシ</td><td>〜するのがよい</td></tr>
+  <tr><td>須</td><td>すべかラク〜ベシ</td><td>ぜひ〜する必要がある</td></tr>
+  <tr><td>猶・由</td><td>なホ〜ノごとシ</td><td>ちょうど〜のようだ</td></tr>
+  <tr><td>盍</td><td>なんゾ〜ざル</td><td>どうして〜しないのか</td></tr>
+</table>
+<p class="l-tip"><b>差がつくポイント</b>　「当・応・宜・須」はどれも「ベシ」で終わるので、<b>意味の違い</b>が問われます。当＝当然／応＝推量／宜＝適当／須＝必要。この四つを言えるようにしておけば大丈夫です。</p>
+`
+  },
+  {
+    id: 'ls06', title: '疑問と反語の見分け方', sub: '文末の「ン」を見よ',
+    body: `
+<p>「何ゾ」「安クンゾ」「豈ニ」——これらは疑問にも反語にもなります。決め手は<b>文末</b>です。</p>
+<div class="l-cmp">
+  <div><b>疑問</b><p>文末が<b>連体形＋か／や</b>。<br>何ぞ去らざる<b>や</b>。<br>→「どうして立ち去らないのか」</p></div>
+  <div><b>反語</b><p>文末が<b>未然形＋ン（ヤ）</b>。<br>何ぞ去ら<b>ん</b>や。<br>→「どうして立ち去ろうか、いや立ち去らない」</p></div>
+</div>
+<p>反語は「疑問の形を借りた、強い否定（または強い肯定）」です。訳すときは必ず「いや〜ない」まで書ききると、意味を取り違えません。</p>
+<p class="l-tip"><b>もう一つの頻出</b>　<b>何如</b>（いかん）は<b>状態</b>を問い、疑問だけ。<b>如何</b>（いかんセン／いかんゾ）は<b>手段・理由</b>を問い、反語にもなる。「何如＝どうだ？」「如何＝どうする？」と覚えると混乱しません。</p>
+`
+  },
+  {
+    id: 'ls07', title: '部分否定と全部否定', sub: '語順だけで意味が変わる',
+    body: `
+<p>否定語「不」と副詞の<b>語順</b>で、意味が正反対になります。</p>
+<div class="l-cmp">
+  <div><b>部分否定＝不＋副詞</b><p>不<b>必</b>〜　必ずしも〜ず<br>不<b>常</b>〜　常には〜ず<br>不<b>倶</b>〜　倶には〜ず<br>→「いつも〜とは限らない」</p></div>
+  <div><b>全部否定＝副詞＋不</b><p><b>必</b>不〜　必ず〜ず<br><b>常</b>不〜　常に〜ず<br><b>倶</b>不〜　倶に〜ず<br>→「まったく〜しない」</p></div>
+</div>
+<p class="l-tip"><b>読みの目印</b>　部分否定は読みに<b>「は」</b>が入ります（常<b>には</b>／倶<b>には</b>／尽く<b>は</b>）。ただし「必」だけは「必ず<b>しも</b>」となる例外。ここは丸暗記でかまいません。</p>
+`
+  },
+  {
+    id: 'ls08', title: '句法の全体マップ', sub: '十四の型で漢文はほぼ読める',
+    body: `
+<p>句法は数が多そうに見えますが、大きく次の型に整理できます。この地図を頭に入れてから個々を覚えると、格段に定着します。</p>
+<table class="l-table">
+  <tr><th>型</th><th>キーになる字</th></tr>
+  <tr><td>再読文字</td><td>未・将・且・当・応・宜・須・猶・由・盍</td></tr>
+  <tr><td>否定・禁止</td><td>不・弗・非・無・莫・毋・勿</td></tr>
+  <tr><td>疑問・反語</td><td>何・安・焉・悪・胡・奚・曷・寧・豈・孰・幾何</td></tr>
+  <tr><td>使役</td><td>使・令・教・遣・俾</td></tr>
+  <tr><td>受身</td><td>見・被・為〜所・於</td></tr>
+  <tr><td>比較・選択</td><td>不如・不若・莫如・莫若・於・与其〜寧・孰与</td></tr>
+  <tr><td>仮定</td><td>如・若・苟・縦・雖・使・微</td></tr>
+  <tr><td>限定・累加</td><td>唯・惟・但・独・徒／耳・爾・而已／非唯〜</td></tr>
+  <tr><td>抑揚</td><td>A且B、況C乎</td></tr>
+  <tr><td>詠嘆・願望</td><td>不亦〜乎・豈不〜哉／願・請・欲・庶幾</td></tr>
+</table>
+<p class="l-tip"><b>覚え方</b>　「字」だけを覚えるのではなく、<b>読み（送り仮名を含めた形）</b>ごと声に出して覚えるのが最短です。読みが出れば意味は自然についてきます。</p>
+`
+  },
+  {
+    id: 'ls09', title: '漢詩のきまり', sub: '形式・押韻・対句の三点セット',
+    body: `
+<p>近体詩（唐代に完成した形式）は、句数と字数で四種類に分かれます。</p>
+<table class="l-table">
+  <tr><th></th><th>四句＝絶句</th><th>八句＝律詩</th></tr>
+  <tr><th>一句五字</th><td>五言絶句</td><td>五言律詩</td></tr>
+  <tr><th>一句七字</th><td>七言絶句</td><td>七言律詩</td></tr>
+</table>
+<p><b>押韻</b>　五言詩は<b>偶数句末</b>、七言詩は<b>第一句末と偶数句末</b>で韻を踏むのが原則です（「春暁」「静夜思」のように五言でも第一句末で韻を踏む例外もあります）。</p>
+<p><b>対句</b>　律詩では八句を二句ずつ<b>首聯・頷聯・頸聯・尾聯</b>と呼び、<b>頷聯（三・四句）と頸聯（五・六句）は必ず対句</b>にします。</p>
+<p><b>構成</b>　絶句は<b>起承転結</b>。転句で場面や視点が大きく転換するので、そこが読解の急所になります。</p>
+`
+  },
+  {
+    id: 'ls10', title: '得点力の上げ方', sub: '偏差値60から先へ',
+    body: `
+<ol class="l-ol">
+  <li><b>句法は「読み」で覚える。</b>「不可不＝〜ざるべからず＝しなければならない」のように、字・読み・意味を三点セットで音読する。</li>
+  <li><b>紛らわしいものはペアで覚える。</b>何如／如何、不必／必不、宜シク／須ラク、是以／於是、なシ／なカレ。入試はこの「対」を突いてきます。</li>
+  <li><b>設問から本文を読む。</b>傍線部の句法を先に特定してから前後を読むと、内容がぐっと取りやすくなります。</li>
+  <li><b>書き下しは声に出して確認。</b>「〜んや」で終わったら反語、と耳で判断できるようになると速度が上がります。</li>
+  <li><b>故事成語は出典まで。</b>出典と内容がセットで問われることが多く、本文の背景理解にも直結します。</li>
+</ol>
+<p class="l-tip">このアプリの<b>弱点復習</b>は、間違えた問題を優先して出し直します。まず全モードを一周し、そのあとは弱点復習を毎日数分回すのが、いちばん効率のよい進め方です。</p>
+`
+  }
+];
+
+</script>
+<script>
+/* 進捗の保存・段位・実績・弱点管理 */
+(function () {
+  'use strict';
+
+  var KEY = 'kanbun-dojo:v1';
+
+  var DEFAULT = {
+    xp: 0,
+    answered: 0,
+    correct: 0,
+    streak: 0,
+    lastDay: '',
+    bestDay: 0,
+    best: {},          // modeId -> best score
+    plays: {},         // modeId -> 回数
+    srs: {},           // questionKey -> { w:誤答数, r:正答数, t:最終学習(ms) }
+    ach: [],           // 取得済み実績 id
+    theme: ''          // '', 'light', 'dark'
+  };
+
+  var RANKS = [
+    { xp: 0,     name: '素読',   kanji: '初' },
+    { xp: 150,   name: '五級',   kanji: '五' },
+    { xp: 400,   name: '四級',   kanji: '四' },
+    { xp: 750,   name: '三級',   kanji: '三' },
+    { xp: 1200,  name: '二級',   kanji: '二' },
+    { xp: 1800,  name: '一級',   kanji: '一' },
+    { xp: 2600,  name: '初段',   kanji: '段' },
+    { xp: 3600,  name: '二段',   kanji: '弐' },
+    { xp: 4900,  name: '三段',   kanji: '参' },
+    { xp: 6500,  name: '四段',   kanji: '肆' },
+    { xp: 8500,  name: '皆伝',   kanji: '皆' }
+  ];
+
+  var ACHIEVEMENTS = [
+    { id: 'a1',  ico: '🖌️', t: '初筆',       d: '最初の問題に答えた',            test: function (s) { return s.answered >= 1; } },
+    { id: 'a2',  ico: '📖', t: '百問',       d: '通算100問に答えた',             test: function (s) { return s.answered >= 100; } },
+    { id: 'a3',  ico: '📚', t: '五百問',     d: '通算500問に答えた',             test: function (s) { return s.answered >= 500; } },
+    { id: 'a4',  ico: '🔥', t: '三日坊主脱出', d: '3日連続で学習した',            test: function (s) { return s.streak >= 3; } },
+    { id: 'a5',  ico: '🏮', t: '七日精進',   d: '7日連続で学習した',             test: function (s) { return s.streak >= 7; } },
+    { id: 'a6',  ico: '🎯', t: '全問正解',   d: 'いずれかのモードを全問正解',     test: function (s) { return !!s._perfect; } },
+    { id: 'a7',  ico: '⚡', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
+    { id: 'a8',  ico: '🌸', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
+    { id: 'a9',  ico: '🗝️', t: '句法通',     d: '句法クイズを5回プレイ',          test: function (s) { return (s.plays.kuho || 0) >= 5; } },
+    { id: 'a10', ico: '🏯', t: '免許皆伝',   d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
+  ];
+
+  var state = null;
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  }
+
+  function dayDiff(a, b) {
+    if (!a || !b) return 999;
+    var pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+    var da = new Date(pa[0], pa[1] - 1, pa[2]), db = new Date(pb[0], pb[1] - 1, pb[2]);
+    return Math.round((db - da) / 86400000);
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { /* privacy mode */ }
+    state = Object.assign({}, DEFAULT);
+    if (raw) {
+      try {
+        var p = JSON.parse(raw);
+        Object.keys(DEFAULT).forEach(function (k) { if (p[k] !== undefined) state[k] = p[k]; });
+      } catch (e) { /* corrupted -> reset */ }
+    }
+    return state;
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  /** その日の最初のアクセスで連続記録を更新 */
+  function touchDay() {
+    var t = today();
+    if (state.lastDay === t) return false;
+    var diff = dayDiff(state.lastDay, t);
+    state.streak = (diff === 1) ? state.streak + 1 : 1;
+    state.lastDay = t;
+    if (state.streak > state.bestDay) state.bestDay = state.streak;
+    save();
+    return true;
+  }
+
+  function rankOf(xp) {
+    var cur = RANKS[0], next = null;
+    for (var i = 0; i < RANKS.length; i++) {
+      if (xp >= RANKS[i].xp) { cur = RANKS[i]; next = RANKS[i + 1] || null; }
+    }
+    var span = next ? next.xp - cur.xp : 1;
+    var got = next ? xp - cur.xp : 1;
+    return { cur: cur, next: next, pct: Math.max(0, Math.min(100, Math.round(got / span * 100))) };
+  }
+
+  /** 1問ぶんの結果を記録 */
+  function record(key, ok) {
+    state.answered++;
+    if (ok) state.correct++;
+    if (key) {
+      var s = state.srs[key] || { w: 0, r: 0, t: 0 };
+      if (ok) s.r++; else s.w++;
+      s.t = Date.now();
+      state.srs[key] = s;
+    }
+  }
+
+  /** 苦手度スコア（大きいほど優先して出題） */
+  function weakness(key) {
+    var s = state.srs[key];
+    if (!s) return 1.2;                       // 未出題はやや優先
+    var total = s.r + s.w;
+    var rate = total ? s.w / total : 0;
+    var recency = Math.min(1, (Date.now() - s.t) / (1000 * 60 * 60 * 24 * 3)); // 3日で最大
+    return rate * 3 + recency * 0.6 + (s.r === 0 ? 0.8 : 0);
+  }
+
+  /** 弱点キー一覧（誤答が正答を上回るもの） */
+  function weakKeys() {
+    return Object.keys(state.srs).filter(function (k) {
+      var s = state.srs[k];
+      return s.w > 0 && s.w >= s.r;
+    });
+  }
+
+  function finishSession(modeId, opt) {
+    opt = opt || {};
+    state.plays[modeId] = (state.plays[modeId] || 0) + 1;
+    if (opt.score !== undefined) {
+      if (!state.best[modeId] || opt.score > state.best[modeId]) state.best[modeId] = opt.score;
+    }
+    if (opt.xp) state.xp += opt.xp;
+    state._perfect = state._perfect || !!opt.perfect;
+    state._maxCombo = Math.max(state._maxCombo || 0, opt.maxCombo || 0);
+    var got = checkAchievements();
+    save();
+    return got;
+  }
+
+  function checkAchievements() {
+    var newly = [];
+    ACHIEVEMENTS.forEach(function (a) {
+      if (state.ach.indexOf(a.id) === -1 && a.test(state)) {
+        state.ach.push(a.id);
+        newly.push(a);
+      }
+    });
+    return newly;
+  }
+
+  function reset() {
+    state = Object.assign({}, DEFAULT, { theme: state.theme });
+    state.best = {}; state.plays = {}; state.srs = {}; state.ach = [];
+    save();
+  }
+
+  window.Store = {
+    load: load, save: save, touchDay: touchDay,
+    rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys,
+    finishSession: finishSession, reset: reset,
+    RANKS: RANKS, ACHIEVEMENTS: ACHIEVEMENTS,
+    get state() { return state; }
+  };
+})();
+
+</script>
+<script>
+/* データから 4 択問題を組み立てる */
+(function () {
+  'use strict';
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  /** 二つの文字列が「実質同じ答え」になっていないか（文字集合の Jaccard 係数） */
+  function tooSimilar(a, b) {
+    if (a === b) return true;
+    if (a.indexOf(b) !== -1 || b.indexOf(a) !== -1) return true;
+    var sa = {}, sb = {}, i;
+    for (i = 0; i < a.length; i++) sa[a.charAt(i)] = 1;
+    for (i = 0; i < b.length; i++) sb[b.charAt(i)] = 1;
+    var inter = 0, uni = 0, k;
+    for (k in sa) { uni++; if (sb[k]) inter++; }
+    for (k in sb) if (!sa[k]) uni++;
+    return uni ? inter / uni >= 0.8 : false;
+  }
+
+  /** correct を含む 4 択を作る。誤答が正解と紛らわしすぎる場合はその問題を捨てる */
+  function makeChoices(correct, pool, n) {
+    n = n || 4;
+    var seen = {}; seen[correct] = 1;
+    var wrong = [];
+    var cand = shuffle(pool);
+    for (var i = 0; i < cand.length && wrong.length < n - 1; i++) {
+      var c = cand[i];
+      if (!c || seen[c]) continue;
+      if (tooSimilar(c, correct)) continue;
+      var dup = false;
+      for (var j = 0; j < wrong.length; j++) if (tooSimilar(c, wrong[j])) dup = true;
+      if (dup) continue;
+      seen[c] = 1; wrong.push(c);
+    }
+    if (wrong.length < n - 1) return null;      // 誤答が足りない問題は捨てる
+    var all = shuffle([correct].concat(wrong));
+    return { choices: all, a: all.indexOf(correct) };
+  }
+
+  function fieldPool(list, field, exclude) {
+    var out = [];
+    list.forEach(function (x) {
+      var v = typeof field === 'function' ? field(x) : x[field];
+      if (v && v !== exclude) out.push(v);
+    });
+    return out;
+  }
+
+  /* ---------------- 句法（読み・意味） ---------------- */
+  function kuhoQuestions(cats) {
+    var src = window.KUHO.filter(function (k) { return !cats || cats.indexOf(k.cat) !== -1; });
+    var all = window.KUHO;
+    var out = [];
+    src.forEach(function (k) {
+      var sameCat = all.filter(function (x) { return x.cat === k.cat && x.id !== k.id; });
+      var basis = sameCat.length >= 3 ? sameCat : all.filter(function (x) { return x.id !== k.id; });
+
+      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read));
+      if (c1) out.push({
+        key: k.id + ':read', cat: k.cat, level: k.level,
+        stem: k.form, q: 'この句形の読みとして正しいものはどれか。',
+        choices: c1.choices, a: c1.a, exp: k.note || (k.form + '＝' + k.read + '＝' + k.mean)
+      });
+
+      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean));
+      if (c2) out.push({
+        key: k.id + ':mean', cat: k.cat, level: k.level,
+        stem: k.form, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
+        choices: c2.choices, a: c2.a, exp: k.note || (k.form + '＝' + k.mean)
+      });
+
+      if (k.ex && k.ex.length && k.ex[0].y) {
+        var exY = k.ex[0].y;
+        var others = [];
+        all.forEach(function (x) {
+          if (x.id !== k.id && x.ex && x.ex.length && x.ex[0].y) others.push(x.ex[0].y);
+        });
+        var c3 = makeChoices(exY, others);
+        if (c3) out.push({
+          key: k.id + ':ex', cat: k.cat, level: Math.min(3, k.level + 1),
+          stem: k.ex[0].k, q: '書き下し文として正しいものはどれか。',
+          src: k.ex[0].s, choices: c3.choices, a: c3.a,
+          exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.ex[0].t ? '　訳：' + k.ex[0].t : '')
+        });
+      }
+    });
+    return out;
+  }
+
+  /* ---------------- 頻出漢字の読み ---------------- */
+  function kanjiQuestions() {
+    var all = window.KANJI;
+    var out = [];
+    all.forEach(function (k) {
+      var ans = k.yomi[0];
+      if (ans === '—') return;
+      var same = all.filter(function (x) { return x.grp === k.grp && x.c !== k.c; });
+      var basis = same.length >= 4 ? same : all.filter(function (x) { return x.c !== k.c; });
+      var pool = [];
+      basis.forEach(function (x) { x.yomi.forEach(function (y) { if (y !== '—') pool.push(y); }); });
+      var c = makeChoices(ans, pool);
+      if (!c) return;
+      out.push({
+        key: 'kj:' + k.c, cat: k.grp, level: 1,
+        stem: k.c, q: 'この漢字の代表的な読みはどれか。',
+        choices: c.choices, a: c.a,
+        exp: '「' + k.c + '」＝' + k.yomi.join('／') + '　' + k.mean + (k.note ? '　' + k.note : '')
+      });
+    });
+    return out;
+  }
+
+  /* ---------------- 故事成語 ---------------- */
+  function kojiQuestions() {
+    var all = window.KOJI;
+    var out = [];
+    all.forEach(function (k) {
+      var c1 = makeChoices(k.mean, fieldPool(all.filter(function (x) { return x.id !== k.id; }), 'mean'));
+      if (c1) out.push({
+        key: k.id + ':mean', cat: '故事成語', level: 1,
+        stem: k.word, q: 'この故事成語の意味として最も適当なものはどれか。',
+        choices: c1.choices, a: c1.a, exp: '【出典】' + k.src + '　' + k.story
+      });
+      var c2 = makeChoices(k.src, fieldPool(all.filter(function (x) { return x.id !== k.id; }), 'src'));
+      if (c2) out.push({
+        key: k.id + ':src', cat: '故事成語', level: 2,
+        stem: k.word, q: 'この故事成語の出典はどれか。',
+        choices: c2.choices, a: c2.a, exp: '【' + k.word + '】' + k.mean + '　' + k.story
+      });
+    });
+    return out;
+  }
+
+  /* ---------------- 漢詩 ---------------- */
+  function kanshiQuestions() {
+    var all = window.KANSHI;
+    var forms = ['五言絶句', '七言絶句', '五言律詩', '七言律詩'];
+    var out = [];
+    all.forEach(function (p) {
+      var body = p.lines.join('／');
+
+      var cf = makeChoices(p.form, forms.filter(function (f) { return f !== p.form; }));
+      if (cf) out.push({
+        key: p.id + ':form', cat: '漢詩', level: 1,
+        stem: body, q: 'この詩の形式として正しいものはどれか。',
+        src: p.author + '「' + p.title + '」',
+        choices: cf.choices, a: cf.a,
+        exp: '一句' + (p.form.indexOf('五') === 0 ? '五' : '七') + '字×' + p.lines.length + '句なので' + p.form + '。' + p.note
+      });
+
+      var ca = makeChoices(p.author, fieldPool(all.filter(function (x) { return x.author !== p.author; }), 'author'));
+      if (ca) out.push({
+        key: p.id + ':author', cat: '漢詩', level: 2,
+        stem: '「' + p.title + '」', q: 'この漢詩の作者は誰か。',
+        choices: ca.choices, a: ca.a, exp: p.author + '「' + p.title + '」（' + p.era + '）　' + p.trans
+      });
+
+      if (p.regular) {
+        var ans = p.rhyme.join('・');
+        var wrongs = [];
+        all.forEach(function (x) { if (x.id !== p.id) wrongs.push(x.rhyme.join('・')); });
+        // 同じ詩の中の非押韻字からもダミーを作る
+        var nonRhyme = [];
+        p.lines.forEach(function (ln, i) {
+          if (p.rhymeLines.indexOf(i + 1) === -1) nonRhyme.push(ln.charAt(ln.length - 1));
+        });
+        if (nonRhyme.length >= p.rhyme.length) wrongs.push(nonRhyme.slice(0, p.rhyme.length).join('・'));
+        var cr = makeChoices(ans, wrongs);
+        if (cr) out.push({
+          key: p.id + ':rhyme', cat: '漢詩', level: 2,
+          stem: body, q: 'この詩で押韻している字の組み合わせはどれか。',
+          src: p.author + '「' + p.title + '」',
+          choices: cr.choices, a: cr.a,
+          exp: (p.form.indexOf('五') === 0 ? '五言詩は偶数句末で押韻するのが原則。' : '七言詩は第一句末と偶数句末で押韻するのが原則。') + '押韻は「' + ans + '」。'
+        });
+      }
+
+      if (p.tsuiku && p.tsuiku.length) {
+        var pair = p.tsuiku[0];
+        var ansT = '第' + pair[0] + '句と第' + pair[1] + '句';
+        var wr = [];
+        for (var i = 1; i < p.lines.length; i++) {
+          var lbl = '第' + i + '句と第' + (i + 1) + '句';
+          if (lbl !== ansT) wr.push(lbl);
+        }
+        var ct = makeChoices(ansT, wr);
+        if (ct) out.push({
+          key: p.id + ':tsuiku', cat: '漢詩', level: 3,
+          stem: body, q: 'この詩で対句になっているのはどこか。',
+          src: p.author + '「' + p.title + '」',
+          choices: ct.choices, a: ct.a, exp: p.note
+        });
+      }
+    });
+    return out;
+  }
+
+  /* ---------------- 手作り問題 ---------------- */
+  function mondaiQuestions(cats) {
+    return window.MONDAI
+      .filter(function (m) { return !cats || cats.indexOf(m.cat) !== -1; })
+      .map(function (m) {
+        return {
+          key: m.id, cat: m.cat, level: m.level, stem: m.stem || '',
+          q: m.q, choices: m.choices.slice(), a: m.a, exp: m.exp, fixed: true
+        };
+      });
+  }
+
+  /** 固定選択肢の問題もシャッフルして出す */
+  function randomizeChoices(q) {
+    var correct = q.choices[q.a];
+    var order = shuffle(q.choices);
+    return Object.assign({}, q, { choices: order, a: order.indexOf(correct) });
+  }
+
+  /* ---------------- プール定義 ---------------- */
+  var POOLS = {
+    kuho: function () {
+      return kuhoQuestions(['否定', '禁止', '二重否定', '部分否定', '疑問', '反語', '使役', '受身',
+        '比較', '選択', '仮定', '限定', '累加', '抑揚', '詠嘆', '願望', '重要語'])
+        .concat(mondaiQuestions(['否定', '疑問反語', '使役', '受身', '比較', '選択', '仮定',
+          '限定', '累加', '抑揚', '詠嘆', '願望', '重要語', '識別']));
+    },
+    saidoku: function () {
+      return kuhoQuestions(['再読文字']).concat(mondaiQuestions(['再読文字']));
+    },
+    kanji: function () { return kanjiQuestions(); },
+    koji: function () { return kojiQuestions(); },
+    kanshi: function () { return kanshiQuestions().concat(mondaiQuestions(['漢詩'])); },
+    kundoku: function () { return mondaiQuestions(['訓読', '識別']); },
+    mogi: function () {
+      return [].concat(
+        mondaiQuestions(),
+        kuhoQuestions(),
+        kanjiQuestions(),
+        kojiQuestions(),
+        kanshiQuestions()
+      );
+    }
+  };
+
+  function build(id) {
+    var f = POOLS[id] || POOLS.mogi;
+    return f().map(function (q) { return q.fixed ? randomizeChoices(q) : q; });
+  }
+
+  /** 苦手優先でくじ引き（重み付きサンプリング・重複なし） */
+  function pick(pool, n) {
+    var items = pool.slice();
+    var out = [];
+    n = Math.min(n, items.length);
+    while (out.length < n && items.length) {
+      var weights = items.map(function (q) { return Math.max(0.05, window.Store.weakness(q.key)); });
+      var total = weights.reduce(function (a, b) { return a + b; }, 0);
+      var r = Math.random() * total, acc = 0, idx = 0;
+      for (var i = 0; i < items.length; i++) {
+        acc += weights[i];
+        if (r <= acc) { idx = i; break; }
+      }
+      out.push(items.splice(idx, 1)[0]);
+    }
+    return out;
+  }
+
+  /** 弱点だけを集める */
+  function weakPool() {
+    var keys = {};
+    window.Store.weakKeys().forEach(function (k) { keys[k] = 1; });
+    var all = build('mogi');
+    return all.filter(function (q) { return keys[q.key]; });
+  }
+
+  window.QuizGen = { build: build, pick: pick, weakPool: weakPool, shuffle: shuffle, makeChoices: makeChoices };
+})();
+
+</script>
+<script>
+/* 漢文道場 — アプリ本体（ルーティング・画面・ゲームエンジン） */
+(function () {
+  'use strict';
+
+  var $app, $toast;
+
+  /* ============================ ユーティリティ ============================ */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function el(id) { return document.getElementById(id); }
+  function render(html) {
+    $app.innerHTML = html;
+    $app.classList.remove('fade');
+    void $app.offsetWidth;
+    $app.classList.add('fade');
+    window.scrollTo({ top: 0, behavior: 'instant' in document.body.style ? 'instant' : 'auto' });
+  }
+  var toastTimer;
+  function toast(msg) {
+    $toast.textContent = msg;
+    $toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { $toast.classList.remove('on'); }, 2200);
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function mmss(sec) { return pad(Math.floor(sec / 60)) + ':' + pad(Math.floor(sec % 60)); }
+
+  /** 訓読文の返り点を上付きで表示する。データ側では「^レ」「^二」のように ^ を前置する。
+   *  自動判別にしないのは、「一見」「二月」のように返り点と同じ字が本文に現れるため。 */
+  function kanbunHTML(s) {
+    return esc(s).replace(/\^(一レ|上レ|甲レ|レ|一|二|三|四|上|中|下|甲|乙|丙)/g, function (m, p1) {
+      return '<i class="mark">' + p1 + '</i>';
+    });
+  }
+
+  /* ============================ モード定義 ============================ */
+  var MODES = [
+    { id: 'kundoku', ico: '📐', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
+    { id: 'saidoku', ico: '🔁', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎' },
+    { id: 'kuho', ico: '⚔️', t: '句法バトル', d: '制限時間つき。三回まちがえると道場破り', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--shu)', hearts: 3, perQ: 25, tag: '本命' },
+    { id: 'kaeriten', ico: '🧭', t: '返り点ルート', d: '返り点に従って読む順にタップする', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'okiji', ico: '👻', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'narabe', ico: '🧩', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'kanshi', ico: '🌙', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識' },
+    { id: 'koji', ico: '📜', t: '故事成語', d: '意味と出典をセットで覚える', kind: 'choice', pool: 'koji', n: 12, accent: 'var(--kin)', tag: '知識' },
+    { id: 'kanji', ico: '✍️', t: '頻出漢字の読み', d: '一問十秒。読みを瞬時に引き出す', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答' },
+    { id: 'weak', ico: '🩹', t: '弱点復習', d: 'まちがえた問題だけを狙って出し直す', kind: 'choice', pool: 'weak', n: 12, accent: 'var(--shu)', tag: '復習' },
+    { id: 'mogi', ico: '🏯', t: '実力テスト', d: '全範囲から20問。百点満点で判定', kind: 'choice', pool: 'mogi', n: 20, accent: 'var(--ink)', total: 600, tag: '総合' }
+  ];
+  function modeById(id) {
+    for (var i = 0; i < MODES.length; i++) if (MODES[i].id === id) return MODES[i];
+    return null;
+  }
+
+  /* ============================ ホーム ============================ */
+  function screenHome() {
+    var s = window.Store.state;
+    var r = window.Store.rankOf(s.xp);
+    var acc = s.answered ? Math.round(s.correct / s.answered * 100) : 0;
+    var weakN = window.Store.weakKeys().length;
+
+    var cards = MODES.map(function (m) {
+      var best = s.best[m.id];
+      var sub = m.id === 'weak'
+        ? (weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません')
+        : (best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦');
+      return '<button class="mode" data-act="play" data-id="' + m.id + '" style="--accent:' + m.accent + '">' +
+        '<span class="m-tag">' + esc(m.tag) + '</span>' +
+        '<div class="m-ico">' + m.ico + '</div>' +
+        '<div class="m-t">' + esc(m.t) + '</div>' +
+        '<div class="m-d">' + esc(m.d) + '</div>' +
+        '<div class="m-prog">' + esc(sub) + '</div>' +
+        '</button>';
+    }).join('');
+
+    render(
+      '<section class="hero">' +
+        '<h1>漢文道場</h1>' +
+        '<p>句法と訓読を、ゲーム感覚で最短距離から。高校生のための漢文トレーニング。</p>' +
+        '<div class="rankbar">' +
+          '<div class="rank-badge">' + esc(r.cur.kanji) + '</div>' +
+          '<div class="rank-meta">' +
+            '<div class="r-top"><b>' + esc(r.cur.name) + '</b>' +
+              '<span class="r-xp">' + s.xp + ' 修錬値' + (r.next ? '　／　次の段位まで ' + (r.next.xp - s.xp) : '　最高位') + '</span></div>' +
+            '<div class="bar"><i style="width:' + r.pct + '%"></i></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="stats">' +
+          '<div class="stat"><b>' + s.answered + '</b><span>のべ解答数</span></div>' +
+          '<div class="stat"><b>' + acc + '%</b><span>正答率</span></div>' +
+          '<div class="stat"><b>' + s.streak + '</b><span>連続学習日</span></div>' +
+        '</div>' +
+      '</section>' +
+      '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
+      '<div class="modes">' + cards + '</div>' +
+      '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
+      '<div class="modes">' +
+        '<button class="mode" data-act="go" data-to="lessons" style="--accent:var(--ai)"><div class="m-ico">📕</div><div class="m-t">基礎講座</div><div class="m-d">訓読・句法・漢詩のルールを読んで理解する</div></button>' +
+        '<button class="mode" data-act="go" data-to="zukan" style="--accent:var(--midori)"><div class="m-ico">🗂️</div><div class="m-t">句法図鑑</div><div class="m-d">' + window.KUHO.length + 'の句形を検索・分類して確認</div></button>' +
+        '<button class="mode" data-act="go" data-to="shishu" style="--accent:var(--murasaki)"><div class="m-ico">🌸</div><div class="m-t">漢詩集</div><div class="m-d">' + window.KANSHI.length + '首の名詩を書き下し・訳つきで</div></button>' +
+        '<button class="mode" data-act="go" data-to="ach" style="--accent:var(--kin)"><div class="m-ico">🏅</div><div class="m-t">実績</div><div class="m-d">称号を集めて学習の記録を残す</div></button>' +
+      '</div>' +
+      '<div class="footer">出典表記のある例文はすべて古典からの引用です。学習用に書き下し文・現代語訳を付しています。</div>'
+    );
+  }
+
+  /* ============================ 句法図鑑 ============================ */
+  var zukanState = { cat: 'すべて', q: '', open: {} };
+
+  function screenZukan() {
+    var cats = ['すべて'];
+    window.KUHO.forEach(function (k) { if (cats.indexOf(k.cat) === -1) cats.push(k.cat); });
+
+    var list = window.KUHO.filter(function (k) {
+      if (zukanState.cat !== 'すべて' && k.cat !== zukanState.cat) return false;
+      if (!zukanState.q) return true;
+      var hay = k.form + k.read + k.mean + (k.note || '') + k.cat +
+        (k.ex || []).map(function (e) { return e.k + e.y + e.t + e.s; }).join('');
+      return hay.indexOf(zukanState.q) !== -1;
+    });
+
+    var items = list.map(function (k) {
+      var open = !!zukanState.open[k.id];
+      var exHtml = (k.ex || []).map(function (e) {
+        return '<div class="ex">' +
+          '<div class="ex-k">' + kanbunHTML(e.k) + '</div>' +
+          '<div class="ex-y">' + esc(e.y) + '</div>' +
+          '<div class="ex-t">' + esc(e.t) + '</div>' +
+          (e.s ? '<div class="ex-s">— ' + esc(e.s) + '</div>' : '') +
+          '</div>';
+      }).join('');
+      return '<div class="kuho-item">' +
+        '<button class="kuho-head" data-act="toggle" data-id="' + k.id + '">' +
+          '<span class="kh-cat">' + esc(k.cat) + '</span>' +
+          '<span class="kh-main"><span class="kh-form">' + kanbunHTML(k.form) + '</span>' +
+          '<span class="kh-read">' + esc(k.read) + '</span></span>' +
+          '<span class="lv">' + '★'.repeat(k.level) + '</span>' +
+        '</button>' +
+        (open ? '<div class="kuho-body">' +
+          '<p class="kb-mean">' + esc(k.mean) + '</p>' +
+          (k.note ? '<p class="kb-note">' + esc(k.note) + '</p>' : '') +
+          exHtml + '</div>' : '') +
+        '</div>';
+    }).join('');
+
+    render(
+      '<div class="sec-h"><h2>句法図鑑</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
+      '<input class="search" id="zk-q" type="search" placeholder="句形・読み・意味・出典で検索" value="' + esc(zukanState.q) + '">' +
+      '<div class="filters">' + cats.map(function (c) {
+        return '<button class="pill' + (c === zukanState.cat ? ' on' : '') + '" data-act="cat" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+      }).join('') + '</div>' +
+      (list.length ? items : '<div class="empty"><div class="e-ico">🔍</div><p>該当する句形が見つかりません。</p></div>') +
+      '<p class="muted center mt">' + list.length + ' / ' + window.KUHO.length + ' 件</p>'
+    );
+
+    var q = el('zk-q');
+    q.addEventListener('input', function () {
+      zukanState.q = q.value.trim();
+      var pos = q.selectionStart;
+      screenZukan();
+      var nq = el('zk-q'); nq.focus(); try { nq.setSelectionRange(pos, pos); } catch (e) {}
+    });
+  }
+
+  /* ============================ 講座 ============================ */
+  function screenLessons() {
+    render(
+      '<div class="sec-h"><h2>基礎講座</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
+      '<div class="modes">' + window.LESSONS.map(function (l, i) {
+        return '<button class="mode" data-act="lesson" data-id="' + l.id + '" style="--accent:var(--ai)">' +
+          '<div class="m-ico">' + (i + 1) + '</div>' +
+          '<div class="m-t">' + esc(l.title) + '</div>' +
+          '<div class="m-d">' + esc(l.sub) + '</div></button>';
+      }).join('') + '</div>'
+    );
+  }
+
+  function screenLesson(id) {
+    var idx = -1;
+    window.LESSONS.forEach(function (l, i) { if (l.id === id) idx = i; });
+    if (idx < 0) return screenLessons();
+    var l = window.LESSONS[idx];
+    var next = window.LESSONS[idx + 1];
+    render(
+      '<div class="sec-h"><h2>' + esc(l.title) + '</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="lessons">一覧</button></div>' +
+      '<p class="muted">' + esc(l.sub) + '</p>' +
+      '<div class="card mt lesson-body">' + l.body + '</div>' +
+      '<div class="btn-row mt">' +
+        (next ? '<button class="btn" data-act="lesson" data-id="' + next.id + '">次の講座：' + esc(next.title) + '</button>' : '') +
+        '<button class="btn ghost" data-act="go" data-to="lessons">講座一覧へ</button>' +
+      '</div>'
+    );
+  }
+
+  /* ============================ 漢詩集 ============================ */
+  function screenShishu() {
+    var body = window.KANSHI.map(function (p) {
+      var lines = p.lines.map(function (ln, i) {
+        var isR = p.rhymeLines.indexOf(i + 1) !== -1;
+        var head = ln.slice(0, ln.length - 1), tail = ln.charAt(ln.length - 1);
+        return '<div class="p-line">' + esc(head) +
+          (isR ? '<span class="rh">' + esc(tail) + '</span>' : esc(tail)) + '</div>';
+      }).join('');
+      return '<div class="card mt">' +
+        '<div class="poem">' + lines +
+          '<div class="p-yomi">' + p.yomi.map(esc).join('／') + '</div>' +
+        '</div>' +
+        '<div class="poem-meta">' +
+          '<span class="tagl">' + esc(p.form) + '</span>' +
+          '<span class="tagl">押韻：' + esc(p.rhyme.join('・')) + '</span>' +
+          (p.tsuiku.length ? '<span class="tagl">対句：' + p.tsuiku.map(function (t) { return '第' + t[0] + '・' + t[1] + '句'; }).join('／') + '</span>' : '') +
+        '</div>' +
+        '<p class="muted mt">' + esc(p.trans) + '</p>' +
+        '<p class="kb-note" style="margin-top:10px">' + esc(p.note) + '</p>' +
+        '<p class="ex-s center" style="margin-top:8px">' + esc(p.author) + '「' + esc(p.title) + '」（' + esc(p.era) + '）</p>' +
+        '</div>';
+    }).join('');
+    render(
+      '<div class="sec-h"><h2>漢詩集</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
+      '<p class="muted">朱色の下線は押韻している字です。</p>' + body
+    );
+  }
+
+  /* ============================ 実績 ============================ */
+  function screenAch() {
+    var s = window.Store.state;
+    var items = window.Store.ACHIEVEMENTS.map(function (a) {
+      var got = s.ach.indexOf(a.id) !== -1;
+      return '<div class="ach-item' + (got ? ' got' : '') + '">' +
+        '<div class="a-ico">' + a.ico + '</div>' +
+        '<div class="a-t">' + esc(a.t) + '</div>' +
+        '<div class="a-d">' + esc(a.d) + '</div></div>';
+    }).join('');
+    render(
+      '<div class="sec-h"><h2>実績</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
+      '<p class="muted">' + s.ach.length + ' / ' + window.Store.ACHIEVEMENTS.length + ' 個を獲得</p>' +
+      '<div class="ach mt">' + items + '</div>' +
+      '<div class="sec-h"><h2>記録</h2><div class="rule"></div></div>' +
+      '<div class="stats">' +
+        '<div class="stat"><b>' + s.xp + '</b><span>修錬値</span></div>' +
+        '<div class="stat"><b>' + s.bestDay + '</b><span>連続日数の最高</span></div>' +
+        '<div class="stat"><b>' + Object.keys(s.srs).length + '</b><span>学習した問題数</span></div>' +
+      '</div>' +
+      '<div class="btn-row mt-l"><button class="btn ghost" data-act="reset">学習記録をリセット</button></div>'
+    );
+  }
+
+  /* ============================ 共通：結果画面 ============================ */
+  function gradeOf(pct) {
+    if (pct >= 95) return { r: '皆伝', msg: '文句なし。この調子なら入試の漢文は完全に得点源です。' };
+    if (pct >= 85) return { r: '甲', msg: 'かなり仕上がっています。取りこぼした型だけ復習しましょう。' };
+    if (pct >= 70) return { r: '乙', msg: '基礎は固まっています。まぎらわしい句法の識別を詰めれば一段上へ。' };
+    if (pct >= 50) return { r: '丙', msg: 'あと一歩。読みと意味を声に出して覚え直すと伸びます。' };
+    return { r: '丁', msg: 'まずは基礎講座と再読文字ドリルから。ここが土台です。' };
+  }
+
+  function screenResult(mode, res) {
+    var pct = res.total ? Math.round(res.correct / res.total * 100) : 0;
+    var g = gradeOf(pct);
+    var xp = res.correct * 8 + Math.floor(res.maxCombo * 3) + (pct === 100 ? 30 : 0);
+    var newAch = window.Store.finishSession(mode.id, {
+      score: mode.id === 'mogi' ? pct : res.score,
+      xp: xp, perfect: pct === 100 && res.total >= 5, maxCombo: res.maxCombo
+    });
+
+    var review = (res.wrong || []).map(function (w) {
+      return '<div class="review-item">' +
+        (w.stem ? '<div class="ri-stem">' + kanbunHTML(w.stem) + '</div>' : '') +
+        '<div class="ri-q">' + esc(w.q) + '</div>' +
+        (w.your !== undefined && w.your !== null ? '<div class="ri-y">✗ ' + esc(w.your) + '</div>' : '') +
+        '<div class="ri-a">✓ ' + esc(w.answer) + '</div>' +
+        (w.exp ? '<div class="ri-e">' + esc(w.exp) + '</div>' : '') +
+        '</div>';
+    }).join('');
+
+    render(
+      '<div class="card result mt">' +
+        '<div class="r-rank">' + esc(g.r) + '</div>' +
+        '<div class="r-score">' + (mode.id === 'mogi' ? pct + '<span style="font-size:.45em"> 点</span>' : res.score) + '</div>' +
+        '<div class="r-sub">' + esc(mode.t) + '　' + res.correct + ' / ' + res.total + ' 問正解（' + pct + '%）</div>' +
+        '<p class="r-msg">' + esc(g.msg) + '</p>' +
+        '<div class="r-grid">' +
+          '<div class="stat"><b>+' + xp + '</b><span>修錬値</span></div>' +
+          '<div class="stat"><b>' + res.maxCombo + '</b><span>最大連鎖</span></div>' +
+          '<div class="stat"><b>' + (window.Store.state.best[mode.id] !== undefined ? window.Store.state.best[mode.id] : '—') + '</b><span>自己ベスト</span></div>' +
+        '</div>' +
+        '<div class="btn-row mt-l" style="justify-content:center">' +
+          '<button class="btn shu" data-act="play" data-id="' + mode.id + '">もう一度</button>' +
+          '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
+        '</div>' +
+      '</div>' +
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '') +
+      (newAch.length ? '' : '')
+    );
+
+    if (newAch.length) {
+      setTimeout(function () { toast('実績を獲得： ' + newAch.map(function (a) { return a.ico + ' ' + a.t; }).join('、')); }, 500);
+    }
+  }
+
+  /* ============================ ゲーム：4択エンジン ============================ */
+  var G = null;   // 現在のゲーム状態
+  var tick = null;
+
+  function stopTick() { if (tick) { clearInterval(tick); tick = null; } }
+
+  function startChoice(mode) {
+    var pool = mode.pool === 'weak' ? window.QuizGen.weakPool() : window.QuizGen.build(mode.pool);
+    if (!pool.length) {
+      toast(mode.pool === 'weak' ? 'まだ弱点が記録されていません。まず他のモードに挑戦しましょう。' : '問題を用意できませんでした。');
+      return screenHome();
+    }
+    var qs = window.QuizGen.pick(pool, Math.min(mode.n, pool.length));
+    G = {
+      mode: mode, qs: qs, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0,
+      hp: mode.hearts || 0, wrong: [], locked: false,
+      left: mode.perQ || 0, totalLeft: mode.total || 0
+    };
+    renderChoice();
+  }
+
+  function renderChoice() {
+    var m = G.mode, q = G.qs[G.i];
+    var hud =
+      '<div class="hud"><div class="hud-row">' +
+        '<span class="q-no">第' + (G.i + 1) + '問 / ' + G.qs.length + '</span>' +
+        (m.hearts ? '<span class="hearts">' + '❤'.repeat(G.hp) + '<span style="opacity:.25">' + '❤'.repeat(m.hearts - G.hp) + '</span></span>' : '') +
+        '<span class="sp"></span>' +
+        '<span class="combo' + (G.combo >= 2 ? ' on' : '') + '">' + G.combo + ' 連鎖</span>' +
+        '<span class="hud-score">' + G.score + '</span>' +
+        '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+      '</div>' +
+      (m.perQ || m.total ? '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div>' : '') +
+      '</div>';
+
+    var ch = q.choices.map(function (c, i) {
+      return '<button class="choice" data-act="ans" data-i="' + i + '">' +
+        '<span class="k">' + '１２３４'.charAt(i) + '</span><span>' + esc(c) + '</span></button>';
+    }).join('');
+
+    render(hud +
+      '<div class="q-card" id="qc">' +
+        '<span class="q-cat">' + esc(q.cat) + '</span>' +
+        (q.stem ? '<div class="q-stem">' + kanbunHTML(q.stem) + '</div>' : '') +
+        (q.src ? '<div class="q-src">— ' + esc(q.src) + '</div>' : '') +
+        '<p class="q-text">' + esc(q.q) + '</p>' +
+        '<div class="choices">' + ch + '</div>' +
+        '<div id="vd"></div>' +
+      '</div>');
+
+    G.locked = false;
+    if (m.perQ) { G.left = m.perQ; runTimer(); }
+    else if (m.total) { runTimer(); }
+  }
+
+  function runTimer() {
+    stopTick();
+    var m = G.mode;
+    var bar = el('tmb'), wrap = el('tm');
+    if (!bar) return;
+    tick = setInterval(function () {
+      if (G.locked) return;
+      if (m.perQ) {
+        G.left -= 0.1;
+        var p = Math.max(0, G.left / m.perQ * 100);
+        bar.style.width = p + '%';
+        wrap.classList.toggle('warn', p < 34);
+        if (G.left <= 0) { stopTick(); answer(-1); }
+      } else if (m.total) {
+        G.totalLeft -= 0.1;
+        var p2 = Math.max(0, G.totalLeft / m.total * 100);
+        bar.style.width = p2 + '%';
+        wrap.classList.toggle('warn', p2 < 25);
+        if (G.totalLeft <= 0) { stopTick(); finishChoice(); }
+      }
+    }, 100);
+  }
+
+  function answer(idx) {
+    if (G.locked) return;
+    G.locked = true;
+    stopTick();
+    var q = G.qs[G.i];
+    var ok = idx === q.a;
+
+    window.Store.record(q.key, ok);
+    if (ok) {
+      G.correct++;
+      G.combo++;
+      G.maxCombo = Math.max(G.maxCombo, G.combo);
+      var timeBonus = G.mode.perQ ? Math.round(Math.max(0, G.left) / G.mode.perQ * 40) : 0;
+      G.score += 100 + Math.min(100, (G.combo - 1) * 20) + timeBonus;
+    } else {
+      G.combo = 0;
+      if (G.mode.hearts) G.hp--;
+      G.wrong.push({
+        stem: q.stem, q: q.q, exp: q.exp,
+        answer: q.choices[q.a],
+        your: idx >= 0 ? q.choices[idx] : '（時間切れ）'
+      });
+    }
+
+    var btns = $app.querySelectorAll('.choice');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+      if (i === q.a) btns[i].classList.add('correct');
+      if (i === idx && !ok) btns[i].classList.add('wrong');
+    }
+    if (!ok) {
+      var qc = el('qc');
+      qc.classList.add('shake');
+      setTimeout(function () { qc.classList.remove('shake'); }, 350);
+    }
+
+    var last = (G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0);
+    el('vd').innerHTML =
+      '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
+        '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') +
+          (ok && G.combo >= 3 ? '<span style="font-size:12px;color:var(--shu)">' + G.combo + ' 連鎖！</span>' : '') + '</div>' +
+        (q.exp ? '<p>' + esc(q.exp) + '</p>' : '') +
+        '<div class="btn-row" style="margin-top:12px">' +
+          '<button class="btn" data-act="next">' + (last ? '結果を見る' : '次の問題へ') + '</button>' +
+        '</div>' +
+      '</div>';
+    el('vd').querySelector('.btn').focus();
+  }
+
+  function nextQuestion() {
+    if (G.mode.hearts && G.hp <= 0) return finishChoice();
+    G.i++;
+    if (G.i >= G.qs.length) return finishChoice();
+    renderChoice();
+  }
+
+  function finishChoice() {
+    stopTick();
+    var res = { correct: G.correct, total: G.qs.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
+    var m = G.mode; G = null;
+    screenResult(m, res);
+  }
+
+  /* ============================ ゲーム：返り点ルート ============================ */
+  function startKaeriten() {
+    var set = window.QuizGen.shuffle(window.KAERITEN).slice(0, 8)
+      .sort(function (a, b) { return a.level - b.level; });
+    G = { mode: modeById('kaeriten'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], step: 0, mistakes: 0, done: false };
+    renderKaeriten();
+  }
+
+  function renderKaeriten() {
+    var it = G.items[G.i];
+    var chars = it.chars.map(function (c, i) {
+      var pos = it.order.indexOf(i);
+      var done = pos >= 0 && pos < G.step;
+      return '<button class="kt-char' + (done ? ' done' : '') + '" data-act="kt" data-i="' + i + '"' + (done ? ' disabled' : '') + '>' +
+        (c.m ? '<span class="mk">' + esc(c.m) + '</span>' : '') +
+        (done ? '<span class="ord">' + (pos + 1) + '</span>' : '') +
+        esc(c.c) + '</button>';
+    }).join('');
+
+    render(
+      '<div class="hud"><div class="hud-row">' +
+        '<span class="q-no">第' + (G.i + 1) + '問 / ' + G.items.length + '</span>' +
+        '<span class="sp"></span>' +
+        '<span class="combo' + (G.combo >= 2 ? ' on' : '') + '">' + G.combo + ' 連鎖</span>' +
+        '<span class="hud-score">' + G.score + '</span>' +
+        '<button class="icon-btn" data-act="quit">✕</button>' +
+      '</div></div>' +
+      '<div class="q-card" id="qc">' +
+        '<span class="q-cat">' + esc(it.label) + '</span>' +
+        '<p class="q-text">返り点にしたがって、<b>読む順に</b>漢字をタップしてください。</p>' +
+        '<div class="kt-stage">' + chars + '</div>' +
+        '<div id="vd"></div>' +
+      '</div>'
+    );
+  }
+
+  function kaeritenTap(i) {
+    if (G.done) return;
+    var it = G.items[G.i];
+    var expect = it.order[G.step];
+    if (i === expect) {
+      G.step++;
+      if (G.step >= it.order.length) {
+        G.done = true;
+        var clean = G.mistakes === 0;
+        window.Store.record('kt:' + it.id, clean);
+        if (clean) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 100 + Math.min(100, (G.combo - 1) * 20); }
+        else { G.combo = 0; G.wrong.push({ stem: it.chars.map(function (c) { return c.c; }).join(''), q: it.label + 'の読む順序', answer: it.yomi, exp: it.tip, your: null }); }
+        renderKaeriten();
+        var last = G.i >= G.items.length - 1;
+        el('vd').innerHTML = '<div class="verdict ' + (clean ? 'ok' : 'ng') + '">' +
+          '<div class="v-h">' + (clean ? '◯ 完成' : '△ 完成（ミスあり）') + '</div>' +
+          '<p><b>' + esc(it.yomi) + '</b></p><p>' + esc(it.tip) + '</p>' +
+          '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="ktnext">' +
+          (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
+        el('vd').querySelector('.btn').focus();
+      } else {
+        renderKaeriten();
+      }
+    } else {
+      G.mistakes++;
+      var btn = $app.querySelector('.kt-char[data-i="' + i + '"]');
+      if (btn) {
+        btn.classList.add('bad');
+        setTimeout(function () { btn.classList.remove('bad'); }, 400);
+      }
+      var qc = el('qc'); qc.classList.add('shake');
+      setTimeout(function () { qc.classList.remove('shake'); }, 350);
+    }
+  }
+
+  function kaeritenNext() {
+    G.i++; G.step = 0; G.mistakes = 0; G.done = false;
+    if (G.i >= G.items.length) {
+      var res = { correct: G.correct, total: G.items.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
+      var m = G.mode; G = null; return screenResult(m, res);
+    }
+    renderKaeriten();
+  }
+
+  /* ============================ ゲーム：置き字ハンター ============================ */
+  function startOkiji() {
+    var set = window.QuizGen.shuffle(window.OKIJI).slice(0, 8);
+    G = { mode: modeById('okiji'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], sel: {}, done: false };
+    renderOkiji();
+  }
+
+  function renderOkiji() {
+    var it = G.items[G.i];
+    var chars = it.chars.map(function (c, i) {
+      var cls = '';
+      if (G.done) {
+        var isO = it.okiji.indexOf(i) !== -1, picked = !!G.sel[i];
+        if (isO) cls = ' hit';
+        else if (picked) cls = ' miss';
+      } else if (G.sel[i]) cls = ' sel';
+      return '<button class="ok-char' + cls + '" data-act="ok" data-i="' + i + '"' + (G.done ? ' disabled' : '') + '>' + esc(c) + '</button>';
+    }).join('');
+
+    render(
+      '<div class="hud"><div class="hud-row">' +
+        '<span class="q-no">第' + (G.i + 1) + '問 / ' + G.items.length + '</span>' +
+        '<span class="sp"></span>' +
+        '<span class="combo' + (G.combo >= 2 ? ' on' : '') + '">' + G.combo + ' 連鎖</span>' +
+        '<span class="hud-score">' + G.score + '</span>' +
+        '<button class="icon-btn" data-act="quit">✕</button>' +
+      '</div></div>' +
+      '<div class="q-card" id="qc">' +
+        '<span class="q-cat">置き字</span>' +
+        '<p class="q-text">この文の中の<b>置き字（読まない字）</b>をすべて選んでください。</p>' +
+        '<div class="ok-stage">' + chars + '</div>' +
+        (G.done ? '' : '<div class="btn-row" style="justify-content:center"><button class="btn shu" data-act="okjudge">判定する</button></div>') +
+        '<div id="vd"></div>' +
+      '</div>'
+    );
+  }
+
+  function okijiJudge() {
+    var it = G.items[G.i];
+    var picked = Object.keys(G.sel).filter(function (k) { return G.sel[k]; }).map(Number).sort(function (a, b) { return a - b; });
+    var ans = it.okiji.slice().sort(function (a, b) { return a - b; });
+    var ok = picked.length === ans.length && picked.every(function (v, i) { return v === ans[i]; });
+
+    G.done = true;
+    window.Store.record('ok:' + it.id, ok);
+    if (ok) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 100 + Math.min(100, (G.combo - 1) * 20); }
+    else {
+      G.combo = 0;
+      G.wrong.push({
+        stem: it.chars.join(''), q: '置き字はどれか', exp: it.tip,
+        answer: ans.map(function (i) { return it.chars[i]; }).join('・') + '（' + it.yomi + '）',
+        your: picked.length ? picked.map(function (i) { return it.chars[i]; }).join('・') : '（選択なし）'
+      });
+    }
+    renderOkiji();
+    var last = G.i >= G.items.length - 1;
+    el('vd').innerHTML = '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
+      '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') + '</div>' +
+      '<p>置き字は <b>' + esc(ans.map(function (i) { return it.chars[i]; }).join('・')) + '</b>。書き下し文は「' + esc(it.yomi) + '」' + (it.src ? '（' + esc(it.src) + '）' : '') + '</p>' +
+      '<p>' + esc(it.tip) + '</p>' +
+      '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="oknext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
+    el('vd').querySelector('.btn').focus();
+  }
+
+  function okijiNext() {
+    G.i++; G.sel = {}; G.done = false;
+    if (G.i >= G.items.length) {
+      var res = { correct: G.correct, total: G.items.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
+      var m = G.mode; G = null; return screenResult(m, res);
+    }
+    renderOkiji();
+  }
+
+  /* ============================ ゲーム：書き下し組立 ============================ */
+  function startNarabe() {
+    var set = window.QuizGen.shuffle(window.NARABEKAE).slice(0, 8)
+      .sort(function (a, b) { return a.level - b.level; });
+    G = { mode: modeById('narabe'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], placed: [], shuffled: [], done: false };
+    G.shuffled = window.QuizGen.shuffle(set[0].parts.map(function (p, i) { return i; }));
+    renderNarabe();
+  }
+
+  function renderNarabe() {
+    var it = G.items[G.i];
+    var slot = G.placed.map(function (pi, k) {
+      var cls = 'chip placed';
+      if (G.done) cls = 'chip ' + (G.placed[k] === k ? 'ok' : 'ng');
+      return '<button class="' + cls + '" data-act="nbpull" data-k="' + k + '"' + (G.done ? ' disabled' : '') + '>' + esc(it.parts[pi]) + '</button>';
+    }).join('');
+    var pool = G.shuffled.map(function (pi) {
+      var used = G.placed.indexOf(pi) !== -1;
+      return '<button class="chip" data-act="nbpush" data-i="' + pi + '"' + (used || G.done ? ' disabled' : '') + '>' + esc(it.parts[pi]) + '</button>';
+    }).join('');
+
+    render(
+      '<div class="hud"><div class="hud-row">' +
+        '<span class="q-no">第' + (G.i + 1) + '問 / ' + G.items.length + '</span>' +
+        '<span class="sp"></span>' +
+        '<span class="combo' + (G.combo >= 2 ? ' on' : '') + '">' + G.combo + ' 連鎖</span>' +
+        '<span class="hud-score">' + G.score + '</span>' +
+        '<button class="icon-btn" data-act="quit">✕</button>' +
+      '</div></div>' +
+      '<div class="q-card" id="qc">' +
+        '<span class="q-cat">書き下し</span>' +
+        '<div class="q-stem">' + kanbunHTML(it.kanbun) + '</div>' +
+        '<div class="q-src">— ' + esc(it.src) + '</div>' +
+        '<p class="q-text">語のかたまりを並べて、正しい書き下し文を作ってください。</p>' +
+        '<div class="nb-slot">' + (slot || '<span class="muted" style="font-size:12px">ここに並べます</span>') + '</div>' +
+        '<div class="nb-pool">' + pool + '</div>' +
+        (!G.done && G.placed.length === it.parts.length ? '<div class="btn-row mt" style="justify-content:center"><button class="btn shu" data-act="nbjudge">判定する</button></div>' : '') +
+        '<div id="vd"></div>' +
+      '</div>'
+    );
+  }
+
+  function narabeJudge() {
+    var it = G.items[G.i];
+    var ok = G.placed.every(function (v, i) { return v === i; });
+    G.done = true;
+    window.Store.record('nb:' + it.id, ok);
+    if (ok) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 120 + Math.min(120, (G.combo - 1) * 20); }
+    else {
+      G.combo = 0;
+      G.wrong.push({
+        stem: it.kanbun, q: '書き下し文に直すと？', exp: '訳：' + it.trans + '（' + it.src + '）',
+        answer: it.parts.join(''), your: G.placed.map(function (p) { return it.parts[p]; }).join('')
+      });
+    }
+    renderNarabe();
+    var last = G.i >= G.items.length - 1;
+    el('vd').innerHTML = '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
+      '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') + '</div>' +
+      '<p><b>' + esc(it.parts.join('')) + '</b></p><p>' + esc(it.trans) + '（' + esc(it.src) + '）</p>' +
+      '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="nbnext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
+    el('vd').querySelector('.btn').focus();
+  }
+
+  function narabeNext() {
+    G.i++; G.placed = []; G.done = false;
+    if (G.i >= G.items.length) {
+      var res = { correct: G.correct, total: G.items.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
+      var m = G.mode; G = null; return screenResult(m, res);
+    }
+    G.shuffled = window.QuizGen.shuffle(G.items[G.i].parts.map(function (p, i) { return i; }));
+    renderNarabe();
+  }
+
+  /* ============================ 起動 ============================ */
+  function play(id) {
+    var m = modeById(id);
+    if (!m) return screenHome();
+    window.Store.touchDay();
+    stopTick();
+    if (m.kind === 'choice') return startChoice(m);
+    if (m.kind === 'kaeriten') return startKaeriten();
+    if (m.kind === 'okiji') return startOkiji();
+    if (m.kind === 'narabe') return startNarabe();
+  }
+
+  function go(to) {
+    stopTick(); G = null;
+    if (to === 'home') return screenHome();
+    if (to === 'zukan') return screenZukan();
+    if (to === 'lessons') return screenLessons();
+    if (to === 'shishu') return screenShishu();
+    if (to === 'ach') return screenAch();
+    screenHome();
+  }
+
+  /* ---------- イベント委譲 ---------- */
+  function onClick(e) {
+    var t = e.target.closest('[data-act]');
+    if (!t) return;
+    var act = t.getAttribute('data-act');
+    switch (act) {
+      case 'go': go(t.getAttribute('data-to')); break;
+      case 'play': play(t.getAttribute('data-id')); break;
+      case 'lesson': screenLesson(t.getAttribute('data-id')); break;
+      case 'toggle':
+        var id = t.getAttribute('data-id');
+        zukanState.open[id] = !zukanState.open[id];
+        screenZukan();
+        break;
+      case 'cat': zukanState.cat = t.getAttribute('data-cat'); screenZukan(); break;
+      case 'ans': answer(parseInt(t.getAttribute('data-i'), 10)); break;
+      case 'next': nextQuestion(); break;
+      case 'quit':
+        if (confirm('中断してホームに戻りますか？　ここまでの記録は保存されます。')) { window.Store.save(); go('home'); }
+        break;
+      case 'kt': kaeritenTap(parseInt(t.getAttribute('data-i'), 10)); break;
+      case 'ktnext': kaeritenNext(); break;
+      case 'ok':
+        var oi = t.getAttribute('data-i');
+        G.sel[oi] = !G.sel[oi];
+        renderOkiji();
+        break;
+      case 'okjudge': okijiJudge(); break;
+      case 'oknext': okijiNext(); break;
+      case 'nbpush': G.placed.push(parseInt(t.getAttribute('data-i'), 10)); renderNarabe(); break;
+      case 'nbpull': G.placed.splice(parseInt(t.getAttribute('data-k'), 10), 1); renderNarabe(); break;
+      case 'nbjudge': narabeJudge(); break;
+      case 'nbnext': narabeNext(); break;
+      case 'theme': toggleTheme(); break;
+      case 'reset':
+        if (confirm('すべての学習記録（段位・実績・弱点）を消去します。よろしいですか？')) {
+          window.Store.reset(); toast('学習記録をリセットしました'); go('home');
+        }
+        break;
+    }
+  }
+
+  function onKey(e) {
+    if (!G || !G.qs || G.locked) return;
+    var n = '1234'.indexOf(e.key);
+    if (n >= 0 && n < G.qs[G.i].choices.length) { answer(n); return; }
+    if (e.key === 'Enter') {
+      var b = $app.querySelector('#vd .btn');
+      if (b) b.click();
+    }
+  }
+
+  function applyTheme() {
+    var t = window.Store.state.theme;
+    if (t) document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+    var btn = el('theme-btn');
+    if (btn) btn.textContent = t === 'dark' ? '☀' : t === 'light' ? '☾' : '◑';
+  }
+  function toggleTheme() {
+    var order = ['', 'light', 'dark'];
+    var cur = order.indexOf(window.Store.state.theme || '');
+    window.Store.state.theme = order[(cur + 1) % 3];
+    window.Store.save();
+    applyTheme();
+    toast(window.Store.state.theme === 'light' ? '明るいテーマ' : window.Store.state.theme === 'dark' ? '暗いテーマ' : '端末の設定に合わせます');
+  }
+
+  function init() {
+    $app = el('app');
+    $toast = el('toast');
+    window.Store.load();
+    applyTheme();
+    var first = window.Store.touchDay();
+    document.addEventListener('click', onClick);
+    document.addEventListener('keydown', onKey);
+    screenHome();
+    if (first && window.Store.state.streak > 1) {
+      setTimeout(function () { toast('連続学習 ' + window.Store.state.streak + ' 日目。今日も一問から。'); }, 700);
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
+</script>

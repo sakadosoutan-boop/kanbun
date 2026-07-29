@@ -1,0 +1,13 @@
+{
+  "name": "kanbun-dojo",
+  "version": "1.0.0",
+  "description": "高校生向けの漢文トレーニング Web アプリ（句法・訓読・漢詩・故事成語）",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node tools/validate.mjs",
+    "build": "node tools/build.mjs",
+    "test": "node tools/validate.mjs && node tools/smoke.mjs"
+  },
+  "license": "MIT"
+}
