@@ -62,32 +62,101 @@
       var sameCat = all.filter(function (x) { return x.cat === k.cat && x.id !== k.id; });
       var basis = sameCat.length >= 3 ? sameCat : all.filter(function (x) { return x.id !== k.id; });
 
+      // 読み問題では漢字だけを提示する。訓点つきの form には送り仮名が入っていて答えが読めてしまう。
       var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read));
       if (c1) out.push({
         key: k.id + ':read', cat: k.cat, level: k.level,
-        stem: k.form, q: 'この句形の読みとして正しいものはどれか。',
-        choices: c1.choices, a: c1.a, exp: k.note || (k.form + '＝' + k.read + '＝' + k.mean)
+        stem: k.bare, q: 'この句形の読みとして正しいものはどれか。',
+        choices: c1.choices, a: c1.a,
+        exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.note ? '　' + k.note : '')
       });
 
       var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean));
       if (c2) out.push({
         key: k.id + ':mean', cat: k.cat, level: k.level,
-        stem: k.form, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
+        stem: k.bare, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
         choices: c2.choices, a: c2.a, exp: k.note || (k.form + '＝' + k.mean)
       });
 
       if (k.ex && k.ex.length && k.ex[0].y) {
         var exY = k.ex[0].y;
-        var others = [];
-        all.forEach(function (x) {
-          if (x.id !== k.id && x.ex && x.ex.length && x.ex[0].y) others.push(x.ex[0].y);
-        });
+        // 誤答はできるだけ同じ分類の例文から取る（無関係な文だと消去法で解けてしまう）
+        function collect(from) {
+          var o = [];
+          from.forEach(function (x) {
+            if (x.id !== k.id && x.ex && x.ex.length && x.ex[0].y) o.push(x.ex[0].y);
+          });
+          return o;
+        }
+        var near = collect(sameCat);
+        var others = near.length >= 3 ? near : near.concat(collect(all));
         var c3 = makeChoices(exY, others);
         if (c3) out.push({
           key: k.id + ':ex', cat: k.cat, level: Math.min(3, k.level + 1),
           stem: k.ex[0].k, q: '書き下し文として正しいものはどれか。',
           src: k.ex[0].s, choices: c3.choices, a: c3.a,
           exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.ex[0].t ? '　訳：' + k.ex[0].t : '')
+        });
+      }
+    });
+    return out;
+  }
+
+  /* ---------------- 再読文字（専用の設問） ----------------
+     読みが同じ組（将／且、当／応、猶／由）があるので、
+     逆引き（読み・意味 → 漢字）は答えが一つに定まるものだけを出題する。 */
+  function saidokuQuestions() {
+    var set = window.KUHO.filter(function (k) { return k.cat === '再読文字'; });
+    var out = [];
+    var chars = set.map(function (k) { return k.bare; });
+    var seconds = [];
+    var katsuAll = ['未然形', '終止形', '連体形', '已然形'];
+    set.forEach(function (k) { if (seconds.indexOf(k.second) === -1) seconds.push(k.second); });
+
+    function uniqueBy(k, field) {
+      return set.filter(function (x) { return x[field] === k[field]; }).length === 1;
+    }
+
+    set.forEach(function (k) {
+      // 二度目の読み
+      var c1 = makeChoices(k.second, seconds.filter(function (v) { return v !== k.second; }));
+      if (c1) out.push({
+        key: k.id + ':second', cat: '再読文字', level: 2,
+        stem: k.bare, q: 'この再読文字の【二度目】の読みはどれか。',
+        choices: c1.choices, a: c1.a,
+        exp: '「' + k.bare + '」は' + k.read + '。二度目の「' + k.second + '」はひらがなで書き下す。'
+      });
+
+      // 二度目の読みが接続する活用形
+      var c2 = makeChoices(k.katsu, katsuAll.filter(function (v) { return v !== k.katsu; }));
+      if (c2) out.push({
+        key: k.id + ':katsu', cat: '再読文字', level: 3,
+        stem: k.bare, q: 'この再読文字は、下の語をどの活用形で受けるか。',
+        choices: c2.choices, a: c2.a,
+        exp: '「' + k.bare + '」は' + k.read + '。「' + k.second + '」は' + k.katsu + '接続。'
+      });
+
+      // 読み → 漢字（読みが一意なものだけ）
+      if (uniqueBy(k, 'read')) {
+        var c3 = makeChoices(k.bare, chars.filter(function (v) { return v !== k.bare; }));
+        if (c3) out.push({
+          key: k.id + ':rev-read', cat: '再読文字', level: 2,
+          stem: '', q: '「' + k.read + '」と読む再読文字はどれか。',
+          choices: c3.choices, a: c3.a,
+          exp: '「' + k.bare + '」＝' + k.read + '＝' + k.mean
+        });
+      }
+
+      // 意味 → 漢字（意味が一意なものだけ。将／且、当／応、猶／由 は除かれる）
+      if (uniqueBy(k, 'mean') && !set.some(function (x) {
+        return x.id !== k.id && (x.mean.indexOf(k.mean) !== -1 || k.mean.indexOf(x.mean) !== -1);
+      })) {
+        var c4 = makeChoices(k.bare, chars.filter(function (v) { return v !== k.bare; }));
+        if (c4) out.push({
+          key: k.id + ':rev-mean', cat: '再読文字', level: 3,
+          stem: '', q: '「' + k.mean + '」の意味を表す再読文字はどれか。',
+          choices: c4.choices, a: c4.a,
+          exp: '「' + k.bare + '」＝' + k.read + '＝' + k.mean
         });
       }
     });
@@ -230,7 +299,9 @@
           '限定', '累加', '抑揚', '詠嘆', '願望', '重要語', '識別']));
     },
     saidoku: function () {
-      return kuhoQuestions(['再読文字']).concat(mondaiQuestions(['再読文字']));
+      return kuhoQuestions(['再読文字'])
+        .concat(saidokuQuestions())
+        .concat(mondaiQuestions(['再読文字']));
     },
     kanji: function () { return kanjiQuestions(); },
     koji: function () { return kojiQuestions(); },
@@ -240,6 +311,7 @@
       return [].concat(
         mondaiQuestions(),
         kuhoQuestions(),
+        saidokuQuestions(),
         kanjiQuestions(),
         kojiQuestions(),
         kanshiQuestions()

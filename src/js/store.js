@@ -15,7 +15,8 @@
     plays: {},         // modeId -> 回数
     srs: {},           // questionKey -> { w:誤答数, r:正答数, t:最終学習(ms) }
     ach: [],           // 取得済み実績 id
-    theme: ''          // '', 'light', 'dark'
+    theme: '',         // '', 'light', 'dark'
+    vertical: true     // 漢文本文を縦書きで表示する
   };
 
   var RANKS = [
@@ -154,7 +155,7 @@
   }
 
   function reset() {
-    state = Object.assign({}, DEFAULT, { theme: state.theme });
+    state = Object.assign({}, DEFAULT, { theme: state.theme, vertical: state.vertical });
     state.best = {}; state.plays = {}; state.srs = {}; state.ach = [];
     save();
   }

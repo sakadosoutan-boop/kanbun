@@ -28,13 +28,23 @@
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function mmss(sec) { return pad(Math.floor(sec / 60)) + ':' + pad(Math.floor(sec % 60)); }
 
-  /** 訓読文の返り点を上付きで表示する。データ側では「^レ」「^二」のように ^ を前置する。
-   *  自動判別にしないのは、「一見」「二月」のように返り点と同じ字が本文に現れるため。 */
+  /** 訓読文を組む。データ側では返り点の前に ^ を置く（未^レ聞^二其名^一）。
+   *  自動判別にしないのは、「一見」「二月」のように返り点と同じ字が本文に現れるため。
+   *  返り点は直前の一字を包んで絶対配置し、縦書きなら左下・横書きなら右下に出す。 */
+  var MARKS = '一レ|上レ|甲レ|レ|一|二|三|四|上|中|下|甲|乙|丙';
   function kanbunHTML(s) {
-    return esc(s).replace(/\^(一レ|上レ|甲レ|レ|一|二|三|四|上|中|下|甲|乙|丙)/g, function (m, p1) {
-      return '<i class="mark">' + p1 + '</i>';
-    });
+    return esc(s).replace(new RegExp('([^\\s^])\\^(' + MARKS + ')', 'g'), function (m, ch, mk) {
+      return '<span class="kc">' + ch + '<i class="mark">' + mk + '</i></span>';
+    }).replace(new RegExp('\\^(' + MARKS + ')', 'g'), '<i class="mark">$1</i>');
   }
+
+  /** 縦書きの高さは文字数から決める。
+   *  writing-mode: vertical-rl の要素は inline サイズ（画面上の高さ）が確定しないと
+   *  1 列に潰れてしまい、height:max-content も効かないため、字数を CSS 変数で渡す。 */
+  function vlen(s) {
+    return String(s || '').replace(new RegExp('\\^(' + MARKS + ')', 'g'), '').replace(/\s/g, '').length;
+  }
+  function vstyle(s) { return ' style="--n:' + vlen(s) + '"'; }
 
   /* ============================ モード定義 ============================ */
   var MODES = [
@@ -126,7 +136,7 @@
       var open = !!zukanState.open[k.id];
       var exHtml = (k.ex || []).map(function (e) {
         return '<div class="ex">' +
-          '<div class="ex-k">' + kanbunHTML(e.k) + '</div>' +
+          '<div class="ex-k"' + vstyle(e.k) + '>' + kanbunHTML(e.k) + '</div>' +
           '<div class="ex-y">' + esc(e.y) + '</div>' +
           '<div class="ex-t">' + esc(e.t) + '</div>' +
           (e.s ? '<div class="ex-s">— ' + esc(e.s) + '</div>' : '') +
@@ -204,11 +214,12 @@
       var lines = p.lines.map(function (ln, i) {
         var isR = p.rhymeLines.indexOf(i + 1) !== -1;
         var head = ln.slice(0, ln.length - 1), tail = ln.charAt(ln.length - 1);
-        return '<div class="p-line">' + esc(head) +
+        return '<div class="p-line"' + vstyle(ln) + '>' + esc(head) +
           (isR ? '<span class="rh">' + esc(tail) + '</span>' : esc(tail)) + '</div>';
       }).join('');
       return '<div class="card mt">' +
-        '<div class="poem">' + lines +
+        '<div class="poem">' +
+          '<div class="p-lines">' + lines + '</div>' +
           '<div class="p-yomi">' + p.yomi.map(esc).join('／') + '</div>' +
         '</div>' +
         '<div class="poem-meta">' +
@@ -347,13 +358,18 @@
     }).join('');
 
     render(hud +
-      '<div class="q-card" id="qc">' +
-        '<span class="q-cat">' + esc(q.cat) + '</span>' +
-        (q.stem ? '<div class="q-stem">' + kanbunHTML(q.stem) + '</div>' : '') +
-        (q.src ? '<div class="q-src">— ' + esc(q.src) + '</div>' : '') +
-        '<p class="q-text">' + esc(q.q) + '</p>' +
-        '<div class="choices">' + ch + '</div>' +
-        '<div id="vd"></div>' +
+      '<div class="q-card' + (q.stem ? ' two' : '') + '" id="qc">' +
+        (q.stem ?
+          '<div class="q-aside">' +
+            '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(q.stem) + '>' + kanbunHTML(q.stem) + '</div></div>' +
+            (q.src ? '<div class="q-src">— ' + esc(q.src) + '</div>' : '') +
+          '</div>' : '') +
+        '<div class="q-main">' +
+          '<span class="q-cat">' + esc(q.cat) + '</span>' +
+          '<p class="q-text">' + esc(q.q) + '</p>' +
+          '<div class="choices">' + ch + '</div>' +
+          '<div id="vd"></div>' +
+        '</div>' +
       '</div>');
 
     G.locked = false;
@@ -629,15 +645,19 @@
         '<span class="hud-score">' + G.score + '</span>' +
         '<button class="icon-btn" data-act="quit">✕</button>' +
       '</div></div>' +
-      '<div class="q-card" id="qc">' +
-        '<span class="q-cat">書き下し</span>' +
-        '<div class="q-stem">' + kanbunHTML(it.kanbun) + '</div>' +
-        '<div class="q-src">— ' + esc(it.src) + '</div>' +
-        '<p class="q-text">語のかたまりを並べて、正しい書き下し文を作ってください。</p>' +
-        '<div class="nb-slot">' + (slot || '<span class="muted" style="font-size:12px">ここに並べます</span>') + '</div>' +
-        '<div class="nb-pool">' + pool + '</div>' +
-        (!G.done && G.placed.length === it.parts.length ? '<div class="btn-row mt" style="justify-content:center"><button class="btn shu" data-act="nbjudge">判定する</button></div>' : '') +
-        '<div id="vd"></div>' +
+      '<div class="q-card two" id="qc">' +
+        '<div class="q-aside">' +
+          '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(it.kanbun) + '>' + kanbunHTML(it.kanbun) + '</div></div>' +
+          '<div class="q-src">— ' + esc(it.src) + '</div>' +
+        '</div>' +
+        '<div class="q-main">' +
+          '<span class="q-cat">書き下し</span>' +
+          '<p class="q-text">語のかたまりを並べて、正しい書き下し文を作ってください。</p>' +
+          '<div class="nb-slot">' + (slot || '<span class="muted" style="font-size:12px">ここに並べます</span>') + '</div>' +
+          '<div class="nb-pool">' + pool + '</div>' +
+          (!G.done && G.placed.length === it.parts.length ? '<div class="btn-row mt" style="justify-content:center"><button class="btn shu" data-act="nbjudge">判定する</button></div>' : '') +
+          '<div id="vd"></div>' +
+        '</div>' +
       '</div>'
     );
   }
@@ -730,6 +750,7 @@
       case 'nbjudge': narabeJudge(); break;
       case 'nbnext': narabeNext(); break;
       case 'theme': toggleTheme(); break;
+      case 'tate': toggleVertical(); break;
       case 'reset':
         if (confirm('すべての学習記録（段位・実績・弱点）を消去します。よろしいですか？')) {
           window.Store.reset(); toast('学習記録をリセットしました'); go('home');
@@ -764,14 +785,41 @@
     toast(window.Store.state.theme === 'light' ? '明るいテーマ' : window.Store.state.theme === 'dark' ? '暗いテーマ' : '端末の設定に合わせます');
   }
 
+  /** 漢文本文の縦書き／横書き */
+  function applyVertical() {
+    var v = window.Store.state.vertical !== false;
+    document.documentElement.classList.toggle('vert', v);
+    var btn = el('tate-btn');
+    if (btn) {
+      btn.textContent = v ? '縦' : '横';
+      btn.setAttribute('aria-pressed', v ? 'true' : 'false');
+    }
+  }
+  function toggleVertical() {
+    window.Store.state.vertical = window.Store.state.vertical === false;
+    window.Store.save();
+    applyVertical();
+    toast(window.Store.state.vertical ? '漢文を縦書きで表示します' : '漢文を横書きで表示します');
+  }
+
+  /** ヘッダーの実寸をCSS変数に流し込む（HUD の sticky 位置に使う） */
+  function measureChrome() {
+    var bar = document.querySelector('.topbar');
+    if (bar) document.documentElement.style.setProperty('--topbar-h', bar.offsetHeight + 'px');
+  }
+
   function init() {
     $app = el('app');
     $toast = el('toast');
     window.Store.load();
     applyTheme();
+    applyVertical();
+    measureChrome();
     var first = window.Store.touchDay();
     document.addEventListener('click', onClick);
     document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', measureChrome);
+    window.addEventListener('orientationchange', function () { setTimeout(measureChrome, 200); });
     screenHome();
     if (first && window.Store.state.streak > 1) {
       setTimeout(function () { toast('連続学習 ' + window.Store.state.streak + ' 日目。今日も一問から。'); }, 700);

@@ -21,10 +21,13 @@
   --ng:         #b8443a;
   --shadow:     0 1px 2px rgba(31,29,26,.06), 0 6px 20px rgba(31,29,26,.08);
   --shadow-lg:  0 2px 6px rgba(31,29,26,.08), 0 18px 48px rgba(31,29,26,.14);
+  --topbar-h:   59px;
   --radius:     16px;
   --radius-sm:  10px;
-  --mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Songti SC", serif;
-  --gothic: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  /* 末尾の IPA 系は Linux 向けの保険。縦書きには vmtx を持つフォントが必要で、
+     一部ディストリの既定 serif には縦方向のメトリクスが無いことがある。 */
+  --mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", "Songti SC", "IPAMincho", "IPAPGothic", serif;
+  --gothic: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", "Noto Sans CJK JP", system-ui, "IPAPGothic", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -83,7 +86,11 @@ button { cursor: pointer; border: none; background: none; }
 h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 
 /* ---------- layout ---------- */
-.wrap { max-width: 880px; margin: 0 auto; padding: 0 16px 96px; }
+.wrap {
+  max-width: 880px; margin: 0 auto;
+  padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
 
 .topbar {
   position: sticky; top: 0; z-index: 40;
@@ -105,7 +112,8 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   line-height: 1.05; text-align: center;
 }
 .brand b { font-size: 17px; letter-spacing: .06em; font-weight: 600; }
-.brand small { display: block; font-family: var(--gothic); font-size: 10px; color: var(--ink-3); letter-spacing: .18em; }
+.brand small { display: block; font-family: var(--gothic); font-size: 10px; color: var(--ink-3); letter-spacing: .18em; white-space: nowrap; }
+@media (max-width: 420px) { .brand small { display: none; } .topbar-in { gap: 8px; } .icon-btn { width: 34px; } }
 .topbar .spacer { flex: 1; }
 .icon-btn {
   width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
@@ -148,7 +156,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .sec-h .rule { flex: 1; height: 1px; background: var(--line); }
 
 /* ---------- mode cards ---------- */
-.modes { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.modes { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .mode {
   position: relative; text-align: left; background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
@@ -196,7 +204,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 
 /* ---------- game HUD ---------- */
 .hud {
-  position: sticky; top: 55px; z-index: 30; margin: 0 -16px 14px; padding: 10px 16px;
+  position: sticky; top: var(--topbar-h); z-index: 30; margin: 0 -16px 14px; padding: 10px 16px;
   background: color-mix(in srgb, var(--paper) 88%, transparent);
   backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
@@ -212,17 +220,32 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .hearts { letter-spacing: 2px; font-size: 14px; }
 
 /* ---------- question ---------- */
-.q-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.q-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px;
+  display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start;
+}
+.q-main { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.q-main .q-cat { justify-self: start; }
+.q-aside { display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.q-stem-wrap { display: flex; justify-content: center; width: 100%; overflow-x: auto; }
 .q-cat { display: inline-block; font-size: 11px; letter-spacing: .12em; color: var(--ai); background: color-mix(in srgb, var(--ai) 12%, transparent); border: 1px solid color-mix(in srgb, var(--ai) 28%, transparent); padding: 2px 10px; border-radius: 99px; }
 .q-stem {
-  font-family: var(--mincho); font-size: clamp(20px, 5.2vw, 27px); letter-spacing: .09em;
-  margin: 14px 0 6px; line-height: 1.85; text-align: center;
+  font-family: var(--mincho); font-size: clamp(20px, 5.2vw, 27px); letter-spacing: .1em;
+  margin: 4px 0 2px; line-height: 1.9; text-align: center;
 }
-.q-stem .mark { color: var(--shu); font-size: .62em; vertical-align: super; margin: 0 1px; font-style: normal; }
+/* 返り点：直前の一字を包んで絶対配置する。横書きは右下、縦書きは左下（伝統的な位置）。 */
+.kc { position: relative; margin-inline-end: .16em; }
+.mark {
+  position: absolute; font-style: normal; white-space: nowrap;
+  color: var(--shu); font-family: var(--gothic);
+  font-size: .44em; line-height: 1; letter-spacing: -.04em;
+  right: -.30em; bottom: -.10em;
+}
 .q-src { text-align: center; font-size: 11px; color: var(--ink-3); }
-.q-text { margin: 14px 0 0; font-size: 15px; }
+.q-text { margin: 0; font-size: 15px; }
 
-.choices { display: grid; gap: 9px; margin-top: 16px; }
+.choices { display: grid; gap: 9px; }
 .choice {
   display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%;
   padding: 13px 15px; border-radius: var(--radius-sm); border: 1.5px solid var(--line);
@@ -240,7 +263,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .choice.wrong .k { background: var(--ng); color: #fff; border-color: var(--ng); }
 .choice:disabled { cursor: default; }
 
-.verdict { margin-top: 14px; border-radius: var(--radius-sm); padding: 14px 16px; border: 1px solid var(--line); background: var(--paper-2); animation: pop .25s cubic-bezier(.2,.8,.2,1); }
+.verdict { border-radius: var(--radius-sm); padding: 14px 16px; border: 1px solid var(--line); background: var(--paper-2); animation: pop .25s cubic-bezier(.2,.8,.2,1); }
 .verdict .v-h { font-family: var(--mincho); font-size: 16px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; }
 .verdict.ok .v-h { color: var(--ok); }
 .verdict.ng .v-h { color: var(--ng); }
@@ -410,3 +433,160 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 
 .footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--ink-3); text-align: center; }
+
+/* ============================================================
+   縦書き（漢文本文）
+   html.vert のときだけ漢文本文を vertical-rl にする。
+   設問文・選択肢・解説は横書きのまま（読みやすさを優先）。
+   ============================================================ */
+.vert .q-stem {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  line-height: 2.15;              /* 縦書きでは行の高さ＝列の幅になる */
+  letter-spacing: .14em;
+  /* 縦組みは inline サイズ（画面上の高さ）が確定しないと 1 列に潰れる。
+     字数 --n から必要な高さを求め、画面に収まらないぶんは列を折り返させる。 */
+  --adv: 1.22em;
+  --cap: min(38vh, 320px);   /* スマホ縦。これを超える長さは列を折り返す */
+  height: min(var(--cap), calc(var(--n, 12) * var(--adv) + 8px));
+  text-align: start;
+  padding-block: 2px;             /* 返り点が左にはみ出すぶんの余白 */
+}
+.q-stem-wrap { align-items: flex-start; }
+.vert .kc .mark { right: auto; left: -.40em; bottom: -.04em; }
+
+/* 漢詩：句を右から左へ列で並べる */
+.p-lines { display: block; }
+.vert .p-lines {
+  display: flex; flex-direction: row-reverse; justify-content: center;
+  gap: .45em; margin-inline: auto;
+}
+.vert .p-lines { align-items: flex-start; }
+.vert .p-lines .p-line {
+  writing-mode: vertical-rl; text-orientation: mixed; margin: 0; line-height: 2;
+  height: calc(var(--n, 7) * 1.26em + 6px);
+}
+
+/* 句法図鑑の例文：白文を右に縦組み、書き下し・訳を左に置く */
+.vert .ex {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 14px; align-items: start;
+}
+.vert .ex > *:not(.ex-k) { grid-column: 1; }
+.vert .ex-k {
+  grid-column: 2; grid-row: 1 / span 4;
+  writing-mode: vertical-rl; text-orientation: mixed;
+  height: min(250px, calc(var(--n, 8) * 1.2em + 6px));
+  line-height: 2.1; letter-spacing: .1em;
+}
+
+/* 返り点パズル・置き字ハンター：上から下へ、列は右から左へ折り返す */
+.vert .kt-stage, .vert .ok-stage {
+  flex-flow: column wrap-reverse;
+  align-content: center; justify-content: flex-start;
+  max-height: min(52vh, 430px);
+  gap: 6px 10px;
+}
+.vert .kt-char { width: 54px; height: 60px; font-size: 25px; }
+.vert .ok-char { width: 50px; height: 54px; font-size: 24px; }
+/* 縦組みでは返り点は字の左下、読み順の番号は右上に出す */
+.vert .kt-char .mk { left: 3px; bottom: 2px; }
+
+/* ============================================================
+   端末別レイアウト
+   ============================================================ */
+
+/* --- スマホ横（高さが足りない）：縦の余白を削り、一画面に収める --- */
+@media (orientation: landscape) and (max-height: 560px) {
+  .hero { padding: 12px 0 2px; }
+  .hero h1 { font-size: 23px; }
+  .hero p { font-size: 12.5px; margin-top: 4px; }
+  .rankbar { margin-top: 12px; padding: 10px 14px; gap: 12px; }
+  .rank-badge { width: 44px; height: 44px; font-size: 16px; }
+  .rank-meta b { font-size: 16px; }
+  .stats { margin-top: 8px; }
+  .stat b { font-size: 18px; }
+  .sec-h { margin: 18px 0 10px; }
+  .hud { padding: 7px 16px; margin-bottom: 10px; }
+  .q-card { padding: 14px 16px; gap: 10px; }
+  .q-stem { font-size: 21px; margin: 0; }
+  .vert .q-stem { --cap: 36vh; }
+  .choice { padding: 9px 13px; font-size: 14px; }
+  .choices { gap: 7px; }
+  .result { padding: 16px 14px; }
+  .result .r-rank { font-size: 40px; }
+  .result .r-score { font-size: 30px; }
+  .vert .kt-stage, .vert .ok-stage { max-height: 40vh; }
+  .kt-char { width: 52px; height: 62px; font-size: 25px; }
+}
+
+/* --- 2 列（大きめのスマホ横／タブレット縦から） --- */
+@media (min-width: 540px) {
+  .modes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* --- タブレット縦：本文を少し大きく、幅を絞って読みやすく --- */
+@media (min-width: 700px) and (orientation: portrait) {
+  .wrap, .topbar-in { max-width: 740px; }
+  .q-text { font-size: 16px; }
+  .choice { font-size: 16px; padding: 15px 17px; }
+  .lesson-body { font-size: 16px; }
+  .vert .q-stem { --cap: min(44vh, 440px); }
+}
+
+/* --- 横長（タブレット横・PC）：漢文を右の柱に、選択肢を左に置く --- */
+@media (min-width: 760px) and (orientation: landscape) {
+  .q-card.two { grid-template-columns: minmax(0, 1fr) auto; column-gap: 26px; }
+  .q-card.two .q-main  { order: 1; }
+  .q-card.two .q-aside { order: 2; border-inline-start: 1px solid var(--line); padding-inline-start: 24px; }
+  .vert .q-card.two .q-stem { --cap: min(62vh, 480px); }
+  .q-card.two .q-aside { align-self: stretch; }
+  .q-card.two .q-aside { max-width: 46%; }
+}
+
+/* --- 3 列＋広め（PC・タブレット横） --- */
+@media (min-width: 960px) {
+  .wrap, .topbar-in { max-width: 960px; }
+  .modes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hero { padding: 34px 0 6px; }
+}
+
+/* --- タッチ端末：タップ領域を広げる --- */
+@media (hover: none) {
+  .choice { min-height: 52px; align-items: center; }
+  .chip { padding: 11px 16px; }
+  .pill { padding: 9px 15px; }
+  .kuho-head { padding: 16px; }
+  .mode:hover { transform: none; box-shadow: var(--shadow); }
+  .icon-btn:hover { background: none; border-color: transparent; }
+}
+
+/* --- 縦書きが使えない環境向けの保険 --- */
+@supports not (writing-mode: vertical-rl) {
+  .vert .q-stem, .vert .ex-k, .vert .p-lines .p-line { writing-mode: horizontal-tb; }
+  .vert .kt-stage, .vert .ok-stage { flex-flow: row wrap; }
+}
+
+/* スマホ横は「横長 2 カラム」の指定と両方に当たるので、打ち消せるよう末尾に置く。
+   セレクタの詳細度を揃えたうえで、後ろに書いて勝たせている。 */
+@media (orientation: landscape) and (max-height: 560px) {
+  .vert .q-stem,
+  .vert .q-card.two .q-stem { --cap: min(34vh, 165px); }
+  .q-card.two .q-aside { max-width: 42%; padding-inline-start: 16px; }
+  .vert .p-lines .p-line { font-size: 17px; }
+}
+
+/* --- スマホ縦：モードカードを横並びにして一覧性を上げる --- */
+@media (max-width: 539px) {
+  .mode {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 13px; padding: 13px 14px;
+  }
+  .mode .m-ico { grid-row: 1 / span 3; align-self: start; margin-top: 1px; }
+  .mode .m-t { margin-top: 0; padding-inline-end: 52px; }
+  .mode .m-d { margin-top: 2px; }
+  .mode .m-prog { margin-top: 4px; }
+  .mode::after { width: 66px; height: 66px; inset: auto -24px -24px auto; }
+  .mode .m-tag { top: 13px; right: 13px; }
+  .modes { gap: 9px; }
+}
