@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = ['kuho', 'mondai', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons'];
+const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes'];
 const CODE = ['store', 'quizgen'];
 
 const sandbox = { window: {}, localStorage: null, console };
@@ -148,6 +148,45 @@ W.KANJI.forEach((k) => {
   if (!k.yomi || !k.yomi.length) err(`KANJI ${k.c}: 読みが空`);
   if (!k.mean) err(`KANJI ${k.c}: 意味が空`);
 });
+
+/* ---------- 書き下し問題の誤答（手書き） ---------- */
+sec(`書き下しの誤答 (${Object.keys(W.MISYOMI).length} 句形)`);
+{
+  const byId = {};
+  W.KUHO.forEach((k) => { byId[k.id] = k; });
+  Object.keys(W.MISYOMI).forEach((id) => {
+    const k = byId[id];
+    const w = W.MISYOMI[id];
+    if (!k) return err(`MISYOMI: 未知の句形 id ${id}`);
+    if (!k.ex || !k.ex[0] || !k.ex[0].y) return err(`MISYOMI ${id}: 対応する例文がない`);
+    if (w.length !== 3) err(`MISYOMI ${id}: 誤答が 3 つでない (${w.length})`);
+    if (new Set(w).size !== w.length) err(`MISYOMI ${id}: 誤答が重複`);
+    if (w.indexOf(k.ex[0].y) !== -1) err(`MISYOMI ${id}: 誤答の中に正解が混じっている`);
+    w.forEach((v) => { if (!/[。]$/.test(v)) warn(`MISYOMI ${id}: 誤答が句点で終わっていない「${v}」`); });
+  });
+  const covered = W.KUHO.filter((k) => W.MISYOMI[k.id]).length;
+  console.log(`  書き下し問題を出せる句形: ${covered} / ${W.KUHO.length}`);
+}
+
+/* ---------- 道場破りの関門 ---------- */
+sec(`関門 (${W.FOES.length} 体)`);
+uniq(W.FOES, 'FOES');
+{
+  const allCats = new Set();
+  W.KUHO.forEach((k) => allCats.add(k.cat));
+  W.MONDAI.forEach((m) => allCats.add(m.cat));
+  allCats.add('漢詩'); allCats.add('故事成語');
+  W.FOES.forEach((f) => {
+    ['glyph', 'name', 'kana', 'src', 'quote', 'qyomi', 'taunt', 'beaten'].forEach((k) => {
+      if (!f[k]) err(`FOES ${f.id}: ${k} が空`);
+    });
+    if (!(f.ki >= 3 && f.ki <= 8)) err(`FOES ${f.id}: ki が不正 (${f.ki})`);
+    if ([...f.glyph].length !== 1) err(`FOES ${f.id}: glyph は一字にする`);
+    if (f.cats) {
+      f.cats.forEach((c) => { if (!allCats.has(c)) err(`FOES ${f.id}: 存在しない分野「${c}」`); });
+    }
+  });
+}
 
 /* ---------- 講座 ---------- */
 sec(`講座 (${W.LESSONS.length} 章)`);

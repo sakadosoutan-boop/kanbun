@@ -24,8 +24,9 @@
     return uni ? inter / uni >= 0.8 : false;
   }
 
-  /** correct を含む 4 択を作る。誤答が正解と紛らわしすぎる場合はその問題を捨てる */
-  function makeChoices(correct, pool, n) {
+  /** correct を含む 4 択を作る。誤答が正解と紛らわしすぎる場合はその問題を捨てる。
+   *  allowSimilar を立てると類似判定を外す（文末だけを変えた「一字違い」の誤答を使うとき）。 */
+  function makeChoices(correct, pool, n, allowSimilar) {
     n = n || 4;
     var seen = {}; seen[correct] = 1;
     var wrong = [];
@@ -33,9 +34,11 @@
     for (var i = 0; i < cand.length && wrong.length < n - 1; i++) {
       var c = cand[i];
       if (!c || seen[c]) continue;
-      if (tooSimilar(c, correct)) continue;
+      if (!allowSimilar && tooSimilar(c, correct)) continue;
       var dup = false;
-      for (var j = 0; j < wrong.length; j++) if (tooSimilar(c, wrong[j])) dup = true;
+      if (!allowSimilar) {
+        for (var j = 0; j < wrong.length; j++) if (tooSimilar(c, wrong[j])) dup = true;
+      }
       if (dup) continue;
       seen[c] = 1; wrong.push(c);
     }
@@ -78,19 +81,14 @@
         choices: c2.choices, a: c2.a, exp: k.note || (k.form + '＝' + k.mean)
       });
 
-      if (k.ex && k.ex.length && k.ex[0].y) {
+      // 書き下し問題は、手書きの誤答（MISYOMI）を用意した句形だけ出題する。
+      // 自動生成した誤答は活用が崩れて明らかな誤りになり、消去法で解けてしまうため。
+      var mis = (window.MISYOMI || {})[k.id];
+      if (k.ex && k.ex.length && k.ex[0].y && mis && mis.length >= 3) {
         var exY = k.ex[0].y;
-        // 誤答はできるだけ同じ分類の例文から取る（無関係な文だと消去法で解けてしまう）
-        function collect(from) {
-          var o = [];
-          from.forEach(function (x) {
-            if (x.id !== k.id && x.ex && x.ex.length && x.ex[0].y) o.push(x.ex[0].y);
-          });
-          return o;
-        }
-        var near = collect(sameCat);
-        var others = near.length >= 3 ? near : near.concat(collect(all));
-        var c3 = makeChoices(exY, others);
+        // 他の文の正解と一致していてもよい（この文の読みとしては誤りだから）
+        var ok = mis.filter(function (w) { return w !== exY; });
+        var c3 = ok.length >= 3 ? makeChoices(exY, ok, 4, true) : null;
         if (c3) out.push({
           key: k.id + ':ex', cat: k.cat, level: Math.min(3, k.level + 1),
           stem: k.ex[0].k, q: '書き下し文として正しいものはどれか。',
@@ -197,11 +195,12 @@
         stem: k.word, q: 'この故事成語の意味として最も適当なものはどれか。',
         choices: c1.choices, a: c1.a, exp: '【出典】' + k.src + '　' + k.story
       });
-      var c2 = makeChoices(k.src, fieldPool(all.filter(function (x) { return x.id !== k.id; }), 'src'));
+      // 意味から語を選ぶ（逆引き）。出典を問う設問は入試での比重が低いので置かない。
+      var c2 = makeChoices(k.word, fieldPool(all.filter(function (x) { return x.id !== k.id; }), 'word'));
       if (c2) out.push({
-        key: k.id + ':src', cat: '故事成語', level: 2,
-        stem: k.word, q: 'この故事成語の出典はどれか。',
-        choices: c2.choices, a: c2.a, exp: '【' + k.word + '】' + k.mean + '　' + k.story
+        key: k.id + ':rev', cat: '故事成語', level: 2,
+        stem: '', q: '「' + k.mean + '」という意味の故事成語はどれか。',
+        choices: c2.choices, a: c2.a, exp: '【' + k.word + '（' + k.yomi + '）】出典は' + k.src + '。' + k.story
       });
     });
     return out;
@@ -224,12 +223,20 @@
         exp: '一句' + (p.form.indexOf('五') === 0 ? '五' : '七') + '字×' + p.lines.length + '句なので' + p.form + '。' + p.note
       });
 
-      var ca = makeChoices(p.author, fieldPool(all.filter(function (x) { return x.author !== p.author; }), 'author'));
-      if (ca) out.push({
-        key: p.id + ':author', cat: '漢詩', level: 2,
-        stem: '「' + p.title + '」', q: 'この漢詩の作者は誰か。',
-        choices: ca.choices, a: ca.a, exp: p.author + '「' + p.title + '」（' + p.era + '）　' + p.trans
-      });
+      // 作者を問う設問は置かず、押韻の原則を詩ごとに確認させる
+      if (p.regular) {
+        var five = p.form.indexOf('五') === 0;
+        var ansR = five ? '偶数句末' : '第一句末と偶数句末';
+        var cw = makeChoices(ansR, ['偶数句末', '奇数句末', '第一句末と偶数句末', 'すべての句末']
+          .filter(function (v) { return v !== ansR; }));
+        if (cw) out.push({
+          key: p.id + ':rule', cat: '漢詩', level: 1,
+          stem: body, q: 'この形式の詩は、原則としてどこで押韻するか。',
+          src: p.author + '「' + p.title + '」（' + p.form + '）',
+          choices: cw.choices, a: cw.a,
+          exp: '五言詩は偶数句末、七言詩は第一句末と偶数句末で押韻するのが原則。この詩の押韻は「' + p.rhyme.join('・') + '」。'
+        });
+      }
 
       if (p.regular) {
         var ans = p.rhyme.join('・');

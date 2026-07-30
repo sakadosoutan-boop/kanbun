@@ -15,6 +15,7 @@
     plays: {},         // modeId -> 回数
     srs: {},           // questionKey -> { w:誤答数, r:正答数, t:最終学習(ms) }
     ach: [],           // 取得済み実績 id
+    foesCleared: [],   // 道場破りで突破した関門の id
     theme: '',         // '', 'light', 'dark'
     vertical: true     // 漢文本文を縦書きで表示する
   };
@@ -42,8 +43,9 @@
     { id: 'a6',  ico: '全', t: '全問正解',   d: 'いずれかのモードを全問正解',     test: function (s) { return !!s._perfect; } },
     { id: 'a7',  ico: '連', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
     { id: 'a8',  ico: '詩', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
-    { id: 'a9',  ico: '句', t: '句法通',     d: '句法クイズを5回プレイ',          test: function (s) { return (s.plays.kuho || 0) >= 5; } },
-    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
+    { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
+    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '道場破りで全ての関門を突破',      test: function (s) { return (s.foesCleared || []).length >= (window.FOES || []).length && (window.FOES || []).length > 0; } },
+    { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
   ];
 
   var state = null;
@@ -156,7 +158,7 @@
 
   function reset() {
     state = Object.assign({}, DEFAULT, { theme: state.theme, vertical: state.vertical });
-    state.best = {}; state.plays = {}; state.srs = {}; state.ach = [];
+    state.best = {}; state.plays = {}; state.srs = {}; state.ach = []; state.foesCleared = [];
     save();
   }
 

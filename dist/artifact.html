@@ -593,6 +593,62 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   .modes { gap: 9px; }
 }
 
+/* ============================================================
+   確認ダイアログ（埋め込み表示では confirm が使えないため自前で出す）
+   ============================================================ */
+.ovl {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  padding: 20px; background: color-mix(in srgb, var(--ink) 42%, transparent);
+  backdrop-filter: blur(3px); animation: fade .18s ease-out;
+}
+.dlg {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); padding: 22px; max-width: 400px; width: 100%;
+  animation: pop .22s cubic-bezier(.2,.8,.2,1);
+}
+.dlg p { margin: 0; font-size: 15px; line-height: 1.8; }
+
+/* ============================================================
+   道場破り
+   ============================================================ */
+.foe-card { text-align: center; display: grid; gap: 10px; justify-items: center; }
+.foe-glyph {
+  width: 42px; height: 42px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--mincho); font-size: 21px; line-height: 1; color: #fff;
+  background: linear-gradient(150deg, var(--shu), color-mix(in srgb, var(--shu) 55%, #4a1410));
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,.22), 0 2px 10px color-mix(in srgb, var(--shu) 34%, transparent);
+}
+.foe-glyph.big { width: 78px; height: 78px; font-size: 38px; }
+.foe-glyph.beaten { filter: grayscale(.75); opacity: .8; }
+.foe-name { font-family: var(--mincho); font-size: 22px; letter-spacing: .07em; line-height: 1.4; }
+.foe-name small { display: block; font-family: var(--gothic); font-size: 11px; letter-spacing: .12em; color: var(--ink-3); }
+.foe-taunt {
+  margin: 4px 0 0; font-size: 14px; color: var(--ink-2); line-height: 1.9;
+  max-width: 34em; text-align: left;
+  border-inline-start: 3px solid var(--shu-soft); padding-inline-start: 13px;
+}
+.gate-clear { font-family: var(--mincho); font-size: clamp(24px, 6vw, 32px); letter-spacing: .1em; color: var(--shu); margin-top: 8px; }
+
+/* 対戦中の HUD */
+.foe-mini { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.foe-mini b { font-family: var(--mincho); font-size: 13.5px; letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ki { display: block; height: 7px; border-radius: 99px; background: var(--paper-2); border: 1px solid var(--line); overflow: hidden; }
+.ki > i {
+  display: block; height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--shu) 70%, #000), var(--shu));
+  transition: width .45s cubic-bezier(.2,.8,.2,1);
+}
+.ki.low > i { background: linear-gradient(90deg, var(--kin), var(--shu)); }
+
+/* ============================================================
+   返り点ルートの縦組みを一本の列として見せる
+   ============================================================ */
+.vert .kt-stage { gap: 3px 14px; }
+.vert .kt-char { width: 58px; height: 58px; border-radius: 8px; }
+.vert .kt-char .ord { top: 50%; right: -9px; transform: translateY(-50%); }
+.vert .kt-char .mk { left: 3px; bottom: 1px; }
+.kt-hint { text-align: center; font-size: 11.5px; color: var(--ink-3); letter-spacing: .1em; }
+
 </style>
 <header class="topbar">
   <div class="topbar-in">
@@ -655,8 +711,8 @@ window.KUHO = [
     bare: '当', second: 'べし', katsu: '終止形', form: '当ニ〜（終止形）ベシ', read: 'まさニ〜べし', mean: '当然〜すべきだ／〜するのが当然だ',
     note: '義務・当然。「應（応）」が推量寄りなのに対し「当」は義務寄り。',
     ex: [
-      { k: '当仁不譲於師。', y: '仁に当たりては師にも譲らず。', t: '仁を行うにあたっては師にも遠慮しない。', s: '論語・衛霊公' },
-      { k: '人当勉学。', y: '人当に勉学すべし。', t: '人は当然学問に励むべきだ。', s: '' }
+      { k: '人当勉学。', y: '人当に勉学すべし。', t: '人は当然学問に励むべきだ。', s: '' },
+      { k: '当仁不譲於師。', y: '仁に当たりては師にも譲らず。', t: '仁を行うにあたっては師にも遠慮しない。', s: '論語・衛霊公' }
     ]
   },
   {
@@ -1583,6 +1639,207 @@ window.MONDAI = [
 
 </script>
 <script>
+/* 書き下し問題の誤答（手書き）
+ * KUHO の id → その ex[0] に対する誤答 3 つ。
+ * 自動生成では活用が崩れて「知らべし」のような明らかな誤りになり、
+ * かえって消去法で解けてしまうため、句法だけを取り違えた形を人手で書いている。
+ * ここに登録のない句形では書き下し問題を出さない（読み・意味の問題は出る）。
+ */
+window.MISYOMI = {
+  /* --- 再読文字 --- */
+  sd01: ['未だ生を知るべし、焉くんぞ死を知らん。', '未だ生を知らず、焉くんぞ死を知らず。', '未だ生を知らず、焉くんぞ死を知るべし。'],
+  sd02: ['日将に暮るべし。', '日将に暮れず。', '日将に暮れんや。'],
+  sd03: ['城且に抜かるべし。', '城且に抜かれず。', '城且に抜かれんや。'],
+  sd04: ['人当に勉学せんとす。', '人当に勉学せず。', '人当に勉学するがごとし。'],
+  sd05: ['応に故郷の事を知らんとす。', '応に故郷の事を知らず。', '応に故郷の事を知るべからず。'],
+  sd06: ['宜しく以て我に教ふること有らんとす。', '宜しく以て我に教ふること有らず。', '宜しく以て我に教ふること有るべからず。'],
+  sd07: ['須らく少年の時を惜しまんとす。', '須らく少年の時を惜しまず。', '須らく少年の時を惜しむべからず。'],
+  sd08: ['過ぎたるは猶ほ及ばざるなり。', '過ぎたるは猶ほ及ばず。', '過ぎたるは猶ほ及ばんとす。'],
+  sd09: ['民の仁に帰するや、猶ほ水の下きに就くなり。', '民の仁に帰するや、猶ほ水の下きに就くべし。', '民の仁に帰するや、猶ほ水の下きに就かんとす。'],
+  sd10: ['盍ぞ各々爾の志を言はず。', '盍ぞ各々爾の志を言はんや。', '蓋し各々爾の志を言ふ。'],
+
+  /* --- 否定・禁止 --- */
+  hi01: ['学びて思はざれば則ち罔からず。', '学びて思へば則ち罔し。', '学びて思はざれば則ち罔きか。'],
+  hi02: ['是れ君子の道に非ざるべし。', '是れ君子の道無し。', '是れ君子の道なり。'],
+  hi03: ['国に盗賊無かれ。', '国に盗賊有り。', '国に盗賊無からず。'],
+  hi04: ['得て聞くべきなり。', '得て聞かざるなり。', '得て聞くべからずや。'],
+  hi05: ['自ら已むこと能ふ。', '自ら已むことを得ず。', '自ら已むこと勿かれ。'],
+  hi06: ['虎穴に入らずんば、虎子を得べし。', '虎穴に入れば、虎子を得ず。', '虎穴に入らずんば、虎子を得んや。'],
+  kn01: ['己の欲せざる所、人に施すこと勿し。', '己の欲せざる所、人に施すこと能はず。', '己の欲する所、人に施すこと勿かれ。'],
+
+  /* --- 二重否定 --- */
+  nj01: ['善しと称せざるは無かれ。', '善しと称するは無し。', '善しと称せざるべからず。'],
+  nj02: ['飲食するは莫きなり。', '飲食せざるは莫かれ。', '飲食せざるべからざるなり。'],
+  nj03: ['事に非ざる者無かれ。', '事なる者無し。', '事に非ざる者有り。'],
+  nj04: ['子の道を説ばざるに非ざるべし。', '子の道を説ばざるなり。', '子の道を説ぶに非ず。'],
+  nj05: ['未だ嘗て嘆息痛恨せざるなり。', '未だ嘗て嘆息痛恨せずんばあらんや。', '嘗て嘆息痛恨せずんばあらざるなり。'],
+  nj06: ['学は以て已むべし。', '学は以て已まず。', '学は以て已むべからずや。'],
+  nj07: ['去るを得ず。', '去らざるべからず。', '去らざるを得んや。'],
+  nj08: ['敢へて告げざるなり。', '敢へて告げずんばあらんや。', '敢へて告ぐるなり。'],
+  nj09: ['事として成るは無し。', '事として成らざるは無かれ。', '事として成らざるべからず。'],
+  nj10: ['其の人に非ざれば伝ふ。', '其の人なれば伝へず。', '其の人に非ざるも伝へず。'],
+
+  /* --- 部分否定・全部否定 --- */
+  bb01: ['弟子必ず師に如かずんばあらず。', '弟子必ずしも師に如かず。', '弟子必ずしも師に如くは莫し。'],
+  bb02: ['必ずしも然らず。', '必ず然り。', '必ず然らんや。'],
+  bb03: ['千里の馬は常に有れども、伯楽は常に有らず。', '千里の馬は常には有れども、伯楽は常に有り。', '千里の馬は常に有れども、伯楽は常に有らんや。'],
+  bb04: ['常には酒を飲まず。', '常に酒を飲む。', '常に酒を飲まんや。'],
+  bb05: ['倶に生きず。', '倶には生く。', '倶には生きんや。'],
+  bb06: ['甚だしく寒からず。', '甚だしくは寒し。', '甚だしくは寒からんや。'],
+  bb07: ['復た見ゆ。', '復た見えんや。', '復たは見えず。'],
+  bb08: ['尽くは書を信ずれば、則ち書無きに如かず。', '尽く書を信ずれば、則ち書無きに如し。', '尽く書を信ぜざれば、則ち書無きに如かず。'],
+
+  /* --- 疑問 --- */
+  gm01: ['朋遠方より来たる有り、豈に楽しからずや。', '朋遠方より来たる有り、亦た楽しからんや。', '朋遠方より来たる有り、亦た楽しからず。'],
+  gm02: ['何ぞ去らざらんや。', '何ぞ去らんや。', '安くんぞ去らざるや。'],
+  gm03: ['燕雀安くんぞ鴻鵠の志を知るや。', '燕雀何ぞ鴻鵠の志を知らんや。', '燕雀安くにか鴻鵠の志を知らんや。'],
+  gm04: ['何ぞ去らざるや。', '何為れぞ去らざらんや。', '何を為して去らざるや。'],
+  gm05: ['誰か能く之を為すや。', '孰れか能く之を為さん。', '誰も能く之を為さん。'],
+  gm06: ['何れの日か是れ帰年なるや。', '何ぞ日は是れ帰年ならん。', '何れの日も是れ帰年ならん。'],
+  gm07: ['人生幾ばくもなし。', '人生幾ばくならんや。', '人生幾つぞ。'],
+  gm08: ['子の矛を以て、子の盾を陥さば、如何せん。', '子の矛を以て、子の盾を陥さば、何すれぞ。', '子の矛を以て、子の盾を陥さんや。'],
+
+  /* --- 反語 --- */
+  hg01: ['王侯将相寧ろ種有らんや。', '王侯将相寧くんぞ種有るや。', '王侯将相寧くんぞ種有らず。'],
+  hg02: ['何ぞ必ず利と曰はん。', '何ぞ必ずしも利と曰はず。', '何ぞ必ずしも利と曰ふや。'],
+  hg04: ['誰か能く出づるに戸に由らざるや。', '誰か能く出づるに戸に由らん。', '孰れか能く出づるに戸に由らざらん。'],
+  hg05: ['相如駑なりと雖も、独り廉将軍を畏るるや。', '相如駑なりと雖も、唯だ廉将軍を畏れんや。', '相如駑ならば、独り廉将軍を畏れんや。'],
+
+  /* --- 使役・受身 --- */
+  si01: ['天帝我をして百獣に長たらる。', '天帝我に百獣の長たらしむ。', '天帝我をして百獣に長たらんとす。'],
+  si02: ['人をして之を望まる。', '人之を望む。', '人をして之を望むべし。'],
+  si03: ['使者を遣はして之に告げらる。', '使者之に告げしむ。', '使者を遣はして之に告ぐ。'],
+  si04: ['子路に命じて之を問はる。', '子路之を問ふ。', '子路に命ぜられて之を問ふ。'],
+  uk01: ['信にして疑はしめ、忠にして謗らしむ。', '信にして疑ひ、忠にして謗る。', '信にして疑はるべく、忠にして謗るべし。'],
+  uk03: ['先んずれば即ち人を制し、後るれば則ち人の制する所と為す。', '先んずれば即ち人に制せられ、後るれば則ち人を制す。', '先んずれば即ち人を制し、後るれば則ち人を制するを得。'],
+  uk04: ['力を労する者は人を治む。', '力を労する者は人をして治めしむ。', '力を労する者は人より治まる。'],
+
+  /* --- 比較・選択 --- */
+  hk01: ['百聞は一見に如し。', '百聞は一見に如かんや。', '百聞は一見に如くは莫し。'],
+  hk02: ['子を知るは父に若かず。', '子を知るは父に若くは莫かれ。', '子を知るは父に若くこと有り。'],
+  hk03: ['青は之を藍に取りて、藍にも青し。', '青は之を藍より取りて、藍よりも青からず。', '青は之を藍より取るも、藍には青からず。'],
+  hk04: ['過ち焉くんぞ大ならんや。', '過ち焉より大なるは莫かれ。', '過ち焉より大なること有り。'],
+  sn01: ['其の奢らんよりは、寧くんぞ倹せんや。', '其の奢るよりは、寧ろ倹す。', '其の奢らんよりは、寧ろ倹するに如かず。'],
+
+  /* --- 仮定 --- */
+  kt01: ['如し王者有らば、必ず世にして後に仁ならず。', '如し王者有らんとすれば、必ず世にして後に仁ならん。', '王者有るがごとし、必ず世にして後に仁ならん。'],
+  kt02: ['苟くも仁に志せば、悪しきこと無かれ。', '縦ひ仁に志すとも、悪しきこと無きなり。', '苟くも仁に志せば、悪しきこと有るなり。'],
+  kt04: ['嘉肴有りと雖も、食らへば其の旨きを知らざるなり。', '嘉肴有りと雖も、食らはずんば其の旨きを知るなり。', '嘉肴有らば、食らはずんば其の旨きを知らざるなり。'],
+  kt05: ['天下をして農夫無からしむれば、挙世皆餓死せん。', '使し天下に農夫無からしめば、挙世皆餓死せず。', '使し天下に農夫無からしめば、挙世皆餓死せんや。'],
+  kt06: ['管仲微かなれば、吾其れ髪を被り衽を左にせん。', '管仲微かりせば、吾其れ髪を被り衽を左にせず。', '管仲微かりせば、吾其れ髪を被り衽を左にせんや。'],
+
+  /* --- 限定・累加・抑揚 --- */
+  gt01: ['但だ人語の響くを聞く。', '唯だ人語の響くを聞くのみならず。', '但だ人語の響くを聞かんや。'],
+  gt02: ['直だ百歩ならざるなり、是も亦た走るなり。', '直だ百歩ならざるのみならず、是も亦た走るなり。', '直だ百歩ならんや、是も亦た走るなり。'],
+  ru01: ['独り賢者のみ是の心有るなり。', '独り賢者のみ是の心有るに非ざらんや。', '唯だ賢者のみ是の心有るのみ。'],
+  ru02: ['豈に唯だに民のみならず。', '唯だ民のみならんや。', '豈に唯だに民のみなるや。'],
+  yy01: ['死馬は且つ之を買ふ、況んや生ける者をや。', '死馬すら且つ之を買ふ、況んや生ける者ならんや。', '死馬すら且つ之を買はんや、況んや生ける者をや。'],
+  yy02: ['臣は猶ほ欺かず、況んや大国をや。', '臣すら猶ほ欺かざるがごとし、況んや大国をや。', '臣すら猶ほ欺かず、況んや大国ならんや。'],
+
+  /* --- 詠嘆・願望 --- */
+  et01: ['学びて時に之を習ふ、豈に説ばしからずや。', '学びて時に之を習ふ、亦た説ばしからんや。', '学びて時に之を習ふ、亦た説ばしからず。'],
+  et02: ['豈に痛ましからんや。', '亦た痛ましからずや。', '豈に痛ましきや。'],
+  et03: ['何ぞ其れ久しからんや。', '何ぞ久しきや。', '何すれぞ其れ久しきや。'],
+  et05: ['賢なるや回や。', '賢ならんや回や。', '賢なるかな回か。'],
+  gn01: ['願はくは其の詳らかなるを聞け。', '請ふ其の詳らかなるを聞かん。', '願はくは其の詳らかなるを聞かんや。'],
+  gn02: ['請ふ隗より始めん。', '願はくは隗より始めよ。', '請ふ隗より始むべし。'],
+  gn03: ['渾べて簪に勝へざるを欲す。', '渾べて簪に勝へずと欲す。', '渾べて簪に勝へざらんとす。'],
+  gn04: ['庶幾はくは過ち無かれ。', '願はくは過ち無からん。', '庶幾はくは過ち無きや。'],
+
+  /* --- 重要語 --- */
+  jy02: ['是に於いて君子は庖厨を遠ざくるなり。', '是を以て君子は庖厨を遠ざくるべし。', '是を以て君子は庖厨を遠ざけざるなり。'],
+  jy03: ['是を以て項王乃ち悲歌慷慨す。', '是に於いて項王乃ち悲歌慷慨せんとす。', '是に於いて項王即ち悲歌慷慨するなり。'],
+  jy04: ['以て神と為る。', '神を以て為す。', '以て神ならんとす。'],
+  jy05: ['然りと雖も何れの時にして楽しまんや。', '然らば則ち何れの時にして楽しむや。', '然らば則ち何ぞ時にして楽しまんや。'],
+  jy06: ['然らば則ち、猶ほ未だしき有り。', '然りと雖も、猶ほ未だしき無し。', '然りと雖も、猶ほ未だしきがごとし。'],
+  jy07: ['此れ所以の朝廷に戦ひ勝つなり。', '此れ所謂朝廷に戦ひ勝たざるなり。', '此れ所謂朝廷に戦ひ勝つべし。'],
+  jy08: ['蓋ぞ之有らざる、我未だ之を見ざるなり。', '蓋し之有り、我未だ之を見ざるなり。', '蓋し之有らんや、我未だ之を見ざるなり。'],
+  jy09: ['未だ幾ばくならずして卒す。', '幾ばくもなくして卒せず。', '未だ幾ばくもなくして卒せんとす。'],
+  jy10: ['既にして雨止む。', '俄にして雨止まず。', '俄にして雨止まんとす。'],
+  jy11: ['少焉くして、月東山の上に出でず。', '俄にして、月東山の上に出づ。', '少焉くして、月東山の上に出でんとす。'],
+  jy12: ['故きを温めて新しきを知れば、以て師と為さん。', '故きを温めて新しきを知れば、以て師と為るに足る。', '故きを温めて新しきを知れば、以て師と為るべからず。'],
+  jy13: ['是の心以て王たるべし。', '是の心以て王たるに足らず。', '是の心以て王たらんとす。'],
+  jy14: ['楚の水土民をして盗みを善くせしむること無し。', '楚の水土民をして盗みを善くせしむること有らんや。', '楚の水土民に盗みを善くせしめらるること無からんや。'],
+  jy15: ['朋友を与へて交はりて信ならざるか。', '朋友と交はりて信ならざらんや。', '朋友と共に交はりて信なるか。']
+};
+
+</script>
+<script>
+/* 道場破り：関門の相手
+ * 漢文の故事・詩に登場する人物や生き物。順に難易度が上がる。
+ * ki    : 突破に必要な正解数（相手の「気」）
+ * cats  : 出題する分野（KUHO の cat と MONDAI の cat の両方の表記を含める）
+ * quote : 相手が名乗る一句（すべて原典からの引用）
+ */
+window.FOES = [
+  {
+    id: 'f1', glyph: '蛙', name: '井の中の蛙', kana: 'いのなかのかわず',
+    src: '荘子・秋水', ki: 3, level: 1,
+    cats: ['訓読', '否定', '禁止'],
+    quote: '井蛙不可以語於海', qyomi: '井蛙は以て海を語るべからず。',
+    taunt: 'この井戸のほかに、いったい何があるというのだ。まずは訓読と否定、基本の型で相手をしてやろう。',
+    beaten: '……海とは、そんなに広いものだったのか。行くがよい。'
+  },
+  {
+    id: 'f2', glyph: '雀', name: '燕雀', kana: 'えんじゃく',
+    src: '史記・陳渉世家', ki: 4, level: 1,
+    cats: ['疑問', '反語', '疑問反語'],
+    quote: '燕雀安知鴻鵠之志哉', qyomi: '燕雀安くんぞ鴻鵠の志を知らんや。',
+    taunt: 'どうして小雀に大鳥の志が分かろうか——さて、その「どうして」は疑問か、反語か。',
+    beaten: '文末の「ンヤ」を見抜かれたか。志ある者よ、先へ進め。'
+  },
+  {
+    id: 'f3', glyph: '兎', name: '守株の農夫', kana: 'しゅしゅののうふ',
+    src: '韓非子・五蠹', ki: 4, level: 2,
+    cats: ['再読文字'],
+    quote: '因釈其耒而守株', qyomi: '因りて其の耒を釈きて株を守る。',
+    taunt: 'わしは待つ。ひたすら待つ。「未だ」「将に」「当に」——待つ者の言葉なら、わしに聞け。',
+    beaten: '二度読む字を、二度とも読み分けたか。……鍬を取り直すとしよう。'
+  },
+  {
+    id: 'f4', glyph: '矛', name: '矛盾の商人', kana: 'むじゅんのしょうにん',
+    src: '韓非子・難一', ki: 5, level: 2,
+    cats: ['二重否定', '部分否定'],
+    quote: '以子之矛陥子之盾、何如', qyomi: '子の矛を以て子の盾を陥さば、何如。',
+    taunt: '通さぬ盾と、通す矛。二つ重ねた否定のからくりを、解いてみせろ。',
+    beaten: 'つじつまが合わぬのは、わしの口上だけであったか。'
+  },
+  {
+    id: 'f5', glyph: '狐', name: '虎の威を借る狐', kana: 'とらのいをかるきつね',
+    src: '戦国策・楚策', ki: 5, level: 2,
+    cats: ['使役', '受身'],
+    quote: '天帝使我長百獣', qyomi: '天帝我をして百獣に長たらしむ。',
+    taunt: '「しむ」か「らる」か。させるのか、されるのか。取り違えれば、虎の餌だ。',
+    beaten: '威を借りていたのは、こちらだったな。'
+  },
+  {
+    id: 'f6', glyph: '蝶', name: '胡蝶', kana: 'こちょう',
+    src: '荘子・斉物論', ki: 5, level: 3,
+    cats: ['限定', '累加', '抑揚', '詠嘆', '願望'],
+    quote: '不知周之夢為胡蝶与', qyomi: '周の夢に胡蝶と為るかを知らず。',
+    taunt: 'ただ夢か、夢だけではないのか。「たダ〜ノミ」「いはンヤ〜ヲヤ」——境目を見極めよ。',
+    beaten: 'ゆめか、まことか。……いずれにせよ、みごと。'
+  },
+  {
+    id: 'f7', glyph: '李', name: '李白', kana: 'りはく',
+    src: '詩仙', ki: 5, level: 3,
+    cats: ['漢詩', '比較', '選択'],
+    quote: '挙頭望明月、低頭思故郷', qyomi: '頭を挙げて明月を望み、頭を低れて故郷を思ふ。',
+    taunt: '酒を一杯。……そのあいだに、絶句と律詩の見分けくらいはつくだろうな。',
+    beaten: '押韻も対句も押さえたか。よい耳をしている。'
+  },
+  {
+    id: 'f8', glyph: '孔', name: '孔子', kana: 'こうし',
+    src: '論語', ki: 6, level: 3,
+    cats: null,   // null = 全分野
+    quote: '温故而知新、可以為師矣', qyomi: '故きを温めて新しきを知れば、以て師と為るべし。',
+    taunt: '学びて時に之を習う。さて——ここまで温めてきたものを、問おう。',
+    beaten: '過ちて改めざる、是を過ちと謂う。おまえは、よく改めた。免許皆伝である。'
+  }
+];
+
+</script>
+<script>
 /* 返り点パズル
  * chars : [{ c:漢字, m:返り点（'' なし / 'レ' / '一'…） }]
  * order : 読む順（chars のインデックスを読む順に並べたもの）
@@ -2163,6 +2420,7 @@ window.LESSONS = [
     plays: {},         // modeId -> 回数
     srs: {},           // questionKey -> { w:誤答数, r:正答数, t:最終学習(ms) }
     ach: [],           // 取得済み実績 id
+    foesCleared: [],   // 道場破りで突破した関門の id
     theme: '',         // '', 'light', 'dark'
     vertical: true     // 漢文本文を縦書きで表示する
   };
@@ -2190,8 +2448,9 @@ window.LESSONS = [
     { id: 'a6',  ico: '全', t: '全問正解',   d: 'いずれかのモードを全問正解',     test: function (s) { return !!s._perfect; } },
     { id: 'a7',  ico: '連', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
     { id: 'a8',  ico: '詩', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
-    { id: 'a9',  ico: '句', t: '句法通',     d: '句法クイズを5回プレイ',          test: function (s) { return (s.plays.kuho || 0) >= 5; } },
-    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
+    { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
+    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '道場破りで全ての関門を突破',      test: function (s) { return (s.foesCleared || []).length >= (window.FOES || []).length && (window.FOES || []).length > 0; } },
+    { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
   ];
 
   var state = null;
@@ -2304,7 +2563,7 @@ window.LESSONS = [
 
   function reset() {
     state = Object.assign({}, DEFAULT, { theme: state.theme, vertical: state.vertical });
-    state.best = {}; state.plays = {}; state.srs = {}; state.ach = [];
+    state.best = {}; state.plays = {}; state.srs = {}; state.ach = []; state.foesCleared = [];
     save();
   }
 
@@ -2345,8 +2604,9 @@ window.LESSONS = [
     return uni ? inter / uni >= 0.8 : false;
   }
 
-  /** correct を含む 4 択を作る。誤答が正解と紛らわしすぎる場合はその問題を捨てる */
-  function makeChoices(correct, pool, n) {
+  /** correct を含む 4 択を作る。誤答が正解と紛らわしすぎる場合はその問題を捨てる。
+   *  allowSimilar を立てると類似判定を外す（文末だけを変えた「一字違い」の誤答を使うとき）。 */
+  function makeChoices(correct, pool, n, allowSimilar) {
     n = n || 4;
     var seen = {}; seen[correct] = 1;
     var wrong = [];
@@ -2354,9 +2614,11 @@ window.LESSONS = [
     for (var i = 0; i < cand.length && wrong.length < n - 1; i++) {
       var c = cand[i];
       if (!c || seen[c]) continue;
-      if (tooSimilar(c, correct)) continue;
+      if (!allowSimilar && tooSimilar(c, correct)) continue;
       var dup = false;
-      for (var j = 0; j < wrong.length; j++) if (tooSimilar(c, wrong[j])) dup = true;
+      if (!allowSimilar) {
+        for (var j = 0; j < wrong.length; j++) if (tooSimilar(c, wrong[j])) dup = true;
+      }
       if (dup) continue;
       seen[c] = 1; wrong.push(c);
     }
@@ -2399,19 +2661,14 @@ window.LESSONS = [
         choices: c2.choices, a: c2.a, exp: k.note || (k.form + '＝' + k.mean)
       });
 
-      if (k.ex && k.ex.length && k.ex[0].y) {
+      // 書き下し問題は、手書きの誤答（MISYOMI）を用意した句形だけ出題する。
+      // 自動生成した誤答は活用が崩れて明らかな誤りになり、消去法で解けてしまうため。
+      var mis = (window.MISYOMI || {})[k.id];
+      if (k.ex && k.ex.length && k.ex[0].y && mis && mis.length >= 3) {
         var exY = k.ex[0].y;
-        // 誤答はできるだけ同じ分類の例文から取る（無関係な文だと消去法で解けてしまう）
-        function collect(from) {
-          var o = [];
-          from.forEach(function (x) {
-            if (x.id !== k.id && x.ex && x.ex.length && x.ex[0].y) o.push(x.ex[0].y);
-          });
-          return o;
-        }
-        var near = collect(sameCat);
-        var others = near.length >= 3 ? near : near.concat(collect(all));
-        var c3 = makeChoices(exY, others);
+        // 他の文の正解と一致していてもよい（この文の読みとしては誤りだから）
+        var ok = mis.filter(function (w) { return w !== exY; });
+        var c3 = ok.length >= 3 ? makeChoices(exY, ok, 4, true) : null;
         if (c3) out.push({
           key: k.id + ':ex', cat: k.cat, level: Math.min(3, k.level + 1),
           stem: k.ex[0].k, q: '書き下し文として正しいものはどれか。',
@@ -2518,11 +2775,12 @@ window.LESSONS = [
         stem: k.word, q: 'この故事成語の意味として最も適当なものはどれか。',
         choices: c1.choices, a: c1.a, exp: '【出典】' + k.src + '　' + k.story
       });
-      var c2 = makeChoices(k.src, fieldPool(all.filter(function (x) { return x.id !== k.id; }), 'src'));
+      // 意味から語を選ぶ（逆引き）。出典を問う設問は入試での比重が低いので置かない。
+      var c2 = makeChoices(k.word, fieldPool(all.filter(function (x) { return x.id !== k.id; }), 'word'));
       if (c2) out.push({
-        key: k.id + ':src', cat: '故事成語', level: 2,
-        stem: k.word, q: 'この故事成語の出典はどれか。',
-        choices: c2.choices, a: c2.a, exp: '【' + k.word + '】' + k.mean + '　' + k.story
+        key: k.id + ':rev', cat: '故事成語', level: 2,
+        stem: '', q: '「' + k.mean + '」という意味の故事成語はどれか。',
+        choices: c2.choices, a: c2.a, exp: '【' + k.word + '（' + k.yomi + '）】出典は' + k.src + '。' + k.story
       });
     });
     return out;
@@ -2545,12 +2803,20 @@ window.LESSONS = [
         exp: '一句' + (p.form.indexOf('五') === 0 ? '五' : '七') + '字×' + p.lines.length + '句なので' + p.form + '。' + p.note
       });
 
-      var ca = makeChoices(p.author, fieldPool(all.filter(function (x) { return x.author !== p.author; }), 'author'));
-      if (ca) out.push({
-        key: p.id + ':author', cat: '漢詩', level: 2,
-        stem: '「' + p.title + '」', q: 'この漢詩の作者は誰か。',
-        choices: ca.choices, a: ca.a, exp: p.author + '「' + p.title + '」（' + p.era + '）　' + p.trans
-      });
+      // 作者を問う設問は置かず、押韻の原則を詩ごとに確認させる
+      if (p.regular) {
+        var five = p.form.indexOf('五') === 0;
+        var ansR = five ? '偶数句末' : '第一句末と偶数句末';
+        var cw = makeChoices(ansR, ['偶数句末', '奇数句末', '第一句末と偶数句末', 'すべての句末']
+          .filter(function (v) { return v !== ansR; }));
+        if (cw) out.push({
+          key: p.id + ':rule', cat: '漢詩', level: 1,
+          stem: body, q: 'この形式の詩は、原則としてどこで押韻するか。',
+          src: p.author + '「' + p.title + '」（' + p.form + '）',
+          choices: cw.choices, a: cw.a,
+          exp: '五言詩は偶数句末、七言詩は第一句末と偶数句末で押韻するのが原則。この詩の押韻は「' + p.rhyme.join('・') + '」。'
+        });
+      }
 
       if (p.regular) {
         var ans = p.rhyme.join('・');
@@ -2703,6 +2969,31 @@ window.LESSONS = [
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { $toast.classList.remove('on'); }, 2200);
   }
+  /** 確認ダイアログ。ブラウザの confirm は埋め込み表示だとブロックされることがあるので自前で出す。 */
+  function ask(msg, okLabel, onOk) {
+    var wrap = document.createElement('div');
+    wrap.className = 'ovl';
+    wrap.innerHTML = '<div class="dlg" role="dialog" aria-modal="true">' +
+      '<p>' + esc(msg) + '</p>' +
+      '<div class="btn-row" style="justify-content:flex-end;margin-top:18px">' +
+        '<button class="btn ghost" data-x="c">やめる</button>' +
+        '<button class="btn shu" data-x="o">' + esc(okLabel) + '</button>' +
+      '</div></div>';
+    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); document.removeEventListener('keydown', onEsc); }
+    function onEsc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+    wrap.addEventListener('click', function (e) {
+      if (e.target === wrap) return close();
+      var t = e.target.closest('[data-x]');
+      if (!t) return;
+      e.stopPropagation();
+      close();
+      if (t.getAttribute('data-x') === 'o') onOk();
+    });
+    document.addEventListener('keydown', onEsc);
+    document.body.appendChild(wrap);
+    wrap.querySelector('[data-x="o"]').focus();
+  }
+
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function mmss(sec) { return pad(Math.floor(sec / 60)) + ':' + pad(Math.floor(sec % 60)); }
 
@@ -2728,8 +3019,9 @@ window.LESSONS = [
   var MODES = [
     { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
     { id: 'saidoku', ico: '再', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎' },
-    { id: 'kuho', ico: '句', t: '句法バトル', d: '制限時間つき。三回まちがえると道場破り', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--shu)', hearts: 3, perQ: 25, tag: '本命' },
-    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '返り点に従って読む順にタップする', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'battle', ico: '闘', t: '道場破り', d: '漢文の主たちが立ちはだかる。八つの関門を抜けよ', kind: 'battle', accent: 'var(--shu)', tag: '対戦' },
+    { id: 'kuho', ico: '句', t: '句法ドリル', d: '全句法から通しで15問。一問25秒', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--ai)', perQ: 25, tag: '練習' },
+    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '縦組みの白文を、返り点どおりの順にタップ', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
     { id: 'okiji', ico: '置', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル' },
     { id: 'narabe', ico: '序', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル' },
     { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識' },
@@ -2752,9 +3044,15 @@ window.LESSONS = [
 
     var cards = MODES.map(function (m) {
       var best = s.best[m.id];
-      var sub = m.id === 'weak'
-        ? (weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません')
-        : (best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦');
+      var sub;
+      if (m.id === 'weak') {
+        sub = weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません';
+      } else if (m.id === 'battle') {
+        var cl = (s.foesCleared || []).length;
+        sub = cl ? '突破 ' + cl + ' / ' + window.FOES.length + ' 関門' : '第一関門から挑戦';
+      } else {
+        sub = best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦';
+      }
       return '<button class="mode" data-act="play" data-id="' + m.id + '" style="--accent:' + m.accent + '">' +
         '<span class="m-tag">' + esc(m.tag) + '</span>' +
         '<div class="m-ico">' + m.ico + '</div>' +
@@ -3009,17 +3307,16 @@ window.LESSONS = [
     }
     var qs = window.QuizGen.pick(pool, Math.min(mode.n, pool.length));
     G = {
-      mode: mode, qs: qs, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0,
+      kind: 'choice', mode: mode, qs: qs, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0,
       hp: mode.hearts || 0, wrong: [], locked: false,
       left: mode.perQ || 0, totalLeft: mode.total || 0
     };
     renderChoice();
   }
 
-  function renderChoice() {
-    var m = G.mode, q = G.qs[G.i];
-    var hud =
-      '<div class="hud"><div class="hud-row">' +
+  function normalHud() {
+    var m = G.mode;
+    return '<div class="hud"><div class="hud-row">' +
         '<span class="q-no">第' + (G.i + 1) + '問 / ' + G.qs.length + '</span>' +
         (m.hearts ? '<span class="hearts">' + '❤'.repeat(G.hp) + '<span style="opacity:.25">' + '❤'.repeat(m.hearts - G.hp) + '</span></span>' : '') +
         '<span class="sp"></span>' +
@@ -3029,6 +3326,27 @@ window.LESSONS = [
       '</div>' +
       (m.perQ || m.total ? '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div>' : '') +
       '</div>';
+  }
+
+  function battleHud() {
+    var f = G.foe;
+    var pct = Math.max(0, Math.round(G.ki / G.kiMax * 100));
+    return '<div class="hud"><div class="hud-row">' +
+        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
+        '<span class="foe-mini">' +
+          '<b>' + esc(f.name) + '</b>' +
+          '<span class="ki' + (pct <= 34 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span>' +
+        '</span>' +
+        '<span class="hearts" title="残り体力">' + '❤'.repeat(G.hearts) +
+          '<span style="opacity:.22">' + '❤'.repeat(G.maxHearts - G.hearts) + '</span></span>' +
+        '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+      '</div>' +
+      '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div></div>';
+  }
+
+  function renderChoice() {
+    var m = G.mode, q = G.qs[G.i];
+    var hud = G.kind === 'battle' ? battleHud() : normalHud();
 
     var ch = q.choices.map(function (c, i) {
       return '<button class="choice" data-act="ans" data-i="' + i + '">' +
@@ -3051,7 +3369,8 @@ window.LESSONS = [
       '</div>');
 
     G.locked = false;
-    if (m.perQ) { G.left = m.perQ; runTimer(); }
+    if (G.kind === 'battle') { G.left = BATTLE_TIME; runTimer(); }
+    else if (m.perQ) { G.left = m.perQ; runTimer(); }
     else if (m.total) { runTimer(); }
   }
 
@@ -3060,11 +3379,12 @@ window.LESSONS = [
     var m = G.mode;
     var bar = el('tmb'), wrap = el('tm');
     if (!bar) return;
+    var perQ = G.kind === 'battle' ? BATTLE_TIME : m.perQ;
     tick = setInterval(function () {
-      if (G.locked) return;
-      if (m.perQ) {
+      if (!G || G.locked) return;
+      if (perQ) {
         G.left -= 0.1;
-        var p = Math.max(0, G.left / m.perQ * 100);
+        var p = Math.max(0, G.left / perQ * 100);
         bar.style.width = p + '%';
         wrap.classList.toggle('warn', p < 34);
         if (G.left <= 0) { stopTick(); answer(-1); }
@@ -3090,11 +3410,14 @@ window.LESSONS = [
       G.correct++;
       G.combo++;
       G.maxCombo = Math.max(G.maxCombo, G.combo);
-      var timeBonus = G.mode.perQ ? Math.round(Math.max(0, G.left) / G.mode.perQ * 40) : 0;
+      var perQ = G.kind === 'battle' ? BATTLE_TIME : G.mode.perQ;
+      var timeBonus = perQ ? Math.round(Math.max(0, G.left) / perQ * 40) : 0;
       G.score += 100 + Math.min(100, (G.combo - 1) * 20) + timeBonus;
+      if (G.kind === 'battle') G.ki--;
     } else {
       G.combo = 0;
-      if (G.mode.hearts) G.hp--;
+      if (G.kind === 'battle') G.hearts--;
+      else if (G.mode.hearts) G.hp--;
       G.wrong.push({
         stem: q.stem, q: q.q, exp: q.exp,
         answer: q.choices[q.a],
@@ -3114,20 +3437,32 @@ window.LESSONS = [
       setTimeout(function () { qc.classList.remove('shake'); }, 350);
     }
 
-    var last = (G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0);
+    var last = G.kind === 'battle'
+      ? (G.hearts <= 0 || G.ki <= 0)
+      : ((G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0));
+    var nextLabel = G.kind === 'battle'
+      ? (G.hearts <= 0 ? '結果を見る' : G.ki <= 0 ? '関門突破' : '続ける')
+      : (last ? '結果を見る' : '次の問題へ');
     el('vd').innerHTML =
       '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
         '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') +
           (ok && G.combo >= 3 ? '<span style="font-size:12px;color:var(--shu)">' + G.combo + ' 連鎖！</span>' : '') + '</div>' +
         (q.exp ? '<p>' + esc(q.exp) + '</p>' : '') +
         '<div class="btn-row" style="margin-top:12px">' +
-          '<button class="btn" data-act="next">' + (last ? '結果を見る' : '次の問題へ') + '</button>' +
+          '<button class="btn" data-act="next">' + nextLabel + '</button>' +
         '</div>' +
       '</div>';
     el('vd').querySelector('.btn').focus();
   }
 
   function nextQuestion() {
+    if (G.kind === 'battle') {
+      if (G.hearts <= 0) return screenBattleEnd(false);
+      if (G.ki <= 0) return screenFoeCleared();
+      G.i++;
+      if (G.i >= G.qs.length) { G.qs = window.QuizGen.pick(foePool(G.foe), 20); G.i = 0; }
+      return renderChoice();
+    }
     if (G.mode.hearts && G.hp <= 0) return finishChoice();
     G.i++;
     if (G.i >= G.qs.length) return finishChoice();
@@ -3139,6 +3474,152 @@ window.LESSONS = [
     var res = { correct: G.correct, total: G.qs.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
     var m = G.mode; G = null;
     screenResult(m, res);
+  }
+
+  /* ============================ ゲーム：道場破り ============================ */
+  var BATTLE_TIME = 25;
+
+  /** その関門の担当分野から問題を集める。足りなければ全分野から。 */
+  function foePool(foe) {
+    if (!foe.cats) return G.master;
+    var set = {};
+    foe.cats.forEach(function (c) { set[c] = 1; });
+    var p = G.master.filter(function (q) { return set[q.cat]; });
+    return p.length >= foe.ki + 4 ? p : G.master;
+  }
+
+  function startBattle(mode) {
+    var cleared = window.Store.state.foesCleared || [];
+    var idx = 0;
+    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
+    if (idx >= window.FOES.length) idx = 0;      // 全突破後はもう一巡できる
+    G = {
+      kind: 'battle', mode: mode, master: window.QuizGen.build('mogi'),
+      foeIdx: idx, hearts: 3, maxHearts: 3,
+      score: 0, combo: 0, maxCombo: 0, correct: 0, gates: 0,
+      wrong: [], locked: false, left: 0, qs: [], i: 0
+    };
+    screenFoeIntro();
+  }
+
+  function screenFoeIntro() {
+    var f = window.FOES[G.foeIdx];
+    var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
+    render(
+      '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
+      '<div class="card foe-card">' +
+        '<div class="foe-glyph big">' + esc(f.glyph) + '</div>' +
+        '<div class="foe-name">' + esc(f.name) +
+          '<small>' + esc(f.kana) + (cleared ? '　※突破済み' : '') + '</small></div>' +
+        '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(f.quote) + '>' + kanbunHTML(f.quote) + '</div></div>' +
+        '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
+        '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
+        '<p class="muted center">出題分野：' + esc(f.cats ? f.cats.join('・') : '全分野') +
+          '　／　正解 ' + f.ki + ' 回で突破　／　体力 ' + G.hearts + '</p>' +
+        '<div class="btn-row" style="justify-content:center;margin-top:16px">' +
+          '<button class="btn shu" data-act="foego">勝負</button></div>' +
+      '</div>'
+    );
+    var b = $app.querySelector('[data-act="foego"]');
+    if (b) b.focus();
+  }
+
+  function beginFoe() {
+    var f = window.FOES[G.foeIdx];
+    G.foe = f; G.ki = f.ki; G.kiMax = f.ki;
+    G.hearts = G.maxHearts;
+    G.qs = window.QuizGen.pick(foePool(f), 20);
+    G.i = 0;
+    renderChoice();
+  }
+
+  function screenFoeCleared() {
+    stopTick();
+    var f = G.foe;
+    var st = window.Store.state;
+    st.foesCleared = st.foesCleared || [];
+    if (st.foesCleared.indexOf(f.id) === -1) st.foesCleared.push(f.id);
+    window.Store.save();
+    G.gates++;
+    G.score += 300;
+    var last = G.foeIdx >= window.FOES.length - 1;
+    render(
+      '<div class="card result">' +
+        '<div class="foe-glyph big beaten">' + esc(f.glyph) + '</div>' +
+        '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
+        '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
+        '<div class="r-grid">' +
+          '<div class="stat"><b>' + G.score + '</b><span>得点</span></div>' +
+          '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
+          '<div class="stat"><b>' + G.hearts + '</b><span>残り体力</span></div>' +
+        '</div>' +
+        '<p class="muted mt">体力を回復して次へ進みます。</p>' +
+        '<div class="btn-row mt" style="justify-content:center">' +
+          (last
+            ? '<button class="btn shu" data-act="bend">結果を見る</button>'
+            : '<button class="btn shu" data-act="foenext">次の関門へ</button>' +
+              '<button class="btn ghost" data-act="bend">ここで終える</button>') +
+        '</div>' +
+      '</div>'
+    );
+    var b = $app.querySelector('.btn.shu');
+    if (b) b.focus();
+  }
+
+  function nextFoe() {
+    G.foeIdx++;
+    if (G.foeIdx >= window.FOES.length) return screenBattleEnd(true);
+    screenFoeIntro();
+  }
+
+  function screenBattleEnd(win) {
+    stopTick();
+    var gates = G.gates, score = G.score, combo = G.maxCombo, wrong = G.wrong;
+    var reached = G.foeIdx + 1;
+    var allDone = (window.Store.state.foesCleared || []).length >= window.FOES.length;
+    var m = G.mode;
+    G = null;
+
+    var newAch = window.Store.finishSession('battle', {
+      score: gates, xp: gates * 60 + Math.floor(score / 20), maxCombo: combo
+    });
+
+    var review = wrong.map(function (w) {
+      return '<div class="review-item">' +
+        (w.stem ? '<div class="ri-stem">' + kanbunHTML(w.stem) + '</div>' : '') +
+        '<div class="ri-q">' + esc(w.q) + '</div>' +
+        (w.your ? '<div class="ri-y">✗ ' + esc(w.your) + '</div>' : '') +
+        '<div class="ri-a">✓ ' + esc(w.answer) + '</div>' +
+        (w.exp ? '<div class="ri-e">' + esc(w.exp) + '</div>' : '') +
+        '</div>';
+    }).join('');
+
+    render(
+      '<div class="card result mt">' +
+        '<div class="r-rank">' + (win || allDone ? '皆伝' : '第' + reached + '関門') + '</div>' +
+        '<div class="r-sub">' + (win || allDone
+          ? '八つの関門をすべて突破しました。'
+          : 'この回で突破した関門：' + gates + '　／　到達：第' + reached + '関門') + '</div>' +
+        '<p class="r-msg">' + (win || allDone
+          ? '孔子まで抜いたなら、入試の漢文で困ることはまずありません。'
+          : gates > 0 ? '突破した関門は記録されています。次は続きから始まります。'
+                      : 'まずは基礎講座と再読文字ドリルで足場を作ってから、もう一度。') + '</p>' +
+        '<div class="r-grid">' +
+          '<div class="stat"><b>' + score + '</b><span>得点</span></div>' +
+          '<div class="stat"><b>' + combo + '</b><span>最大連鎖</span></div>' +
+          '<div class="stat"><b>' + (window.Store.state.foesCleared || []).length + ' / ' + window.FOES.length + '</b><span>突破した関門</span></div>' +
+        '</div>' +
+        '<div class="btn-row mt-l" style="justify-content:center">' +
+          '<button class="btn shu" data-act="play" data-id="battle">もう一度</button>' +
+          '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
+        '</div>' +
+      '</div>' +
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '')
+    );
+    if (newAch.length) {
+      setTimeout(function () { toast('実績を獲得： ' + newAch.map(function (a) { return a.ico + ' ' + a.t; }).join('、')); }, 500);
+    }
   }
 
   /* ============================ ゲーム：返り点ルート ============================ */
@@ -3172,6 +3653,8 @@ window.LESSONS = [
         '<span class="q-cat">' + esc(it.label) + '</span>' +
         '<p class="q-text">返り点にしたがって、<b>読む順に</b>漢字をタップしてください。</p>' +
         '<div class="kt-stage">' + chars + '</div>' +
+        '<p class="kt-hint">' + (document.documentElement.classList.contains('vert')
+          ? '縦書き（上から下へ）' : '横書き（左から右へ）') + '</p>' +
         '<div id="vd"></div>' +
       '</div>'
     );
@@ -3379,6 +3862,7 @@ window.LESSONS = [
     window.Store.touchDay();
     stopTick();
     if (m.kind === 'choice') return startChoice(m);
+    if (m.kind === 'battle') return startBattle(m);
     if (m.kind === 'kaeriten') return startKaeriten();
     if (m.kind === 'okiji') return startOkiji();
     if (m.kind === 'narabe') return startNarabe();
@@ -3412,8 +3896,14 @@ window.LESSONS = [
       case 'ans': answer(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'next': nextQuestion(); break;
       case 'quit':
-        if (confirm('中断してホームに戻りますか？　ここまでの記録は保存されます。')) { window.Store.save(); go('home'); }
+        stopTick();
+        ask('中断してホームに戻りますか？　ここまでの解答記録は保存されます。', '中断する', function () {
+          window.Store.save(); go('home');
+        });
         break;
+      case 'foego': beginFoe(); break;
+      case 'foenext': nextFoe(); break;
+      case 'bend': screenBattleEnd(false); break;
       case 'kt': kaeritenTap(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'ktnext': kaeritenNext(); break;
       case 'ok':
@@ -3430,9 +3920,9 @@ window.LESSONS = [
       case 'theme': toggleTheme(); break;
       case 'tate': toggleVertical(); break;
       case 'reset':
-        if (confirm('すべての学習記録（段位・実績・弱点）を消去します。よろしいですか？')) {
+        ask('すべての学習記録（段位・実績・弱点・関門の突破）を消去します。よろしいですか？', '消去する', function () {
           window.Store.reset(); toast('学習記録をリセットしました'); go('home');
-        }
+        });
         break;
     }
   }

@@ -36,9 +36,51 @@ async function playChoice(id, label) {
   await page.waitForSelector('.mode');
 }
 
-for (const [id, label] of [['kundoku','訓読の基本'],['saidoku','再読文字'],['kuho','句法バトル'],['kanshi','漢詩'],['koji','故事成語'],['kanji','漢字読み'],['mogi','実力テスト']]) {
+for (const [id, label] of [['kundoku','訓読の基本'],['saidoku','再読文字'],['kuho','句法ドリル'],['kanshi','漢詩'],['koji','故事成語'],['kanji','漢字読み'],['mogi','実力テスト']]) {
   await playChoice(id, label);
 }
+
+// 道場破り：第一関門を突破できるところまで進める
+await page.click('[data-act="play"][data-id="battle"]');
+await page.waitForSelector('[data-act="foego"]');
+await page.screenshot({ path: OUT + '/q-battle-intro.png', fullPage: true });
+await page.click('[data-act="foego"]');
+await page.waitForSelector('.choice');
+let gateSeen = false;
+for (let i = 0; i < 120; i++) {
+  if (await page.$('.gate-clear')) { gateSeen = true; break; }
+  if (await page.$('.result')) break;
+  const c = await page.$('.choice:not([disabled])');
+  if (c) { await c.click(); await page.waitForTimeout(45); continue; }
+  const n = await page.$('#vd .btn');
+  if (n) { await n.click(); await page.waitForTimeout(45); continue; }
+  break;
+}
+if (!gateSeen && !(await page.$('.result'))) errors.push('道場破り: 決着しなかった');
+await page.screenshot({ path: OUT + '/r-battle.png', fullPage: true });
+console.log('✔ 道場破り' + (gateSeen ? '（関門突破を確認）' : '（敗北で終了）'));
+await page.goto(url); await page.waitForSelector('.mode');
+
+// 中断ボタン（自前ダイアログ）が働くか
+await page.click('[data-act="play"][data-id="kuho"]');
+await page.waitForSelector('.choice');
+await page.click('[data-act="quit"]');
+await page.waitForSelector('.ovl', { timeout: 3000 });
+await page.screenshot({ path: OUT + '/q-quit-dialog.png' });
+await page.click('.ovl [data-x="o"]');
+await page.waitForSelector('.hero h1', { timeout: 3000 });
+console.log('✔ 中断ダイアログ → ホームへ戻れた');
+// やめる側も確認
+await page.click('[data-act="play"][data-id="kuho"]');
+await page.waitForSelector('.choice');
+await page.click('[data-act="quit"]');
+await page.waitForSelector('.ovl');
+await page.click('.ovl [data-x="c"]');
+await page.waitForTimeout(150);
+if (await page.$('.ovl')) errors.push('中断ダイアログ: 「やめる」で閉じない');
+if (!(await page.$('.choice'))) errors.push('中断ダイアログ: 「やめる」で問題画面に戻らない');
+console.log('✔ 中断ダイアログ「やめる」で問題に戻れた');
+await page.goto(url); await page.waitForSelector('.mode');
 
 // 返り点パズル：正しい順にタップ
 await page.click('[data-act="play"][data-id="kaeriten"]');

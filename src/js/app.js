@@ -25,6 +25,31 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { $toast.classList.remove('on'); }, 2200);
   }
+  /** 確認ダイアログ。ブラウザの confirm は埋め込み表示だとブロックされることがあるので自前で出す。 */
+  function ask(msg, okLabel, onOk) {
+    var wrap = document.createElement('div');
+    wrap.className = 'ovl';
+    wrap.innerHTML = '<div class="dlg" role="dialog" aria-modal="true">' +
+      '<p>' + esc(msg) + '</p>' +
+      '<div class="btn-row" style="justify-content:flex-end;margin-top:18px">' +
+        '<button class="btn ghost" data-x="c">やめる</button>' +
+        '<button class="btn shu" data-x="o">' + esc(okLabel) + '</button>' +
+      '</div></div>';
+    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); document.removeEventListener('keydown', onEsc); }
+    function onEsc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+    wrap.addEventListener('click', function (e) {
+      if (e.target === wrap) return close();
+      var t = e.target.closest('[data-x]');
+      if (!t) return;
+      e.stopPropagation();
+      close();
+      if (t.getAttribute('data-x') === 'o') onOk();
+    });
+    document.addEventListener('keydown', onEsc);
+    document.body.appendChild(wrap);
+    wrap.querySelector('[data-x="o"]').focus();
+  }
+
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function mmss(sec) { return pad(Math.floor(sec / 60)) + ':' + pad(Math.floor(sec % 60)); }
 
@@ -50,8 +75,9 @@
   var MODES = [
     { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
     { id: 'saidoku', ico: '再', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎' },
-    { id: 'kuho', ico: '句', t: '句法バトル', d: '制限時間つき。三回まちがえると道場破り', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--shu)', hearts: 3, perQ: 25, tag: '本命' },
-    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '返り点に従って読む順にタップする', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
+    { id: 'battle', ico: '闘', t: '道場破り', d: '漢文の主たちが立ちはだかる。八つの関門を抜けよ', kind: 'battle', accent: 'var(--shu)', tag: '対戦' },
+    { id: 'kuho', ico: '句', t: '句法ドリル', d: '全句法から通しで15問。一問25秒', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--ai)', perQ: 25, tag: '練習' },
+    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '縦組みの白文を、返り点どおりの順にタップ', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
     { id: 'okiji', ico: '置', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル' },
     { id: 'narabe', ico: '序', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル' },
     { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識' },
@@ -74,9 +100,15 @@
 
     var cards = MODES.map(function (m) {
       var best = s.best[m.id];
-      var sub = m.id === 'weak'
-        ? (weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません')
-        : (best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦');
+      var sub;
+      if (m.id === 'weak') {
+        sub = weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません';
+      } else if (m.id === 'battle') {
+        var cl = (s.foesCleared || []).length;
+        sub = cl ? '突破 ' + cl + ' / ' + window.FOES.length + ' 関門' : '第一関門から挑戦';
+      } else {
+        sub = best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦';
+      }
       return '<button class="mode" data-act="play" data-id="' + m.id + '" style="--accent:' + m.accent + '">' +
         '<span class="m-tag">' + esc(m.tag) + '</span>' +
         '<div class="m-ico">' + m.ico + '</div>' +
@@ -331,17 +363,16 @@
     }
     var qs = window.QuizGen.pick(pool, Math.min(mode.n, pool.length));
     G = {
-      mode: mode, qs: qs, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0,
+      kind: 'choice', mode: mode, qs: qs, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0,
       hp: mode.hearts || 0, wrong: [], locked: false,
       left: mode.perQ || 0, totalLeft: mode.total || 0
     };
     renderChoice();
   }
 
-  function renderChoice() {
-    var m = G.mode, q = G.qs[G.i];
-    var hud =
-      '<div class="hud"><div class="hud-row">' +
+  function normalHud() {
+    var m = G.mode;
+    return '<div class="hud"><div class="hud-row">' +
         '<span class="q-no">第' + (G.i + 1) + '問 / ' + G.qs.length + '</span>' +
         (m.hearts ? '<span class="hearts">' + '❤'.repeat(G.hp) + '<span style="opacity:.25">' + '❤'.repeat(m.hearts - G.hp) + '</span></span>' : '') +
         '<span class="sp"></span>' +
@@ -351,6 +382,27 @@
       '</div>' +
       (m.perQ || m.total ? '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div>' : '') +
       '</div>';
+  }
+
+  function battleHud() {
+    var f = G.foe;
+    var pct = Math.max(0, Math.round(G.ki / G.kiMax * 100));
+    return '<div class="hud"><div class="hud-row">' +
+        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
+        '<span class="foe-mini">' +
+          '<b>' + esc(f.name) + '</b>' +
+          '<span class="ki' + (pct <= 34 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span>' +
+        '</span>' +
+        '<span class="hearts" title="残り体力">' + '❤'.repeat(G.hearts) +
+          '<span style="opacity:.22">' + '❤'.repeat(G.maxHearts - G.hearts) + '</span></span>' +
+        '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+      '</div>' +
+      '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div></div>';
+  }
+
+  function renderChoice() {
+    var m = G.mode, q = G.qs[G.i];
+    var hud = G.kind === 'battle' ? battleHud() : normalHud();
 
     var ch = q.choices.map(function (c, i) {
       return '<button class="choice" data-act="ans" data-i="' + i + '">' +
@@ -373,7 +425,8 @@
       '</div>');
 
     G.locked = false;
-    if (m.perQ) { G.left = m.perQ; runTimer(); }
+    if (G.kind === 'battle') { G.left = BATTLE_TIME; runTimer(); }
+    else if (m.perQ) { G.left = m.perQ; runTimer(); }
     else if (m.total) { runTimer(); }
   }
 
@@ -382,11 +435,12 @@
     var m = G.mode;
     var bar = el('tmb'), wrap = el('tm');
     if (!bar) return;
+    var perQ = G.kind === 'battle' ? BATTLE_TIME : m.perQ;
     tick = setInterval(function () {
-      if (G.locked) return;
-      if (m.perQ) {
+      if (!G || G.locked) return;
+      if (perQ) {
         G.left -= 0.1;
-        var p = Math.max(0, G.left / m.perQ * 100);
+        var p = Math.max(0, G.left / perQ * 100);
         bar.style.width = p + '%';
         wrap.classList.toggle('warn', p < 34);
         if (G.left <= 0) { stopTick(); answer(-1); }
@@ -412,11 +466,14 @@
       G.correct++;
       G.combo++;
       G.maxCombo = Math.max(G.maxCombo, G.combo);
-      var timeBonus = G.mode.perQ ? Math.round(Math.max(0, G.left) / G.mode.perQ * 40) : 0;
+      var perQ = G.kind === 'battle' ? BATTLE_TIME : G.mode.perQ;
+      var timeBonus = perQ ? Math.round(Math.max(0, G.left) / perQ * 40) : 0;
       G.score += 100 + Math.min(100, (G.combo - 1) * 20) + timeBonus;
+      if (G.kind === 'battle') G.ki--;
     } else {
       G.combo = 0;
-      if (G.mode.hearts) G.hp--;
+      if (G.kind === 'battle') G.hearts--;
+      else if (G.mode.hearts) G.hp--;
       G.wrong.push({
         stem: q.stem, q: q.q, exp: q.exp,
         answer: q.choices[q.a],
@@ -436,20 +493,32 @@
       setTimeout(function () { qc.classList.remove('shake'); }, 350);
     }
 
-    var last = (G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0);
+    var last = G.kind === 'battle'
+      ? (G.hearts <= 0 || G.ki <= 0)
+      : ((G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0));
+    var nextLabel = G.kind === 'battle'
+      ? (G.hearts <= 0 ? '結果を見る' : G.ki <= 0 ? '関門突破' : '続ける')
+      : (last ? '結果を見る' : '次の問題へ');
     el('vd').innerHTML =
       '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
         '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') +
           (ok && G.combo >= 3 ? '<span style="font-size:12px;color:var(--shu)">' + G.combo + ' 連鎖！</span>' : '') + '</div>' +
         (q.exp ? '<p>' + esc(q.exp) + '</p>' : '') +
         '<div class="btn-row" style="margin-top:12px">' +
-          '<button class="btn" data-act="next">' + (last ? '結果を見る' : '次の問題へ') + '</button>' +
+          '<button class="btn" data-act="next">' + nextLabel + '</button>' +
         '</div>' +
       '</div>';
     el('vd').querySelector('.btn').focus();
   }
 
   function nextQuestion() {
+    if (G.kind === 'battle') {
+      if (G.hearts <= 0) return screenBattleEnd(false);
+      if (G.ki <= 0) return screenFoeCleared();
+      G.i++;
+      if (G.i >= G.qs.length) { G.qs = window.QuizGen.pick(foePool(G.foe), 20); G.i = 0; }
+      return renderChoice();
+    }
     if (G.mode.hearts && G.hp <= 0) return finishChoice();
     G.i++;
     if (G.i >= G.qs.length) return finishChoice();
@@ -461,6 +530,152 @@
     var res = { correct: G.correct, total: G.qs.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
     var m = G.mode; G = null;
     screenResult(m, res);
+  }
+
+  /* ============================ ゲーム：道場破り ============================ */
+  var BATTLE_TIME = 25;
+
+  /** その関門の担当分野から問題を集める。足りなければ全分野から。 */
+  function foePool(foe) {
+    if (!foe.cats) return G.master;
+    var set = {};
+    foe.cats.forEach(function (c) { set[c] = 1; });
+    var p = G.master.filter(function (q) { return set[q.cat]; });
+    return p.length >= foe.ki + 4 ? p : G.master;
+  }
+
+  function startBattle(mode) {
+    var cleared = window.Store.state.foesCleared || [];
+    var idx = 0;
+    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
+    if (idx >= window.FOES.length) idx = 0;      // 全突破後はもう一巡できる
+    G = {
+      kind: 'battle', mode: mode, master: window.QuizGen.build('mogi'),
+      foeIdx: idx, hearts: 3, maxHearts: 3,
+      score: 0, combo: 0, maxCombo: 0, correct: 0, gates: 0,
+      wrong: [], locked: false, left: 0, qs: [], i: 0
+    };
+    screenFoeIntro();
+  }
+
+  function screenFoeIntro() {
+    var f = window.FOES[G.foeIdx];
+    var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
+    render(
+      '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
+        '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
+      '<div class="card foe-card">' +
+        '<div class="foe-glyph big">' + esc(f.glyph) + '</div>' +
+        '<div class="foe-name">' + esc(f.name) +
+          '<small>' + esc(f.kana) + (cleared ? '　※突破済み' : '') + '</small></div>' +
+        '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(f.quote) + '>' + kanbunHTML(f.quote) + '</div></div>' +
+        '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
+        '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
+        '<p class="muted center">出題分野：' + esc(f.cats ? f.cats.join('・') : '全分野') +
+          '　／　正解 ' + f.ki + ' 回で突破　／　体力 ' + G.hearts + '</p>' +
+        '<div class="btn-row" style="justify-content:center;margin-top:16px">' +
+          '<button class="btn shu" data-act="foego">勝負</button></div>' +
+      '</div>'
+    );
+    var b = $app.querySelector('[data-act="foego"]');
+    if (b) b.focus();
+  }
+
+  function beginFoe() {
+    var f = window.FOES[G.foeIdx];
+    G.foe = f; G.ki = f.ki; G.kiMax = f.ki;
+    G.hearts = G.maxHearts;
+    G.qs = window.QuizGen.pick(foePool(f), 20);
+    G.i = 0;
+    renderChoice();
+  }
+
+  function screenFoeCleared() {
+    stopTick();
+    var f = G.foe;
+    var st = window.Store.state;
+    st.foesCleared = st.foesCleared || [];
+    if (st.foesCleared.indexOf(f.id) === -1) st.foesCleared.push(f.id);
+    window.Store.save();
+    G.gates++;
+    G.score += 300;
+    var last = G.foeIdx >= window.FOES.length - 1;
+    render(
+      '<div class="card result">' +
+        '<div class="foe-glyph big beaten">' + esc(f.glyph) + '</div>' +
+        '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
+        '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
+        '<div class="r-grid">' +
+          '<div class="stat"><b>' + G.score + '</b><span>得点</span></div>' +
+          '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
+          '<div class="stat"><b>' + G.hearts + '</b><span>残り体力</span></div>' +
+        '</div>' +
+        '<p class="muted mt">体力を回復して次へ進みます。</p>' +
+        '<div class="btn-row mt" style="justify-content:center">' +
+          (last
+            ? '<button class="btn shu" data-act="bend">結果を見る</button>'
+            : '<button class="btn shu" data-act="foenext">次の関門へ</button>' +
+              '<button class="btn ghost" data-act="bend">ここで終える</button>') +
+        '</div>' +
+      '</div>'
+    );
+    var b = $app.querySelector('.btn.shu');
+    if (b) b.focus();
+  }
+
+  function nextFoe() {
+    G.foeIdx++;
+    if (G.foeIdx >= window.FOES.length) return screenBattleEnd(true);
+    screenFoeIntro();
+  }
+
+  function screenBattleEnd(win) {
+    stopTick();
+    var gates = G.gates, score = G.score, combo = G.maxCombo, wrong = G.wrong;
+    var reached = G.foeIdx + 1;
+    var allDone = (window.Store.state.foesCleared || []).length >= window.FOES.length;
+    var m = G.mode;
+    G = null;
+
+    var newAch = window.Store.finishSession('battle', {
+      score: gates, xp: gates * 60 + Math.floor(score / 20), maxCombo: combo
+    });
+
+    var review = wrong.map(function (w) {
+      return '<div class="review-item">' +
+        (w.stem ? '<div class="ri-stem">' + kanbunHTML(w.stem) + '</div>' : '') +
+        '<div class="ri-q">' + esc(w.q) + '</div>' +
+        (w.your ? '<div class="ri-y">✗ ' + esc(w.your) + '</div>' : '') +
+        '<div class="ri-a">✓ ' + esc(w.answer) + '</div>' +
+        (w.exp ? '<div class="ri-e">' + esc(w.exp) + '</div>' : '') +
+        '</div>';
+    }).join('');
+
+    render(
+      '<div class="card result mt">' +
+        '<div class="r-rank">' + (win || allDone ? '皆伝' : '第' + reached + '関門') + '</div>' +
+        '<div class="r-sub">' + (win || allDone
+          ? '八つの関門をすべて突破しました。'
+          : 'この回で突破した関門：' + gates + '　／　到達：第' + reached + '関門') + '</div>' +
+        '<p class="r-msg">' + (win || allDone
+          ? '孔子まで抜いたなら、入試の漢文で困ることはまずありません。'
+          : gates > 0 ? '突破した関門は記録されています。次は続きから始まります。'
+                      : 'まずは基礎講座と再読文字ドリルで足場を作ってから、もう一度。') + '</p>' +
+        '<div class="r-grid">' +
+          '<div class="stat"><b>' + score + '</b><span>得点</span></div>' +
+          '<div class="stat"><b>' + combo + '</b><span>最大連鎖</span></div>' +
+          '<div class="stat"><b>' + (window.Store.state.foesCleared || []).length + ' / ' + window.FOES.length + '</b><span>突破した関門</span></div>' +
+        '</div>' +
+        '<div class="btn-row mt-l" style="justify-content:center">' +
+          '<button class="btn shu" data-act="play" data-id="battle">もう一度</button>' +
+          '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
+        '</div>' +
+      '</div>' +
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '')
+    );
+    if (newAch.length) {
+      setTimeout(function () { toast('実績を獲得： ' + newAch.map(function (a) { return a.ico + ' ' + a.t; }).join('、')); }, 500);
+    }
   }
 
   /* ============================ ゲーム：返り点ルート ============================ */
@@ -494,6 +709,8 @@
         '<span class="q-cat">' + esc(it.label) + '</span>' +
         '<p class="q-text">返り点にしたがって、<b>読む順に</b>漢字をタップしてください。</p>' +
         '<div class="kt-stage">' + chars + '</div>' +
+        '<p class="kt-hint">' + (document.documentElement.classList.contains('vert')
+          ? '縦書き（上から下へ）' : '横書き（左から右へ）') + '</p>' +
         '<div id="vd"></div>' +
       '</div>'
     );
@@ -701,6 +918,7 @@
     window.Store.touchDay();
     stopTick();
     if (m.kind === 'choice') return startChoice(m);
+    if (m.kind === 'battle') return startBattle(m);
     if (m.kind === 'kaeriten') return startKaeriten();
     if (m.kind === 'okiji') return startOkiji();
     if (m.kind === 'narabe') return startNarabe();
@@ -734,8 +952,14 @@
       case 'ans': answer(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'next': nextQuestion(); break;
       case 'quit':
-        if (confirm('中断してホームに戻りますか？　ここまでの記録は保存されます。')) { window.Store.save(); go('home'); }
+        stopTick();
+        ask('中断してホームに戻りますか？　ここまでの解答記録は保存されます。', '中断する', function () {
+          window.Store.save(); go('home');
+        });
         break;
+      case 'foego': beginFoe(); break;
+      case 'foenext': nextFoe(); break;
+      case 'bend': screenBattleEnd(false); break;
       case 'kt': kaeritenTap(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'ktnext': kaeritenNext(); break;
       case 'ok':
@@ -752,9 +976,9 @@
       case 'theme': toggleTheme(); break;
       case 'tate': toggleVertical(); break;
       case 'reset':
-        if (confirm('すべての学習記録（段位・実績・弱点）を消去します。よろしいですか？')) {
+        ask('すべての学習記録（段位・実績・弱点・関門の突破）を消去します。よろしいですか？', '消去する', function () {
           window.Store.reset(); toast('学習記録をリセットしました'); go('home');
-        }
+        });
         break;
     }
   }
