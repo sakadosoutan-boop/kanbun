@@ -646,3 +646,131 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .vert .kt-char .ord { top: 50%; right: -9px; transform: translateY(-50%); }
 .vert .kt-char .mk { left: 3px; bottom: 1px; }
 .kt-hint { text-align: center; font-size: 11.5px; color: var(--ink-3); letter-spacing: .1em; }
+
+/* ============================================================
+   学びの記録
+   ============================================================ */
+.sec-min { font-family: var(--mincho); font-size: 13px; letter-spacing: .14em; color: var(--ink-3); text-align: center; margin-bottom: 10px; }
+
+/* 今日のカード */
+.rec-today { text-align: center; padding: 22px 18px; }
+.rt-label { font-size: 12px; letter-spacing: .14em; color: var(--ink-3); }
+.rt-num {
+  font-family: var(--mincho); font-size: clamp(44px, 13vw, 68px); line-height: 1.05;
+  letter-spacing: .02em; margin-top: 2px; font-variant-numeric: tabular-nums;
+}
+.rt-num small { font-size: .34em; margin-inline-start: .12em; color: var(--ink-2); }
+.rt-say {
+  margin: 8px 0 0; font-size: 14px; color: var(--shu); font-weight: 600; line-height: 1.8;
+}
+.rt-sub { margin-top: 8px; font-size: 12px; color: var(--ink-3); }
+
+/* 三つの数字 */
+.rec-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.rn {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 13px 8px 11px; text-align: center; position: relative;
+}
+.rn b { display: block; font-family: var(--mincho); font-size: clamp(22px, 6.5vw, 30px); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.rn small { font-family: var(--mincho); font-size: .46em; color: var(--ink-2); margin-inline-start: .1em; font-weight: 400; }
+.rn span { display: block; font-size: 10.5px; color: var(--ink-3); letter-spacing: .06em; margin-top: 3px; }
+.rn:nth-child(1) b { color: var(--midori); }
+.rn:nth-child(2) b { color: var(--kin); }
+.rn:nth-child(3) b { color: var(--shu); }
+
+/* 竹簡 */
+.chikan-head { text-align: center; font-family: var(--mincho); font-size: 15px; letter-spacing: .1em; margin-bottom: 12px; }
+.chikan-head b { font-size: 26px; color: var(--midori); font-variant-numeric: tabular-nums; }
+.chikan {
+  display: flex; gap: 3px; justify-content: center; align-items: flex-end;
+  padding: 12px 10px; border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  overflow-x: auto;
+}
+.chikan .slat {
+  flex: 0 0 auto; width: 9px; height: 64px; border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 8%, var(--card));
+  border: 1px solid var(--line);
+  position: relative;
+}
+/* 竹の節 */
+.chikan .slat::before,
+.chikan .slat::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 1px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.chikan .slat::before { top: 32%; }
+.chikan .slat::after { top: 66%; }
+.chikan .slat.on {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--midori) 66%, var(--card)),
+    var(--midori));
+  border-color: color-mix(in srgb, var(--midori) 70%, var(--line));
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--midori) 28%, transparent);
+}
+.chikan .slat.on::before, .chikan .slat.on::after {
+  background: color-mix(in srgb, var(--midori) 40%, #000);
+  opacity: .5;
+}
+
+/* 墨あと */
+.sumi-grid {
+  display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr);
+  gap: 3px; overflow-x: auto; padding-bottom: 2px;
+}
+.sumi {
+  width: 100%; aspect-ratio: 1; min-width: 9px; border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+.sumi.pad { background: none; border-color: transparent; }
+.sumi.lv1 { background: color-mix(in srgb, var(--ink) 18%, transparent); }
+.sumi.lv2 { background: color-mix(in srgb, var(--ink) 34%, transparent); }
+.sumi.lv3 { background: color-mix(in srgb, var(--ink) 52%, transparent); }
+.sumi.lv4 { background: color-mix(in srgb, var(--ink) 72%, transparent); }
+.sumi.lv5 { background: color-mix(in srgb, var(--ink) 92%, transparent); }
+.sumi.today { outline: 2px solid var(--shu); outline-offset: 1px; }
+.sumi-legend { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 12px; font-size: 10.5px; color: var(--ink-3); }
+.sumi-legend i { width: 11px; height: 11px; border-radius: 2px; }
+.sumi-legend span:first-child { margin-inline-end: 4px; }
+.sumi-legend span:last-child { margin-inline-start: 4px; }
+
+/* 分野別の帯 */
+.fld-list { display: grid; gap: 15px; }
+.fld-h { display: flex; align-items: baseline; gap: 10px; }
+.fld-h b { font-family: var(--mincho); font-size: 15px; letter-spacing: .05em; flex: 1; min-width: 0; }
+.fld-h span { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fld-bar {
+  position: relative; height: 10px; border-radius: 99px; margin-top: 6px;
+  background: var(--paper-2); border: 1px solid var(--line); overflow: hidden;
+}
+.fld-bar > i { position: absolute; inset: 0 auto 0 0; height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.fld-bar > i.t { background: color-mix(in srgb, var(--kin) 34%, transparent); }
+.fld-bar > i.m { background: linear-gradient(90deg, var(--kin), var(--shu)); }
+.fld-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 5px; }
+.fld-total { border-top: 1px dashed var(--line); padding-top: 13px; text-align: center; font-family: var(--mincho); font-size: 15px; letter-spacing: .06em; }
+
+/* 踏破率のリング */
+.cov-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center; }
+.cov-ring {
+  width: 62px; height: 62px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--shu) calc(var(--p) * 1%), color-mix(in srgb, var(--ink) 9%, transparent) 0);
+}
+.cov-ring span {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--card);
+  display: grid; place-items: center; font-family: var(--mincho); font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.cov-ring small { font-size: 9px; color: var(--ink-3); }
+.cov-t { font-family: var(--mincho); font-size: 13px; margin-top: 7px; letter-spacing: .04em; }
+.cov-n { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
+@media (max-width: 420px) {
+  .cov-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+}
+
+/* 関門コレクション */
+.foe-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 8px; text-align: center; }
+.foe-slot { display: grid; justify-items: center; gap: 5px; opacity: .34; filter: grayscale(1); transition: all .2s; }
+.foe-slot.got { opacity: 1; filter: none; }
+.foe-slot small { font-size: 10.5px; color: var(--ink-3); line-height: 1.4; }
+@media (min-width: 620px) { .foe-row { grid-template-columns: repeat(8, 1fr); } }

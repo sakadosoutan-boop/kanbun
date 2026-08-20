@@ -71,6 +71,12 @@
   }
   function vstyle(s) { return ' style="--n:' + vlen(s) + '"'; }
 
+  /** 読んだ漢文の量として数える文字数（漢字だけを数える） */
+  function kanjiCount(s) {
+    var m = String(s || '').match(/[\u3400-\u4DBF\u4E00-\u9FFF]/g);
+    return m ? m.length : 0;
+  }
+
   /* ============================ モード定義 ============================ */
   var MODES = [
     { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
@@ -97,6 +103,8 @@
     var r = window.Store.rankOf(s.xp);
     var acc = s.answered ? Math.round(s.correct / s.answered * 100) : 0;
     var weakN = window.Store.weakKeys().length;
+    var todayChars = window.Store.recentDays(1)[0].chars;
+    var slatsAll = Math.floor((s.chars || 0) / SLAT_CHARS);
 
     var cards = MODES.map(function (m) {
       var best = s.best[m.id];
@@ -131,8 +139,8 @@
           '</div>' +
         '</div>' +
         '<div class="stats">' +
-          '<div class="stat"><b>' + s.answered + '</b><span>のべ解答数</span></div>' +
-          '<div class="stat"><b>' + acc + '%</b><span>正答率</span></div>' +
+          '<div class="stat"><b>' + fmtNum(todayChars) + '</b><span>今日読んだ字</span></div>' +
+          '<div class="stat"><b>' + fmtNum(s.answered) + '</b><span>のべ解答数</span></div>' +
           '<div class="stat"><b>' + s.streak + '</b><span>連続学習日</span></div>' +
         '</div>' +
       '</section>' +
@@ -143,7 +151,8 @@
         '<button class="mode" data-act="go" data-to="lessons" style="--accent:var(--ai)"><div class="m-ico">講</div><div class="m-t">基礎講座</div><div class="m-d">訓読・句法・漢詩のルールを読んで理解する</div></button>' +
         '<button class="mode" data-act="go" data-to="zukan" style="--accent:var(--midori)"><div class="m-ico">図</div><div class="m-t">句法図鑑</div><div class="m-d">' + window.KUHO.length + 'の句形を検索・分類して確認</div></button>' +
         '<button class="mode" data-act="go" data-to="shishu" style="--accent:var(--murasaki)"><div class="m-ico">詩</div><div class="m-t">漢詩集</div><div class="m-d">' + window.KANSHI.length + '首の名詩を書き下し・訳つきで</div></button>' +
-        '<button class="mode" data-act="go" data-to="ach" style="--accent:var(--kin)"><div class="m-ico">賞</div><div class="m-t">実績</div><div class="m-d">称号を集めて学習の記録を残す</div></button>' +
+        '<button class="mode" data-act="go" data-to="ach" style="--accent:var(--kin)"><div class="m-ico">録</div><div class="m-t">学びの記録</div><div class="m-d">読んだ字数・日々の墨あと・分野別の習熟</div>' +
+          '<div class="m-prog">' + (s.chars ? '漢文 ' + fmtNum(s.chars) + ' 字・竹簡 ' + Math.floor(slatsAll / MAKI_SLATS) + ' 巻' : 'まだ記録がありません') + '</div></button>' +
       '</div>' +
       '<div class="footer">出典表記のある例文はすべて古典からの引用です。学習用に書き下し文・現代語訳を付しています。</div>'
     );
@@ -271,27 +280,238 @@
     );
   }
 
-  /* ============================ 実績 ============================ */
-  function screenAch() {
+  /* ============================ 学びの記録 ============================
+     学習量を漢文の道具立てで見せる。
+       読んだ字 → 竹簡（約30字で一枚、30枚で一巻）
+       日々の量 → 墨あとの濃淡
+       分野別   → 習得した問題数の帯
+  ============================================================ */
+  var SLAT_CHARS = 30;   // 竹簡一枚におよそ収まる字数
+  var MAKI_SLATS = 30;   // 一巻に綴じる枚数
+
+  function fmtNum(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+  /** 字数を、詩や書物の分量に言い換える。数はすべて実際の字数から出している。 */
+  function tatoe(n) {
+    if (n >= 200) {
+      var t = '孟浩然「春暁」のような五言絶句（20字）にして ' + Math.floor(n / 20) + ' 首ぶん。';
+      if (n >= 1000) t += '『千字文』を ' + Math.floor(n / 1000) + ' 回読み通した字数です。';
+      return t;
+    }
+    if (n >= 112) return '杜甫「春望」のような五言律詩（40字）' + Math.floor(n / 40) + ' 首ぶん。';
+    if (n >= 56) return '七言律詩（56字）' + Math.floor(n / 56) + ' 首ぶん。';
+    if (n >= 20) return '孟浩然「春暁」のような五言絶句（20字）' + Math.floor(n / 20) + ' 首ぶん。';
+    if (n > 0) return 'あと ' + (20 - n) + ' 字で、五言絶句 1 首ぶんになります。';
+    return '二十字読めば、五言絶句 1 首ぶん。まずは一問から。';
+  }
+
+  function hhmm(sec) {
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60);
+    if (h) return h + ' 時間 ' + m + ' 分';
+    if (m) return m + ' 分';
+    return Math.max(0, Math.round(sec)) + ' 秒';
+  }
+
+  /* 竹簡の帯 */
+  function chikanHTML(filled, total) {
+    var out = '';
+    for (var i = 0; i < total; i++) {
+      out += '<i class="slat' + (i < filled ? ' on' : '') + '"></i>';
+    }
+    return '<div class="chikan" aria-hidden="true">' + out + '</div>';
+  }
+
+  /* 墨あと（直近12週） */
+  function sumiHTML() {
+    var days = window.Store.recentDays(84);
+    var pad = days[0].date.getDay();
+    var cells = '';
+    for (var i = 0; i < pad; i++) cells += '<span class="sumi pad"></span>';
+    var max = 0;
+    days.forEach(function (d) { if (d.n > max) max = d.n; });
+    days.forEach(function (d, idx) {
+      var lv = d.n === 0 ? 0 : d.n < 5 ? 1 : d.n < 12 ? 2 : d.n < 25 ? 3 : d.n < 50 ? 4 : 5;
+      var label = (d.date.getMonth() + 1) + '月' + d.date.getDate() + '日　' +
+        (d.n ? d.n + ' 問（正解 ' + d.c + '）' : '学習なし');
+      cells += '<span class="sumi lv' + lv + (idx === days.length - 1 ? ' today' : '') +
+        '" title="' + esc(label) + '"></span>';
+    });
+    return '<div class="sumi-grid">' + cells + '</div>';
+  }
+
+  /* 分野別の習熟 */
+  var FIELDS = [
+    { t: '訓読の基礎', cats: ['訓読', '識別'] },
+    { t: '返り点', cats: ['返り点'] },
+    { t: '置き字', cats: ['置き字'] },
+    { t: '再読文字', cats: ['再読文字'] },
+    { t: '否定・禁止', cats: ['否定', '禁止', '二重否定', '部分否定'] },
+    { t: '疑問・反語', cats: ['疑問', '反語', '疑問反語'] },
+    { t: '使役・受身', cats: ['使役', '受身'] },
+    { t: '比較・選択・仮定', cats: ['比較', '選択', '仮定'] },
+    { t: '限定・累加ほか', cats: ['限定', '累加', '抑揚', '詠嘆', '願望'] },
+    { t: '書き下し', cats: ['書き下し'] },
+    { t: '重要語・頻出漢字', cats: ['重要語', '頻出漢字'] },
+    { t: '漢詩', cats: ['漢詩'] },
+    { t: '故事成語', cats: ['故事成語'] }
+  ];
+
+  function fieldStats() {
+    var uni = window.QuizGen.universe();
+    var srs = window.Store.state.srs;
+    var byCat = {};
+    uni.forEach(function (u) {
+      var b = byCat[u.cat] || (byCat[u.cat] = { total: 0, touched: 0, mastered: 0, r: 0, w: 0 });
+      b.total++;
+      var rec = srs[u.key];
+      if (rec) {
+        b.touched++;
+        b.r += rec.r; b.w += rec.w;
+        if (window.Store.isMastered(u.key)) b.mastered++;
+      }
+    });
+    return FIELDS.map(function (f) {
+      var o = { t: f.t, total: 0, touched: 0, mastered: 0, r: 0, w: 0 };
+      f.cats.forEach(function (c) {
+        var b = byCat[c];
+        if (!b) return;
+        o.total += b.total; o.touched += b.touched; o.mastered += b.mastered;
+        o.r += b.r; o.w += b.w;
+      });
+      return o;
+    }).filter(function (o) { return o.total > 0; });
+  }
+
+  /** 収録内容のうち、どれだけに触れたか */
+  function coverage() {
+    var srs = window.Store.state.srs;
+    var keys = Object.keys(srs);
+    function hit(test) {
+      var seen = {};
+      keys.forEach(function (k) { var id = test(k); if (id) seen[id] = 1; });
+      return Object.keys(seen).length;
+    }
+    return [
+      { t: '句形', n: hit(function (k) { var m = /^([a-z]{2}\d{2}):/.exec(k); return m && window.KUHO.some(function (x) { return x.id === m[1]; }) ? m[1] : null; }), all: window.KUHO.length, u: '句' },
+      { t: '漢詩', n: hit(function (k) { var m = /^(ks\d{2}):/.exec(k); return m ? m[1] : null; }), all: window.KANSHI.length, u: '首' },
+      { t: '故事成語', n: hit(function (k) { var m = /^(kj\d{2}):/.exec(k); return m ? m[1] : null; }), all: window.KOJI.length, u: '話' },
+      { t: '頻出漢字', n: hit(function (k) { return k.indexOf('kj:') === 0 ? k : null; }), all: window.KANJI.length, u: '字' }
+    ];
+  }
+
+  function screenKiroku() {
     var s = window.Store.state;
-    var items = window.Store.ACHIEVEMENTS.map(function (a) {
+    var chars = s.chars || 0;
+    var slatsAll = Math.floor(chars / SLAT_CHARS);
+    var maki = Math.floor(slatsAll / MAKI_SLATS);
+    var slats = slatsAll % MAKI_SLATS;
+    var today = window.Store.recentDays(1)[0];
+    var acc = s.answered ? Math.round(s.correct / s.answered * 100) : 0;
+    var flds = fieldStats();
+    var masteredAll = flds.reduce(function (a, f) { return a + f.mastered; }, 0);
+    var totalAll = flds.reduce(function (a, f) { return a + f.total; }, 0);
+    var weakN = window.Store.weakKeys().length;
+
+    var fieldHTML = flds.map(function (f) {
+      var mp = Math.round(f.mastered / f.total * 100);
+      var tp = Math.round(f.touched / f.total * 100);
+      var rate = (f.r + f.w) ? Math.round(f.r / (f.r + f.w) * 100) : null;
+      return '<div class="fld">' +
+        '<div class="fld-h"><b>' + esc(f.t) + '</b>' +
+          '<span>' + f.mastered + ' / ' + f.total + ' 習得</span></div>' +
+        '<div class="fld-bar"><i class="t" style="width:' + tp + '%"></i><i class="m" style="width:' + mp + '%"></i></div>' +
+        '<div class="fld-sub">' + (f.touched ? '挑戦 ' + f.touched + ' 問' + (rate !== null ? '・正答率 ' + rate + '%' : '') : 'まだ手つかず') + '</div>' +
+        '</div>';
+    }).join('');
+
+    var covHTML = coverage().map(function (c) {
+      var pct = Math.round(c.n / c.all * 100);
+      return '<div class="cov">' +
+        '<div class="cov-ring" style="--p:' + pct + '"><span>' + pct + '<small>%</small></span></div>' +
+        '<div class="cov-t">' + esc(c.t) + '</div>' +
+        '<div class="cov-n">' + c.n + ' / ' + c.all + ' ' + esc(c.u) + '</div>' +
+        '</div>';
+    }).join('');
+
+    var foeHTML = window.FOES.map(function (f) {
+      var got = (s.foesCleared || []).indexOf(f.id) !== -1;
+      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="' + esc(f.name) + '">' +
+        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
+        '<small>' + esc(got ? f.name : '？？？') + '</small></div>';
+    }).join('');
+
+    var achHTML = window.Store.ACHIEVEMENTS.map(function (a) {
       var got = s.ach.indexOf(a.id) !== -1;
       return '<div class="ach-item' + (got ? ' got' : '') + '">' +
-        '<div class="a-ico">' + a.ico + '</div>' +
+        '<div class="a-ico">' + esc(a.ico) + '</div>' +
         '<div class="a-t">' + esc(a.t) + '</div>' +
         '<div class="a-d">' + esc(a.d) + '</div></div>';
     }).join('');
+
     render(
-      '<div class="sec-h"><h2>実績</h2><div class="rule"></div>' +
+      '<div class="sec-h"><h2>学びの記録</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
-      '<p class="muted">' + s.ach.length + ' / ' + window.Store.ACHIEVEMENTS.length + ' 個を獲得</p>' +
-      '<div class="ach mt">' + items + '</div>' +
-      '<div class="sec-h"><h2>記録</h2><div class="rule"></div></div>' +
-      '<div class="stats">' +
-        '<div class="stat"><b>' + s.xp + '</b><span>修錬値</span></div>' +
-        '<div class="stat"><b>' + s.bestDay + '</b><span>連続日数の最高</span></div>' +
-        '<div class="stat"><b>' + Object.keys(s.srs).length + '</b><span>学習した問題数</span></div>' +
+
+      /* 今日 */
+      '<div class="card rec-today">' +
+        '<div class="rt-label">今日読んだ漢文</div>' +
+        '<div class="rt-num">' + fmtNum(today.chars) + '<small>字</small></div>' +
+        '<p class="rt-say">' + esc(tatoe(today.chars)) + '</p>' +
+        '<div class="rt-sub">今日の解答 ' + today.n + ' 問（正解 ' + today.c + '）　／　連続 ' + s.streak + ' 日</div>' +
       '</div>' +
+
+      /* 三つの数字 */
+      '<div class="rec-nums">' +
+        '<div class="rn"><b>' + fmtNum(chars) + '<small>字</small></b><span>読んだ漢文</span></div>' +
+        '<div class="rn"><b>' + fmtNum(masteredAll) + '<small>問</small></b><span>習得した問題</span></div>' +
+        '<div class="rn"><b>' + fmtNum(weakN) + '<small>問</small></b><span>要復習</span></div>' +
+      '</div>' +
+
+      /* 竹簡 */
+      '<div class="card mt">' +
+        '<div class="sec-min">綴じた竹簡</div>' +
+        '<div class="chikan-head"><b>' + maki + '</b> 巻 と <b>' + slats + '</b> 枚</div>' +
+        chikanHTML(slats, MAKI_SLATS) +
+        '<p class="muted center" style="margin-top:10px">' +
+          '竹簡は一枚におよそ ' + SLAT_CHARS + ' 字、' + MAKI_SLATS + ' 枚で一巻。' +
+          'あと ' + (SLAT_CHARS - (chars % SLAT_CHARS)) + ' 字で次の一枚が綴じられます。</p>' +
+        '<p class="rt-say center">' + esc(tatoe(chars)) + '</p>' +
+      '</div>' +
+
+      /* 墨あと */
+      '<div class="card mt">' +
+        '<div class="sec-min">日々の墨あと</div>' +
+        sumiHTML() +
+        '<div class="sumi-legend"><span>12週間前</span><i class="sumi lv0"></i><i class="sumi lv1"></i>' +
+          '<i class="sumi lv2"></i><i class="sumi lv3"></i><i class="sumi lv4"></i><i class="sumi lv5"></i><span>今日</span></div>' +
+        '<p class="muted center" style="margin-top:8px">たくさん解いた日ほど、墨が濃くなります。</p>' +
+        '<div class="stats" style="margin-top:14px">' +
+          '<div class="stat"><b>' + window.Store.activeDays() + '</b><span>学んだ日数</span></div>' +
+          '<div class="stat"><b>' + s.bestDay + '</b><span>連続日数の最高</span></div>' +
+          '<div class="stat"><b>' + hhmm(s.secs || 0) + '</b><span>学習時間の目安</span></div>' +
+        '</div>' +
+      '</div>' +
+
+      /* 分野別 */
+      '<div class="sec-h"><h2>分野別の習熟</h2><div class="rule"></div></div>' +
+      '<p class="muted">濃い帯は「習得した問題」（2回以上正解し、正解が誤答を上回るもの）。薄い帯は一度でも解いた問題です。</p>' +
+      '<div class="card mt fld-list">' + fieldHTML +
+        '<div class="fld-total">合計　' + masteredAll + ' / ' + totalAll + ' 問を習得</div>' +
+      '</div>' +
+
+      /* 踏破 */
+      '<div class="sec-h"><h2>収録内容の踏破</h2><div class="rule"></div></div>' +
+      '<div class="card cov-grid">' + covHTML + '</div>' +
+
+      /* 関門 */
+      '<div class="sec-h"><h2>関門の面々</h2><div class="rule"></div></div>' +
+      '<div class="card foe-row">' + foeHTML + '</div>' +
+
+      /* 実績 */
+      '<div class="sec-h"><h2>称号</h2><div class="rule"></div></div>' +
+      '<p class="muted">' + s.ach.length + ' / ' + window.Store.ACHIEVEMENTS.length + ' 個を獲得</p>' +
+      '<div class="ach mt">' + achHTML + '</div>' +
+
       '<div class="btn-row mt-l"><button class="btn ghost" data-act="reset">学習記録をリセット</button></div>'
     );
   }
@@ -461,7 +681,7 @@
     var q = G.qs[G.i];
     var ok = idx === q.a;
 
-    window.Store.record(q.key, ok);
+    window.Store.record(q.key, ok, kanjiCount(q.stem));
     if (ok) {
       G.correct++;
       G.combo++;
@@ -725,7 +945,7 @@
       if (G.step >= it.order.length) {
         G.done = true;
         var clean = G.mistakes === 0;
-        window.Store.record('kt:' + it.id, clean);
+        window.Store.record('kt:' + it.id, clean, it.chars.length);
         if (clean) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 100 + Math.min(100, (G.combo - 1) * 20); }
         else { G.combo = 0; G.wrong.push({ stem: it.chars.map(function (c) { return c.c; }).join(''), q: it.label + 'の読む順序', answer: it.yomi, exp: it.tip, your: null }); }
         renderKaeriten();
@@ -804,7 +1024,7 @@
     var ok = picked.length === ans.length && picked.every(function (v, i) { return v === ans[i]; });
 
     G.done = true;
-    window.Store.record('ok:' + it.id, ok);
+    window.Store.record('ok:' + it.id, ok, it.chars.length);
     if (ok) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 100 + Math.min(100, (G.combo - 1) * 20); }
     else {
       G.combo = 0;
@@ -883,7 +1103,7 @@
     var it = G.items[G.i];
     var ok = G.placed.every(function (v, i) { return v === i; });
     G.done = true;
-    window.Store.record('nb:' + it.id, ok);
+    window.Store.record('nb:' + it.id, ok, kanjiCount(it.kanbun));
     if (ok) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 120 + Math.min(120, (G.combo - 1) * 20); }
     else {
       G.combo = 0;
@@ -916,6 +1136,7 @@
     var m = modeById(id);
     if (!m) return screenHome();
     window.Store.touchDay();
+    window.Store.mark();
     stopTick();
     if (m.kind === 'choice') return startChoice(m);
     if (m.kind === 'battle') return startBattle(m);
@@ -930,7 +1151,7 @@
     if (to === 'zukan') return screenZukan();
     if (to === 'lessons') return screenLessons();
     if (to === 'shishu') return screenShishu();
-    if (to === 'ach') return screenAch();
+    if (to === 'ach') return screenKiroku();
     screenHome();
   }
 

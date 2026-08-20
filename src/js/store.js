@@ -14,6 +14,9 @@
     best: {},          // modeId -> best score
     plays: {},         // modeId -> 回数
     srs: {},           // questionKey -> { w:誤答数, r:正答数, t:最終学習(ms) }
+    days: {},          // 'Y-M-D' -> [解答数, 正解数, 読んだ字数]　日ごとの学習量（墨あと）
+    chars: 0,          // これまでに読んだ漢文の延べ字数
+    secs: 0,           // 学習時間の目安（秒）
     ach: [],           // 取得済み実績 id
     foesCleared: [],   // 道場破りで突破した関門の id
     theme: '',         // '', 'light', 'dark'
@@ -45,7 +48,9 @@
     { id: 'a8',  ico: '詩', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
     { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
     { id: 'a10', ico: '伝', t: '免許皆伝',   d: '道場破りで全ての関門を突破',      test: function (s) { return (s.foesCleared || []).length >= (window.FOES || []).length && (window.FOES || []).length > 0; } },
-    { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } }
+    { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } },
+    { id: 'a12', ico: '墨', t: '千字文',     d: '漢文を通算1000字読んだ',          test: function (s) { return (s.chars || 0) >= 1000; } },
+    { id: 'a13', ico: '万', t: '万巻の書',   d: '漢文を通算10000字読んだ',         test: function (s) { return (s.chars || 0) >= 10000; } }
   ];
 
   var state = null;
@@ -101,17 +106,55 @@
     return { cur: cur, next: next, pct: Math.max(0, Math.min(100, Math.round(got / span * 100))) };
   }
 
-  /** 1問ぶんの結果を記録 */
-  function record(key, ok) {
+  /** 直前の解答時刻。学習時間の見積もりに使う */
+  var lastAt = 0;
+  function mark() { lastAt = Date.now(); }
+
+  /** 1問ぶんの結果を記録する。chars はその問題で読んだ漢文の字数。 */
+  function record(key, ok, chars) {
     state.answered++;
     if (ok) state.correct++;
+    state.chars += (chars || 0);
+
+    // 学習時間：前の解答からの経過を足す。離席ぶんを拾わないよう 90 秒で頭打ちにする。
+    var now = Date.now();
+    if (lastAt && now - lastAt < 90000) state.secs += Math.round((now - lastAt) / 1000);
+    lastAt = now;
+
+    var d = today();
+    var rec = state.days[d] || [0, 0, 0];
+    if (rec.length < 3) rec[2] = 0;                 // 旧形式からの移行
+    rec[0]++; if (ok) rec[1]++; rec[2] += (chars || 0);
+    state.days[d] = rec;
+
     if (key) {
       var s = state.srs[key] || { w: 0, r: 0, t: 0 };
       if (ok) s.r++; else s.w++;
-      s.t = Date.now();
+      s.t = now;
       state.srs[key] = s;
     }
   }
+
+  /** 直近 n 日ぶんの学習量。カレンダー表示に使う。 */
+  function recentDays(n) {
+    var out = [], base = new Date();
+    for (var i = n - 1; i >= 0; i--) {
+      var t = new Date(base.getFullYear(), base.getMonth(), base.getDate() - i);
+      var k = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate();
+      var v = state.days[k] || [0, 0, 0];
+      out.push({ key: k, date: t, n: v[0], c: v[1], chars: v[2] || 0 });
+    }
+    return out;
+  }
+
+  /** その問題を「習得した」とみなすか（2回以上正解し、正解が誤答を上回る） */
+  function isMastered(key) {
+    var s = state.srs[key];
+    return !!(s && s.r >= 2 && s.r > s.w);
+  }
+
+  /** 学習した日数 */
+  function activeDays() { return Object.keys(state.days).length; }
 
   /** 苦手度スコア（大きいほど優先して出題） */
   function weakness(key) {
@@ -159,12 +202,14 @@
   function reset() {
     state = Object.assign({}, DEFAULT, { theme: state.theme, vertical: state.vertical });
     state.best = {}; state.plays = {}; state.srs = {}; state.ach = []; state.foesCleared = [];
+    state.days = {}; state.chars = 0; state.secs = 0;
     save();
   }
 
   window.Store = {
     load: load, save: save, touchDay: touchDay,
     rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys,
+    mark: mark, recentDays: recentDays, isMastered: isMastered, activeDays: activeDays,
     finishSession: finishSession, reset: reset,
     RANKS: RANKS, ACHIEVEMENTS: ACHIEVEMENTS,
     get state() { return state; }

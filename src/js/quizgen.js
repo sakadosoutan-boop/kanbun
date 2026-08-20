@@ -357,5 +357,46 @@
     return all.filter(function (q) { return keys[q.key]; });
   }
 
-  window.QuizGen = { build: build, pick: pick, weakPool: weakPool, shuffle: shuffle, makeChoices: makeChoices };
+  /* ---------------- 学習量の集計に使う「問題の全体像」 ----------------
+     build() は誤答の選び方に乱数が入るため、実行のたびに数個ぶれる。
+     分野ごとの母数を安定させたいので、データから決定的に列挙する。 */
+  function universe() {
+    var out = [];
+    var add = function (key, cat) { out.push({ key: key, cat: cat }); };
+
+    window.KUHO.forEach(function (k) {
+      add(k.id + ':read', k.cat);
+      add(k.id + ':mean', k.cat);
+      var mis = (window.MISYOMI || {})[k.id];
+      if (k.ex && k.ex.length && k.ex[0].y && mis && mis.length >= 3) add(k.id + ':ex', k.cat);
+      if (k.cat === '再読文字') {
+        add(k.id + ':second', k.cat);
+        add(k.id + ':katsu', k.cat);
+        var sd = window.KUHO.filter(function (x) { return x.cat === '再読文字'; });
+        if (sd.filter(function (x) { return x.read === k.read; }).length === 1) add(k.id + ':rev-read', k.cat);
+        var uniqMean = sd.filter(function (x) { return x.mean === k.mean; }).length === 1 &&
+          !sd.some(function (x) {
+            return x.id !== k.id && (x.mean.indexOf(k.mean) !== -1 || k.mean.indexOf(x.mean) !== -1);
+          });
+        if (uniqMean) add(k.id + ':rev-mean', k.cat);
+      }
+    });
+    window.MONDAI.forEach(function (m) { add(m.id, m.cat); });
+    window.KANJI.forEach(function (k) { if (k.yomi[0] !== '—') add('kj:' + k.c, '頻出漢字'); });
+    window.KOJI.forEach(function (k) { add(k.id + ':mean', '故事成語'); add(k.id + ':rev', '故事成語'); });
+    window.KANSHI.forEach(function (p) {
+      add(p.id + ':form', '漢詩');
+      if (p.regular) { add(p.id + ':rhyme', '漢詩'); add(p.id + ':rule', '漢詩'); }
+      if (p.tsuiku && p.tsuiku.length) add(p.id + ':tsuiku', '漢詩');
+    });
+    (window.KAERITEN || []).forEach(function (k) { add('kt:' + k.id, '返り点'); });
+    (window.OKIJI || []).forEach(function (o) { add('ok:' + o.id, '置き字'); });
+    (window.NARABEKAE || []).forEach(function (n) { add('nb:' + n.id, '書き下し'); });
+    return out;
+  }
+
+  window.QuizGen = {
+    build: build, pick: pick, weakPool: weakPool,
+    shuffle: shuffle, makeChoices: makeChoices, universe: universe
+  };
 })();
