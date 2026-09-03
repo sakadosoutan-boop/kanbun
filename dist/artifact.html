@@ -230,7 +230,9 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .q-main { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .q-main .q-cat { justify-self: start; }
 .q-aside { display: grid; gap: 6px; justify-items: center; min-width: 0; }
-.q-stem-wrap { display: flex; justify-content: center; width: 100%; overflow-x: auto; }
+/* width:100% を付けると、overflow-x:auto と相まって grid の auto 列が
+   最小幅（≒0）に潰れ、縦組みの柱が見切れる。幅は内容に決めさせる。 */
+.q-stem-wrap { display: flex; justify-content: center; max-width: 100%; overflow-x: auto; }
 .q-cat { display: inline-block; font-size: 11px; letter-spacing: .12em; color: var(--ai); background: color-mix(in srgb, var(--ai) 12%, transparent); border: 1px solid color-mix(in srgb, var(--ai) 28%, transparent); padding: 2px 10px; border-radius: 99px; }
 .q-stem {
   font-family: var(--mincho); font-size: clamp(20px, 5.2vw, 27px); letter-spacing: .1em;
@@ -448,9 +450,8 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   letter-spacing: .14em;
   /* 縦組みは inline サイズ（画面上の高さ）が確定しないと 1 列に潰れる。
      字数 --n から必要な高さを求め、画面に収まらないぶんは列を折り返させる。 */
-  --adv: 1.22em;
   --cap: min(38vh, 320px);   /* スマホ縦。これを超える長さは列を折り返す */
-  height: min(var(--cap), calc(var(--n, 12) * var(--adv) + 8px));
+  height: min(var(--cap), calc(var(--n, 12) * var(--adv-stem, 1.24em) + 12px));
   text-align: start;
   padding-block: 2px;             /* 返り点が左にはみ出すぶんの余白 */
 }
@@ -466,7 +467,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .vert .p-lines { align-items: flex-start; }
 .vert .p-lines .p-line {
   writing-mode: vertical-rl; text-orientation: mixed; margin: 0; line-height: 2;
-  height: calc(var(--n, 7) * 1.26em + 6px);
+  height: calc(var(--n, 7) * var(--adv-line, 1.28em) + 12px);
 }
 
 /* 句法図鑑の例文：白文を右に縦組み、書き下し・訳を左に置く */
@@ -478,7 +479,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .vert .ex-k {
   grid-column: 2; grid-row: 1 / span 4;
   writing-mode: vertical-rl; text-orientation: mixed;
-  height: min(250px, calc(var(--n, 8) * 1.2em + 6px));
+  height: min(250px, calc(var(--n, 8) * var(--adv-ex, 1.22em) + 12px));
   line-height: 2.1; letter-spacing: .1em;
 }
 
@@ -538,12 +539,15 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 
 /* --- 横長（タブレット横・PC）：漢文を右の柱に、選択肢を左に置く --- */
 @media (min-width: 760px) and (orientation: landscape) {
-  .q-card.two { grid-template-columns: minmax(0, 1fr) auto; column-gap: 26px; }
+  /* 右の柱は内容ぶんの幅にするが、広くなりすぎないよう fit-content で頭打ちにする。
+     ここで auto 列にすると、中の overflow-x:auto が最小幅 0 を持ち込んで柱が潰れる。 */
+  .q-card.two { grid-template-columns: minmax(0, 1fr) fit-content(42%); column-gap: 26px; }
   .q-card.two .q-main  { order: 1; }
-  .q-card.two .q-aside { order: 2; border-inline-start: 1px solid var(--line); padding-inline-start: 24px; }
+  .q-card.two .q-aside { order: 2; border-inline-start: 1px solid var(--line); padding-inline-start: 24px; max-width: none; }
+  .q-card.two .q-stem-wrap, .q-card.two .stem-lines { overflow-x: visible; }
   .vert .q-card.two .q-stem { --cap: min(62vh, 480px); }
   .q-card.two .q-aside { align-self: stretch; }
-  .q-card.two .q-aside { max-width: 46%; }
+
 }
 
 /* --- 3 列＋広め（PC・タブレット横） --- */
@@ -574,7 +578,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 @media (orientation: landscape) and (max-height: 560px) {
   .vert .q-stem,
   .vert .q-card.two .q-stem { --cap: min(34vh, 165px); }
-  .q-card.two .q-aside { max-width: 42%; padding-inline-start: 16px; }
+  .q-card.two .q-aside { padding-inline-start: 16px; }
   .vert .p-lines .p-line { font-size: 17px; }
 }
 
@@ -611,15 +615,63 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 /* ============================================================
    道場破り
    ============================================================ */
-.foe-card { text-align: center; display: grid; gap: 10px; justify-items: center; }
-.foe-glyph {
-  width: 42px; height: 42px; flex: none; border-radius: 50%; display: grid; place-items: center;
-  font-family: var(--mincho); font-size: 21px; line-height: 1; color: #fff;
-  background: linear-gradient(150deg, var(--shu), color-mix(in srgb, var(--shu) 55%, #4a1410));
-  box-shadow: inset 0 -2px 5px rgba(0,0,0,.22), 0 2px 10px color-mix(in srgb, var(--shu) 34%, transparent);
+
+/* ---- 水墨画のキャラクター ---------------------------------- */
+/* 墨の濃淡はすべて currentColor の不透明度で作る。テーマを切り替えても
+   紙と墨の関係が保たれるようにするため。 */
+/* 濃さは opacity ではなく fill-opacity / stroke-opacity で持たせる。
+   こうしておくと、各図形が個別に指定する濃さが「絶対値」として素直に効く。 */
+.ink { display: block; width: 100%; height: 100%; overflow: visible; }
+.ink .w  { fill: currentColor; fill-opacity: .085; }
+.ink .m  { fill: currentColor; fill-opacity: .42; }
+.ink .b  { fill: currentColor; fill-opacity: .93; }
+.ink .s  { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-opacity: .85; }
+.ink .hl { fill: var(--card); }
+.ink .hl-s { stroke: var(--card); stroke-opacity: .9; }
+.ink .a  { fill: var(--shu); }
+
+/* 朱印は円の外にはみ出すので、絵と印を包む枠を一段かませる */
+.foe-figure {
+  --sz: 46px;
+  position: relative; display: inline-grid; flex: none;
+  width: var(--sz); height: var(--sz);
 }
-.foe-glyph.big { width: 78px; height: 78px; font-size: 38px; }
-.foe-glyph.beaten { filter: grayscale(.75); opacity: .8; }
+.foe-portrait {
+  position: relative; width: 100%; height: 100%;
+  border-radius: 50%; overflow: hidden; color: var(--ink);
+  display: grid; place-items: center;
+  background:
+    radial-gradient(circle at 34% 26%, var(--card), color-mix(in srgb, var(--paper-2) 88%, var(--card)));
+  border: 1px solid var(--line);
+  box-shadow: inset 0 -4px 12px color-mix(in srgb, var(--ink) 9%, transparent);
+}
+.foe-portrait > svg { width: 88%; height: 88%; }
+.foe-figure.big { --sz: clamp(140px, 42vw, 176px); }
+.foe-figure.big .foe-portrait {
+  border-width: 2px; border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
+  box-shadow: inset 0 -8px 26px color-mix(in srgb, var(--ink) 10%, transparent), var(--shadow);
+}
+.foe-figure.mini { --sz: 40px; }
+.foe-figure.hud-foe { --sz: 44px; }
+/* 未踏の相手は姿を伏せる */
+.foe-figure.unknown .foe-portrait { color: var(--ink-3); }
+.foe-figure.unknown .ink { filter: blur(2.4px); opacity: .45; }
+
+/* 「破」の朱印 */
+.foe-figure.beaten .foe-portrait { filter: grayscale(.85); opacity: .82; }
+.foe-stamp {
+  position: absolute; inset: auto -4% -2% auto;
+  width: 29%; min-width: 15px; aspect-ratio: 1; border-radius: 4px;
+  display: grid; place-items: center;
+  font-family: var(--mincho); font-size: calc(var(--sz) * .17); line-height: 1;
+  color: #fff; border: 1px solid color-mix(in srgb, var(--shu) 70%, #000);
+  background: var(--shu);
+  box-shadow: 0 1px 5px color-mix(in srgb, var(--shu) 45%, transparent);
+  transform: rotate(-11deg);
+}
+.foe-figure.mini .foe-stamp { width: 34%; font-size: 8.5px; border-radius: 3px; }
+
+.foe-card { text-align: center; display: grid; gap: 10px; justify-items: center; }
 .foe-name { font-family: var(--mincho); font-size: 22px; letter-spacing: .07em; line-height: 1.4; }
 .foe-name small { display: block; font-family: var(--gothic); font-size: 11px; letter-spacing: .12em; color: var(--ink-3); }
 .foe-taunt {
@@ -629,16 +681,94 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 .gate-clear { font-family: var(--mincho); font-size: clamp(24px, 6vw, 32px); letter-spacing: .1em; color: var(--shu); margin-top: 8px; }
 
-/* 対戦中の HUD */
-.foe-mini { flex: 1; min-width: 0; display: grid; gap: 4px; }
-.foe-mini b { font-family: var(--mincho); font-size: 13.5px; letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ki { display: block; height: 7px; border-radius: 99px; background: var(--paper-2); border: 1px solid var(--line); overflow: hidden; }
-.ki > i {
-  display: block; height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--shu) 70%, #000), var(--shu));
-  transition: width .45s cubic-bezier(.2,.8,.2,1);
+/* 関門の道のり（第一関門から第八関門まで） */
+.gate-road { display: flex; align-items: center; gap: 5px; justify-content: center; margin-bottom: 4px; }
+.gate-road i {
+  width: 9px; height: 9px; border-radius: 50%; flex: none;
+  background: var(--paper-2); border: 1px solid var(--line);
 }
-.ki.low > i { background: linear-gradient(90deg, var(--kin), var(--shu)); }
+.gate-road i.done { background: var(--ink-3); border-color: transparent; }
+.gate-road i.now  { background: var(--shu); border-color: transparent; transform: scale(1.5); box-shadow: 0 0 0 3px color-mix(in srgb, var(--shu) 18%, transparent); }
+.gate-road span { flex: 1; max-width: 18px; height: 1px; background: var(--line); }
+
+/* 相手の見どころ（分野・必要正解数） */
+.foe-facts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.foe-facts b {
+  font: 500 11.5px/1.6 var(--gothic); letter-spacing: .08em; color: var(--ink-2);
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px 11px;
+}
+.foe-facts b.shu { color: var(--shu); border-color: var(--shu-soft); background: color-mix(in srgb, var(--shu) 8%, transparent); }
+
+/* ---- 対戦盤（HUD） ----------------------------------------- */
+.bhud { display: grid; gap: 9px; }
+.bhud-row { display: flex; align-items: center; gap: 11px; }
+.foe-mini { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.foe-mini b {
+  font-family: var(--mincho); font-size: 14px; letter-spacing: .05em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 気：残りを珠の数で見せる。棒より「あと何回当てればよいか」が数えやすい */
+.ki-pips { display: flex; gap: 4px; align-items: center; max-width: 250px; }
+.ki-pips i {
+  flex: 1 1 0; min-width: 6px; height: 8px; border-radius: 99px;
+  background: var(--paper-2); border: 1px solid var(--line);
+  transition: background .3s, border-color .3s;
+}
+.ki-pips i.on {
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 62%, var(--paper)), var(--ink-2));
+}
+.ki-pips.low i.on { background: linear-gradient(180deg, var(--kin), color-mix(in srgb, var(--kin) 60%, var(--shu))); }
+.ki-label { font-size: 10.5px; letter-spacing: .14em; color: var(--ink-3); flex: none; }
+
+/* 体力：朱の玉。失うと輪郭だけ残る */
+.life-row { display: flex; align-items: center; gap: 10px; }
+.life-row .lbl { font-size: 11px; letter-spacing: .16em; color: var(--ink-3); flex: none; }
+.life { display: flex; gap: 7px; }
+.life i {
+  width: 19px; height: 19px; border-radius: 50%; flex: none;
+  background: radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--shu) 40%, #fff), var(--shu));
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--shu) 40%, transparent);
+  transition: transform .2s;
+}
+.life i.gone {
+  background: none; box-shadow: none;
+  border: 2px solid var(--line); opacity: .8;
+}
+.life.warn i:not(.gone) { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.14); } }
+
+/* 命中・被弾の演出 */
+@keyframes foeHit {
+  0%   { transform: translateX(0)   rotate(0); }
+  25%  { transform: translateX(-7px) rotate(-5deg); }
+  55%  { transform: translateX(6px)  rotate(4deg); }
+  100% { transform: translateX(0)   rotate(0); }
+}
+.foe-figure.hit { animation: foeHit .42s cubic-bezier(.36,.07,.19,.97); }
+.foe-figure.hit .foe-portrait::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--shu); animation: fadeOut .55s ease-out forwards;
+}
+@keyframes fadeOut { from { opacity: .55; } to { opacity: 0; } }
+.life.dmg i.gone { animation: crack .45s ease-out; }
+@keyframes crack {
+  0%   { transform: scale(1.55); }
+  60%  { transform: scale(.82); }
+  100% { transform: scale(1); }
+}
+/* 相手の反応 */
+.foe-say {
+  margin: 0 0 11px; font-family: var(--mincho); font-size: 14.5px; letter-spacing: .04em;
+  line-height: 1.7; color: var(--ink-2); display: flex; align-items: center; gap: 10px;
+  animation: pop .25s cubic-bezier(.2,.8,.2,1);
+}
+.foe-say .foe-figure { --sz: 34px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .foe-figure.hit, .life.dmg i, .life.warn i:not(.gone), .foe-say { animation: none; }
+}
 
 /* ============================================================
    返り点ルートの縦組みを一本の列として見せる
@@ -771,11 +901,19 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 
 /* 関門コレクション */
-.foe-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 8px; text-align: center; }
-.foe-slot { display: grid; justify-items: center; gap: 5px; opacity: .34; filter: grayscale(1); transition: all .2s; }
-.foe-slot.got { opacity: 1; filter: none; }
+.foe-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 8px; text-align: center; }
+.foe-slot { display: grid; justify-items: center; gap: 6px; transition: opacity .2s; }
+.foe-slot:not(.got) { opacity: .6; }
 .foe-slot small { font-size: 10.5px; color: var(--ink-3); line-height: 1.4; }
+.foe-slot.got small { color: var(--ink-2); }
 @media (min-width: 620px) { .foe-row { grid-template-columns: repeat(8, 1fr); } }
+
+/* 設問中の漢詩：句ごとに列を分ける */
+.stem-lines { margin: 2px 0; }
+.vert .stem-lines { gap: .3em; max-width: 100%; overflow-x: auto; padding-block: 2px; }
+.stem-lines .p-line { font-family: var(--mincho); font-size: clamp(17px, 4.4vw, 21px); letter-spacing: .12em; }
+:not(.vert) .stem-lines .p-line { text-align: center; line-height: 1.9; }
+.vert .stem-lines .p-line { max-height: min(40vh, 330px); }
 
 </style>
 <header class="topbar">
@@ -1898,6 +2036,8 @@ window.MISYOMI = {
  * ki    : 突破に必要な正解数（相手の「気」）
  * cats  : 出題する分野（KUHO の cat と MONDAI の cat の両方の表記を含める）
  * quote : 相手が名乗る一句（すべて原典からの引用）
+ * hit   : こちらが正解したときの相手の反応
+ * miss  : こちらが誤ったときの相手の反応
  */
 window.FOES = [
   {
@@ -1906,7 +2046,8 @@ window.FOES = [
     cats: ['訓読', '否定', '禁止'],
     quote: '井蛙不可以語於海', qyomi: '井蛙は以て海を語るべからず。',
     taunt: 'この井戸のほかに、いったい何があるというのだ。まずは訓読と否定、基本の型で相手をしてやろう。',
-    beaten: '……海とは、そんなに広いものだったのか。行くがよい。'
+    beaten: '……海とは、そんなに広いものだったのか。行くがよい。',
+    hit: 'むっ、井戸の外の言葉か。', miss: 'ふん、その程度か。'
   },
   {
     id: 'f2', glyph: '雀', name: '燕雀', kana: 'えんじゃく',
@@ -1914,7 +2055,8 @@ window.FOES = [
     cats: ['疑問', '反語', '疑問反語'],
     quote: '燕雀安知鴻鵠之志哉', qyomi: '燕雀安くんぞ鴻鵠の志を知らんや。',
     taunt: 'どうして小雀に大鳥の志が分かろうか——さて、その「どうして」は疑問か、反語か。',
-    beaten: '文末の「ンヤ」を見抜かれたか。志ある者よ、先へ進め。'
+    beaten: '文末の「ンヤ」を見抜かれたか。志ある者よ、先へ進め。',
+    hit: '……ぐっ、志があるな。', miss: '小雀にも及ばぬわ。'
   },
   {
     id: 'f3', glyph: '兎', name: '守株の農夫', kana: 'しゅしゅののうふ',
@@ -1922,7 +2064,8 @@ window.FOES = [
     cats: ['再読文字'],
     quote: '因釈其耒而守株', qyomi: '因りて其の耒を釈きて株を守る。',
     taunt: 'わしは待つ。ひたすら待つ。「未だ」「将に」「当に」——待つ者の言葉なら、わしに聞け。',
-    beaten: '二度読む字を、二度とも読み分けたか。……鍬を取り直すとしよう。'
+    beaten: '二度読む字を、二度とも読み分けたか。……鍬を取り直すとしよう。',
+    hit: '待っておるだけでは、勝てぬか。', miss: 'まだ待つ気か。わしと同じだな。'
   },
   {
     id: 'f4', glyph: '矛', name: '矛盾の商人', kana: 'むじゅんのしょうにん',
@@ -1930,7 +2073,8 @@ window.FOES = [
     cats: ['二重否定', '部分否定'],
     quote: '以子之矛陥子之盾、何如', qyomi: '子の矛を以て子の盾を陥さば、何如。',
     taunt: '通さぬ盾と、通す矛。二つ重ねた否定のからくりを、解いてみせろ。',
-    beaten: 'つじつまが合わぬのは、わしの口上だけであったか。'
+    beaten: 'つじつまが合わぬのは、わしの口上だけであったか。',
+    hit: 'そ、その盾は通さぬはずが……。', miss: '口上どおり、こちらの勝ちだ。'
   },
   {
     id: 'f5', glyph: '狐', name: '虎の威を借る狐', kana: 'とらのいをかるきつね',
@@ -1938,7 +2082,8 @@ window.FOES = [
     cats: ['使役', '受身'],
     quote: '天帝使我長百獣', qyomi: '天帝我をして百獣に長たらしむ。',
     taunt: '「しむ」か「らる」か。させるのか、されるのか。取り違えれば、虎の餌だ。',
-    beaten: '威を借りていたのは、こちらだったな。'
+    beaten: '威を借りていたのは、こちらだったな。',
+    hit: '虎が、うしろで笑うておるわ。', miss: '威を借りるは、そちらの番か。'
   },
   {
     id: 'f6', glyph: '蝶', name: '胡蝶', kana: 'こちょう',
@@ -1946,7 +2091,8 @@ window.FOES = [
     cats: ['限定', '累加', '抑揚', '詠嘆', '願望'],
     quote: '不知周之夢為胡蝶与', qyomi: '周の夢に胡蝶と為るかを知らず。',
     taunt: 'ただ夢か、夢だけではないのか。「たダ〜ノミ」「いはンヤ〜ヲヤ」——境目を見極めよ。',
-    beaten: 'ゆめか、まことか。……いずれにせよ、みごと。'
+    beaten: 'ゆめか、まことか。……いずれにせよ、みごと。',
+    hit: 'ひらり——見切られたか。', miss: '夢と現の、どちらにおる。'
   },
   {
     id: 'f7', glyph: '李', name: '李白', kana: 'りはく',
@@ -1954,7 +2100,8 @@ window.FOES = [
     cats: ['漢詩', '比較', '選択'],
     quote: '挙頭望明月、低頭思故郷', qyomi: '頭を挙げて明月を望み、頭を低れて故郷を思ふ。',
     taunt: '酒を一杯。……そのあいだに、絶句と律詩の見分けくらいはつくだろうな。',
-    beaten: '押韻も対句も押さえたか。よい耳をしている。'
+    beaten: '押韻も対句も押さえたか。よい耳をしている。',
+    hit: 'よい。杯を置いて相手をしよう。', miss: 'その耳では、韻は聞こえぬな。'
   },
   {
     id: 'f8', glyph: '孔', name: '孔子', kana: 'こうし',
@@ -1962,9 +2109,305 @@ window.FOES = [
     cats: null,   // null = 全分野
     quote: '温故而知新、可以為師矣', qyomi: '故きを温めて新しきを知れば、以て師と為るべし。',
     taunt: '学びて時に之を習う。さて——ここまで温めてきたものを、問おう。',
-    beaten: '過ちて改めざる、是を過ちと謂う。おまえは、よく改めた。免許皆伝である。'
+    beaten: '過ちて改めざる、是を過ちと謂う。おまえは、よく改めた。免許皆伝である。',
+    hit: '学びて時に之を習う、とはこのことか。', miss: '過ちて改めざる、是を過ちと謂う。'
   }
 ];
+
+</script>
+<script>
+/* 道場破りの相手の水墨画（インラインSVG）
+ *
+ * 色は一切持たせず、すべて currentColor の濃淡だけで描く。紙の色・墨の色は
+ * テーマ変数から決まるので、明暗どちらのテーマでも「紙に墨」の関係が保たれる。
+ *
+ * 筆味は feTurbulence + feDisplacementMap で輪郭を毛羽立たせて出す。
+ * 三段階の filter を使い分ける：
+ *   sumi-w  淡墨のにじみ（大きく揺らして、ぼかす）
+ *   sumi-b  濃墨のかたまり（中くらいに揺らす）
+ *   sumi-s  筆線・細部（わずかに揺らす。崩れると線が切れるため）
+ *
+ * クラス
+ *   .w  淡墨   .m  中墨   .b  濃墨   .s  筆線   .hl 白抜き   .a 朱
+ */
+(function () {
+  'use strict';
+
+  /* フィルタ定義。DOM に一度だけ差し込む（id は文書内で共有される） */
+  window.FOE_ART_DEFS =
+    '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">' +
+    '<defs>' +
+      '<filter id="sumi-w" x="-30%" y="-30%" width="160%" height="160%">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.021" numOctaves="3" seed="11" result="n"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>' +
+        '<feGaussianBlur stdDeviation="2.1"/>' +
+      '</filter>' +
+      '<filter id="sumi-b" x="-25%" y="-25%" width="150%" height="150%">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.052" numOctaves="4" seed="5" result="n"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>' +
+      '</filter>' +
+      '<filter id="sumi-s" x="-25%" y="-25%" width="150%" height="150%">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.075" numOctaves="3" seed="19" result="n"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="1.9" xChannelSelector="R" yChannelSelector="G"/>' +
+      '</filter>' +
+    '</defs></svg>';
+
+  /* wash: 背景のにじみ / body: 墨のかたまり / line: 筆線 / fine: にじませない細部 */
+  function svg(wash, body, line, fine) {
+    return '<svg class="ink" viewBox="0 0 120 120" role="img" aria-hidden="true" ' +
+      'xmlns="http://www.w3.org/2000/svg">' +
+      '<g filter="url(#sumi-w)">' + wash + '</g>' +
+      '<g filter="url(#sumi-b)">' + body + '</g>' +
+      '<g filter="url(#sumi-s)">' + (line || '') + '</g>' +
+      (fine || '') +
+      '</svg>';
+  }
+
+  window.FOE_ART = {
+
+    /* ── 井の中の蛙 ── 井戸の底からこちらを見上げる蛙 ── */
+    f1: svg(
+      '<ellipse class="w" cx="60" cy="70" rx="45" ry="37"/>' +
+      /* 井戸の底の水たまり */
+      '<path class="w" d="M14 104q46 12 92-4v7q-46 14-92 4z"/>',
+
+      /* 後脚 */
+      '<path class="b" d="M25 74c-11 5-17 18-11 27 6 9 20 9 25-1 5-8 1-18-6-23z"/>' +
+      '<path class="b" d="M95 74c11 5 17 18 11 27-6 9-20 9-25-1-5-8-1-18 6-23z"/>' +
+      /* 胴 */
+      '<path class="b" d="M60 46c21 0 37 13 37 29 0 15-16 26-37 26S23 90 23 75c0-16 16-29 37-29z"/>' +
+      /* 目のふくらみ */
+      '<circle class="b" cx="42" cy="45" r="15.5"/>' +
+      '<circle class="b" cx="78" cy="45" r="15.5"/>' +
+      /* 背の濃淡 */
+      '<path class="m" d="M38 62c14-7 30-7 44 0-6 9-16 13-22 13s-16-4-22-13z" fill-opacity=".3"/>',
+
+      /* 口・前脚 */
+      '<path class="s" d="M40 76q20 13 40 0"/>' +
+      '<path class="s" d="M47 96q-5 9 1 14"/>' +
+      '<path class="s" d="M73 96q5 9-1 14"/>',
+
+      /* 目 */
+      '<circle class="hl" cx="42" cy="44" r="8.6"/>' +
+      '<circle class="hl" cx="78" cy="44" r="8.6"/>' +
+      '<circle class="b" cx="43" cy="46" r="4.9"/>' +
+      '<circle class="b" cx="79" cy="46" r="4.9"/>'
+    ),
+
+    /* ── 燕雀 ── 枝にとまる雀 ── */
+    f2: svg(
+      '<ellipse class="w" cx="62" cy="54" rx="42" ry="34"/>' +
+      '<path class="w" d="M6 96q54 14 110-6v9q-56 20-110 6z"/>',
+
+      /* 胴 */
+      '<path class="b" d="M48 36c19-8 38 2 45 19 7 18-2 35-19 41-19 7-40-1-46-17-6-16 2-36 20-43z"/>' +
+      /* 頭 */
+      '<circle class="b" cx="44" cy="38" r="18"/>' +
+      /* くちばし */
+      '<path class="b" d="M26 36l-17 4 16 8z"/>' +
+      /* 尾（先を細くする） */
+      '<path class="b" d="M84 70l30 6-27 12-6-8z"/>' +
+      /* 翼 */
+      '<path class="m" d="M58 52c15-3 28 5 33 18-10 9-26 8-35-2-5-6-4-14 2-16z"/>' +
+      /* 頬の白 */
+      '<path class="m" fill-opacity=".25" d="M34 44c7-4 15-3 19 2-4 6-12 8-18 5z"/>',
+
+      /* 脚 */
+      '<path class="s" style="stroke-width:2.4" d="M55 92v9M67 91v10"/>' +
+      /* 枝 */
+      '<path class="s" style="stroke-width:4.5" d="M10 99q36 9 100-5"/>' +
+      '<path class="s" style="stroke-width:2.4" d="M40 100l-9 9M84 96l7 9"/>',
+
+      '<circle class="hl" cx="40" cy="33" r="4.6"/>' +
+      '<circle class="b" cx="40" cy="33" r="2.3"/>'
+    ),
+
+    /* ── 守株の農夫 ── 切り株のかたわらで身構える兎 ── */
+    f3: svg(
+      '<ellipse class="w" cx="52" cy="70" rx="44" ry="34"/>' +
+      '<path class="w" d="M8 100q52 12 106-4v8q-54 16-106 4z"/>',
+
+      /* 切り株（斧の跡が残る、いびつな断面） */
+      '<path class="b" d="M75 64l6-6 9 3 8-4 8 5-4 38c0 3-2 4-5 4H82c-3 0-5-1-5-4z"/>' +
+      /* 断面は紙の色に近く抜き、そこに年輪を描く */
+      '<ellipse class="hl" cx="91" cy="64" rx="15" ry="5.6" fill-opacity=".9"/>' +
+      /* 兎の胴 */
+      '<path class="b" d="M40 54c15 0 26 12 26 26 0 12-9 20-24 20-16 0-26-8-26-20 0-14 9-26 24-26z"/>' +
+      /* 頭 */
+      '<circle class="b" cx="32" cy="50" r="15"/>' +
+      /* 耳（先をすぼめる） */
+      '<path class="b" d="M24 40c-6-17-5-30 1-30 7 0 9 13 6 29z"/>' +
+      '<path class="b" d="M38 40c1-17 7-29 13-27 5 2 1 14-6 29z"/>' +
+      /* 背の濃淡 */
+      '<path class="m" fill-opacity=".28" d="M30 62c12-4 24 0 30 9-9 5-24 5-33-1z"/>',
+
+      /* 年輪 */
+      '<path class="s" style="stroke-width:1.7" stroke-opacity=".8" d="M87 64q4-3 7 0M83 66q10-7 17-2"/>' +
+      /* 樹皮の割れ */
+      '<path class="s" style="stroke-width:1.8" stroke-opacity=".3" d="M84 76q-1 12 1 22M99 78q1 10 0 20"/>' +
+      /* 鼻・口 */
+      '<path class="s" style="stroke-width:2" d="M20 55q4 5 9 3"/>' +
+      /* 耳の内側 */
+      '<path class="s" style="stroke-width:1.6" stroke-opacity=".45" d="M23 36q-3-12 0-19M40 36q1-12 6-19"/>',
+
+      '<circle class="hl" cx="25" cy="49" r="3.8"/>' +
+      '<circle class="b" cx="25" cy="50" r="1.9"/>' +
+      /* 尾 */
+      '<circle class="hl" cx="64" cy="72" r="6"/>'
+    ),
+
+    /* ── 矛盾の商人 ── 矛と盾を売り立てる ── */
+    f4: svg(
+      '<ellipse class="w" cx="60" cy="62" rx="45" ry="41"/>',
+
+      /* 矛の柄（下ほど太く） */
+      '<path class="b" d="M22 112l6 3 72-88-5-3z"/>' +
+      /* 矛先 */
+      '<path class="b" d="M96 24l3-7 9-12 0 16-6 9z"/>' +
+      /* 商人 */
+      '<circle class="b" cx="68" cy="40" r="12"/>' +
+      '<path class="b" d="M68 52c12 0 20 10 22 24l3 26H43l3-26c2-14 10-24 22-24z"/>' +
+      /* 頭巾 */
+      '<path class="b" d="M56 38c0-9 5-15 12-15s12 6 12 15z"/>' +
+      '<path class="b" d="M79 30l9-5-6 10z"/>' +
+      /* 盾（左手に構える） */
+      '<path class="b" d="M12 56l18-9 18 9v16c0 13-8 22-18 27-10-5-18-14-18-27z"/>' +
+      '<path class="hl" fill-opacity=".82" d="M18 60l12-6 12 6v12c0 9-6 16-12 20-6-4-12-11-12-20z"/>' +
+      '<path class="m" fill-opacity=".3" d="M30 54l12 6v12c0 9-6 16-12 20z"/>',
+
+      /* 商人の腕（盾を掲げる） */
+      '<path class="s" style="stroke-width:5" d="M50 62q-11 2-18 6"/>',
+
+      /* 盾の朱の鋲 */
+      '<circle class="a" cx="30" cy="70" r="4.6"/>'
+    ),
+
+    /* ── 虎の威を借る狐 ── 背に虎の影 ── */
+    f5: svg(
+      '<ellipse class="w" cx="56" cy="72" rx="45" ry="34"/>',
+
+      /* 背後にぬっと現れる虎の顔。薄墨だが輪郭ははっきりさせる */
+      '<circle class="m" fill-opacity=".15" cx="70" cy="20" r="10"/>' +
+      '<circle class="m" fill-opacity=".15" cx="104" cy="20" r="10"/>' +
+      '<path class="m" fill-opacity=".15" d="M64 18h46c4 0 6 3 6 7v18c0 18-13 29-29 29S58 61 58 43V25c0-4 2-7 6-7z"/>' +
+      /* 額の「王」——虎の目印 */
+      '<path class="m" fill-opacity=".3" d="M79 24h16v3H79zM79 31h16v3H79zM85.5 20h3v17h-3z"/>' +
+      /* 目・鼻・頬の縞 */
+      '<ellipse class="m" fill-opacity=".38" cx="76" cy="43" rx="4.4" ry="3.2"/>' +
+      '<ellipse class="m" fill-opacity=".38" cx="98" cy="43" rx="4.4" ry="3.2"/>' +
+      '<path class="m" fill-opacity=".34" d="M81 51h12l-6 7z"/>' +
+      '<path class="m" fill-opacity=".2" d="M62 34l-8 3 1-7zM112 34l8 3-1-7z"/>' +
+      /* 狐の尾（付け根を太く、先へすぼめる） */
+      '<path class="b" d="M62 92c16 7 33-4 36-23 2-11-5-19-12-17 7 8 2 22-10 29-7 4-12 6-14 11z"/>' +
+      /* 狐の胴（座り姿） */
+      '<path class="b" d="M48 56c15 0 25 13 25 29 0 12-9 19-23 19-15 0-26-8-26-20 0-15 10-28 24-28z"/>' +
+      /* 頭（左向き・鼻先をとがらせる） */
+      '<path class="b" d="M54 42l4 25-20 6-26-12 22-17z"/>' +
+      /* 耳（頭に食い込ませる） */
+      '<path class="b" d="M32 48L27 24l18 16z"/>' +
+      '<path class="b" d="M48 45l7-21 6 22z"/>' +
+      /* 胸の白 */
+      '<path class="m" fill-opacity=".24" d="M36 70c9-3 18 0 22 7-8 6-19 6-26 1z"/>',
+
+      /* 尾の先 */
+      '<path class="s hl-s" style="stroke-width:2.2" stroke-opacity=".45" d="M88 52q5 4 4 11"/>',
+
+      '<circle class="hl" cx="38" cy="50" r="3.6"/>' +
+      '<circle class="b" cx="38" cy="51" r="1.8"/>' +
+      '<circle class="b" cx="13" cy="61" r="2.6"/>'
+    ),
+
+    /* ── 胡蝶 ── 夢に舞う ── */
+    f6: svg(
+      '<ellipse class="w" cx="60" cy="56" rx="45" ry="37"/>' +
+      '<path class="w" fill-opacity=".07" d="M18 96q42 12 84-4v7q-42 16-84 4z"/>',
+
+      /* 上翅 */
+      '<path class="b" d="M57 58C46 27 24 12 13 22 1 33 13 58 34 66c11 4 19 2 23-8z"/>' +
+      '<path class="b" d="M63 58C74 27 96 12 107 22c12 11 0 36-21 44-11 4-19 2-23-8z"/>' +
+      /* 下翅 */
+      '<path class="m" d="M56 63c-8 22-22 35-32 31-10-5-6-24 9-32 9-4 18-4 23 1z"/>' +
+      '<path class="m" d="M64 63c8 22 22 35 32 31 10-5 6-24-9-32-9-4-18-4-23 1z"/>' +
+      /* 胴 */
+      '<path class="b" d="M60 43c3 0 5 3 5 9v37c0 6-2 9-5 9s-5-3-5-9V52c0-6 2-9 5-9z"/>',
+
+      /* 触角 */
+      '<path class="s" style="stroke-width:2.4" d="M57 44q-7-11-17-14M63 44q7-11 17-14"/>' +
+      /* 翅脈 */
+      '<path class="s" style="stroke-width:1.6" stroke-opacity=".3" d="M52 54q-14-12-28-18M68 54q14-12 28-18"/>',
+
+      '<circle class="hl" cx="33" cy="40" r="5"/>' +
+      '<circle class="hl" cx="87" cy="40" r="5"/>' +
+      '<circle class="hl" cx="27" cy="76" r="3.4"/>' +
+      '<circle class="hl" cx="93" cy="76" r="3.4"/>'
+    ),
+
+    /* ── 李白 ── 月を仰いで杯を挙げる ── */
+    f7: svg(
+      /* 月。輪郭を描かず、まわりの夜気を刷いて白く抜き残す（水墨の常法） */
+      '<path class="w" fill-opacity=".16" fill-rule="evenodd" ' +
+        'd="M56-16C92-30 132-12 132 22c0 26-26 40-48 31C60 44 46 6 56-16Z' +
+        'M95 3a18 18 0 100 36 18 18 0 100-36Z"/>' +
+      '<ellipse class="w" cx="50" cy="76" rx="40" ry="32"/>' +
+      '<path class="w" d="M6 104q46 10 92-4v7q-46 14-92 4z"/>',
+
+      /* 衣 */
+      '<path class="b" d="M50 48c16 0 27 13 30 32l4 26H16l4-26c3-19 14-32 30-32z"/>' +
+      /* 袖（挙げた側） */
+      '<path class="b" d="M64 54c8 0 14 5 14 11 0 4-3 7-8 7l-14-4z"/>' +
+      /* 頭 */
+      '<circle class="b" cx="48" cy="32" r="13"/>' +
+      /* 幞頭（頭巾） */
+      '<path class="b" d="M34 30c0-11 6-18 14-18s14 7 14 18z"/>' +
+      '<path class="b" d="M47 12l2-8 4 8z"/>' +
+      /* 衣の陰 */
+      '<path class="m" fill-opacity=".28" d="M50 60c9 4 14 15 16 28l2 18H50z"/>',
+
+      /* 腕 */
+      '<path class="s" style="stroke-width:5" d="M70 66q7-6 12-12"/>' +
+      /* 帯 */
+      '<path class="s hl-s" style="stroke-width:3" d="M32 76q18 8 36 0"/>' +
+      /* 髭 */
+      '<path class="s" style="stroke-width:2.2" d="M42 42q3 8 0 13M54 42q-3 8 0 13"/>',
+
+      /* 杯 */
+      '<path class="a" d="M74 46h17l-3 9c-1 3-3 4-6 4s-5-1-6-4z"/>' +
+      '<path class="a" d="M79 59h7v3h-7z"/>'
+    ),
+
+    /* ── 孔子 ── 拱手して立つ ── */
+    f8: svg(
+      '<ellipse class="w" cx="60" cy="70" rx="43" ry="38"/>' +
+      '<path class="w" d="M12 104q48 10 96-4v7q-48 14-96 4z"/>',
+
+      /* 深衣（裾に向かって広がる） */
+      '<path class="b" d="M60 46c17 0 27 13 30 31l5 27H25l5-27c3-18 13-31 30-31z"/>' +
+      /* 大袖。左右から出て、胸の前で袂を合わせる */
+      '<path class="b" d="M40 52c-11 4-19 17-22 34-1 6 2 9 8 9 7 0 11-4 12-11l6-27z"/>' +
+      '<path class="b" d="M80 52c11 4 19 17 22 34 1 6-2 9-8 9-7 0-11-4-12-11l-6-27z"/>' +
+      /* 頭 */
+      '<circle class="b" cx="60" cy="30" r="13.5"/>' +
+      /* 儒巾。丸みのある頭巾に、小さな巾子（こじ）を載せる */
+      '<path class="b" d="M45 22c0-12 7-19 15-19s15 7 15 19z"/>' +
+      '<path class="b" d="M53 6c0-5 3-8 7-8s7 3 7 8z"/>' +
+      /* 衣の陰 */
+      '<path class="m" fill-opacity=".24" d="M60 58c9 5 15 18 17 33l1 13H60z"/>',
+
+      /* 襟合わせ */
+      '<path class="s hl-s" style="stroke-width:3.2" d="M51 47l9 13 9-13"/>' +
+      /* 帯 */
+      '<path class="s hl-s" style="stroke-width:2.6" stroke-opacity=".55" d="M40 90q20 7 40 0"/>' +
+      /* 長い髭 */
+      '<path class="s" style="stroke-width:2.4" d="M52 38q3 12-1 20M68 38q-3 12 1 20M60 42v20"/>',
+
+      /* 拱手（袂に包んだ手を胸の前で組む） */
+      '<ellipse class="hl" cx="60" cy="71" rx="9" ry="5.6" fill-opacity=".9"/>' +
+      '<path class="s" style="stroke-width:1.3" stroke-opacity=".45" d="M60 65.8v10.4"/>' +
+      /* 朱の落款 */
+      '<rect class="a" x="95" y="96" width="14" height="14" rx="3"/>'
+    )
+  };
+})();
 
 </script>
 <script>
@@ -3229,6 +3672,42 @@ window.LESSONS = [
   }
   function vstyle(s) { return ' style="--n:' + vlen(s) + '"'; }
 
+  /** 設問の漢文を組む。漢詩のように「／」で句が区切られている場合は、
+   *  一続きの長い列にせず句ごとの列に分ける（縦組みで読みやすく、はみ出しも防げる）。 */
+  function stemHTML(stem) {
+    if (String(stem).indexOf('／') !== -1) {
+      return '<div class="p-lines stem-lines">' + String(stem).split('／').map(function (ln) {
+        return '<div class="p-line"' + vstyle(ln) + '>' + kanbunHTML(ln) + '</div>';
+      }).join('') + '</div>';
+    }
+    return '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(stem) + '>' + kanbunHTML(stem) + '</div></div>';
+  }
+
+  /** 縦組みの一字あたりの送り（画面上の高さ）を実測して CSS 変数に入れる。
+   *  字数から高さを見積もる方式だと、フォントや字間の差で数 px 足りず、
+   *  最後の一字だけ次の列へ回り込んで見切れることがあった。実測すれば確実に収まる。 */
+  function measureAdvance(cls, varName) {
+    var probe = document.createElement('div');
+    probe.className = cls;
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;' +
+      'height:4000px;max-height:none;width:auto;';
+    probe.textContent = '漢'.repeat(20);
+    document.body.appendChild(probe);
+    var r = document.createRange();
+    r.selectNodeContents(probe);
+    var rect = r.getBoundingClientRect();
+    var vert = document.documentElement.classList.contains('vert');
+    var adv = (vert ? rect.height : rect.width) / 20;
+    document.body.removeChild(probe);
+    if (adv > 4) document.documentElement.style.setProperty(varName, adv.toFixed(2) + 'px');
+  }
+  function measureAdvances() {
+    if (!document.documentElement.classList.contains('vert')) return;
+    measureAdvance('q-stem', '--adv-stem');
+    measureAdvance('ex-k', '--adv-ex');
+    measureAdvance('p-line', '--adv-line');
+  }
+
   /** 読んだ漢文の量として数える文字数（漢字だけを数える） */
   function kanjiCount(s) {
     var m = String(s || '').match(/[\u3400-\u4DBF\u4E00-\u9FFF]/g);
@@ -3591,10 +4070,11 @@ window.LESSONS = [
         '</div>';
     }).join('');
 
-    var foeHTML = window.FOES.map(function (f) {
+    var foeHTML = window.FOES.map(function (f, i) {
       var got = (s.foesCleared || []).indexOf(f.id) !== -1;
-      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="' + esc(f.name) + '">' +
-        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
+      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="第' + (i + 1) + '関門　' +
+          esc(got ? f.name : '未踏') + '">' +
+        foeArt(f, got ? 'mini' : 'mini unknown', got ? '破' : '') +
         '<small>' + esc(got ? f.name : '？？？') + '</small></div>';
     }).join('');
 
@@ -3762,18 +4242,49 @@ window.LESSONS = [
       '</div>';
   }
 
+  /** 相手の水墨画。cls で大きさ・状態を、stamp で朱印の字を変える */
+  function foeArt(f, cls, stamp) {
+    var art = (window.FOE_ART || {})[f.id] || '';
+    return '<span class="foe-figure' + (cls ? ' ' + cls : '') + '">' +
+      '<span class="foe-portrait">' + art + '</span>' +
+      (stamp ? '<span class="foe-stamp">' + esc(stamp) + '</span>' : '') +
+      '</span>';
+  }
+
+  /** 「あと何回当てればよいか」を数えられるよう、気は珠で見せる */
+  function kiPips(left, max) {
+    var s = '';
+    for (var i = 0; i < max; i++) s += '<i class="' + (i < left ? 'on' : '') + '"></i>';
+    return '<span class="ki-pips' + (left <= 2 ? ' low' : '') + '" ' +
+      'role="img" aria-label="相手の気 残り' + left + ' / ' + max + '">' + s + '</span>';
+  }
+
+  /** 体力。朱の玉で、残りと失った分をはっきり分ける */
+  function lifeDots(left, max, extraCls) {
+    var s = '';
+    for (var i = 0; i < max; i++) s += '<i class="' + (i < left ? '' : 'gone') + '"></i>';
+    return '<span class="life' + (left === 1 ? ' warn' : '') + (extraCls ? ' ' + extraCls : '') + '" ' +
+      'role="img" aria-label="残り体力 ' + left + ' / ' + max + '">' + s + '</span>';
+  }
+
   function battleHud() {
     var f = G.foe;
-    var pct = Math.max(0, Math.round(G.ki / G.kiMax * 100));
-    return '<div class="hud"><div class="hud-row">' +
-        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
-        '<span class="foe-mini">' +
-          '<b>' + esc(f.name) + '</b>' +
-          '<span class="ki' + (pct <= 34 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span>' +
-        '</span>' +
-        '<span class="hearts" title="残り体力">' + '❤'.repeat(G.hearts) +
-          '<span style="opacity:.22">' + '❤'.repeat(G.maxHearts - G.hearts) + '</span></span>' +
-        '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+    return '<div class="hud"><div class="bhud">' +
+        '<div class="bhud-row">' +
+          foeArt(f, 'hud-foe') +
+          '<span class="foe-mini">' +
+            '<b>' + esc(f.name) + '</b>' +
+            kiPips(G.ki, G.kiMax) +
+          '</span>' +
+          '<span class="ki-label">気 ' + G.ki + '/' + G.kiMax + '</span>' +
+          '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+        '</div>' +
+        '<div class="bhud-row life-row">' +
+          '<span class="lbl">我が体力</span>' +
+          lifeDots(G.hearts, G.maxHearts) +
+          '<span class="sp"></span>' +
+          '<span class="combo' + (G.combo >= 2 ? ' on' : '') + '">' + G.combo + ' 連鎖</span>' +
+        '</div>' +
       '</div>' +
       '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div></div>';
   }
@@ -3791,7 +4302,7 @@ window.LESSONS = [
       '<div class="q-card' + (q.stem ? ' two' : '') + '" id="qc">' +
         (q.stem ?
           '<div class="q-aside">' +
-            '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(q.stem) + '>' + kanbunHTML(q.stem) + '</div></div>' +
+            stemHTML(q.stem) +
             (q.src ? '<div class="q-src">— ' + esc(q.src) + '</div>' : '') +
           '</div>' : '') +
         '<div class="q-main">' +
@@ -3871,13 +4382,46 @@ window.LESSONS = [
       setTimeout(function () { qc.classList.remove('shake'); }, 350);
     }
 
+    /* 道場破りでは、当てた／喰らったを盤面にも返す */
+    if (G.kind === 'battle') {
+      var pips = $app.querySelector('.ki-pips');
+      var life = $app.querySelector('.life');
+      var label = $app.querySelector('.ki-label');
+      if (ok) {
+        var fig = $app.querySelector('.bhud .foe-figure');
+        if (fig) { fig.classList.add('hit'); }
+        if (pips) {
+          var on = pips.querySelectorAll('i.on');
+          if (on.length) on[on.length - 1].className = '';
+          pips.classList.toggle('low', G.ki <= 2);
+          pips.setAttribute('aria-label', '相手の気 残り' + G.ki + ' / ' + G.kiMax);
+        }
+        if (label) label.textContent = '気 ' + G.ki + '/' + G.kiMax;
+      } else if (life) {
+        var dots = life.querySelectorAll('i:not(.gone)');
+        if (dots.length) dots[dots.length - 1].className = 'gone';
+        life.classList.add('dmg');
+        life.classList.toggle('warn', G.hearts === 1);
+        life.setAttribute('aria-label', '残り体力 ' + G.hearts + ' / ' + G.maxHearts);
+      }
+    }
+
     var last = G.kind === 'battle'
       ? (G.hearts <= 0 || G.ki <= 0)
       : ((G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0));
     var nextLabel = G.kind === 'battle'
       ? (G.hearts <= 0 ? '結果を見る' : G.ki <= 0 ? '関門突破' : '続ける')
       : (last ? '結果を見る' : '次の問題へ');
-    el('vd').innerHTML =
+    /* 相手の一言。手応えが返ってくると、対戦らしくなる */
+    var say = '';
+    if (G.kind === 'battle') {
+      var line = ok
+        ? (G.ki <= 0 ? null : G.foe.hit)
+        : (G.hearts <= 0 ? null : G.foe.miss);
+      if (line) say = '<div class="foe-say">' + foeArt(G.foe) + '<span>「' + esc(line) + '」</span></div>';
+    }
+
+    el('vd').innerHTML = say +
       '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
         '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') +
           (ok && G.combo >= 3 ? '<span style="font-size:12px;color:var(--shu)">' + G.combo + ' 連鎖！</span>' : '') + '</div>' +
@@ -3936,21 +4480,39 @@ window.LESSONS = [
     screenFoeIntro();
   }
 
+  /** 第一関門から第八関門までの道のり */
+  function gateRoad(cur) {
+    var cleared = window.Store.state.foesCleared || [];
+    var s = '';
+    for (var i = 0; i < window.FOES.length; i++) {
+      if (i) s += '<span></span>';
+      var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
+      s += '<i class="' + st + '" title="第' + (i + 1) + '関門"></i>';
+    }
+    return '<div class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
+      window.FOES.length + '">' + s + '</div>';
+  }
+
   function screenFoeIntro() {
     var f = window.FOES[G.foeIdx];
     var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
     render(
       '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
+      gateRoad(G.foeIdx) +
       '<div class="card foe-card">' +
-        '<div class="foe-glyph big">' + esc(f.glyph) + '</div>' +
+        foeArt(f, 'big') +
         '<div class="foe-name">' + esc(f.name) +
           '<small>' + esc(f.kana) + (cleared ? '　※突破済み' : '') + '</small></div>' +
         '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(f.quote) + '>' + kanbunHTML(f.quote) + '</div></div>' +
         '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
-        '<p class="muted center">出題分野：' + esc(f.cats ? f.cats.join('・') : '全分野') +
-          '　／　正解 ' + f.ki + ' 回で突破　／　体力 ' + G.hearts + '</p>' +
+        '<div class="foe-facts">' +
+          '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
+          '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
+          '<b>体力 ' + G.maxHearts + '</b>' +
+          '<b>一問 ' + BATTLE_TIME + ' 秒</b>' +
+        '</div>' +
         '<div class="btn-row" style="justify-content:center;margin-top:16px">' +
           '<button class="btn shu" data-act="foego">勝負</button></div>' +
       '</div>'
@@ -3980,7 +4542,8 @@ window.LESSONS = [
     var last = G.foeIdx >= window.FOES.length - 1;
     render(
       '<div class="card result">' +
-        '<div class="foe-glyph big beaten">' + esc(f.glyph) + '</div>' +
+        gateRoad(G.foeIdx) +
+        foeArt(f, 'big beaten', '破') +
         '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
         '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
         '<div class="r-grid">' +
@@ -4402,6 +4965,7 @@ window.LESSONS = [
     window.Store.state.vertical = window.Store.state.vertical === false;
     window.Store.save();
     applyVertical();
+    measureAdvances();
     toast(window.Store.state.vertical ? '漢文を縦書きで表示します' : '漢文を横書きで表示します');
   }
 
@@ -4409,11 +4973,14 @@ window.LESSONS = [
   function measureChrome() {
     var bar = document.querySelector('.topbar');
     if (bar) document.documentElement.style.setProperty('--topbar-h', bar.offsetHeight + 'px');
+    measureAdvances();
   }
 
   function init() {
     $app = el('app');
     $toast = el('toast');
+    /* 水墨画のフィルタ定義。文書に一度だけ置き、各SVGから id で参照する */
+    if (window.FOE_ART_DEFS) document.body.insertAdjacentHTML('afterbegin', window.FOE_ART_DEFS);
     window.Store.load();
     applyTheme();
     applyVertical();
@@ -4428,6 +4995,13 @@ window.LESSONS = [
       setTimeout(function () { toast('連続学習 ' + window.Store.state.streak + ' 日目。今日も一問から。'); }, 700);
     }
   }
+
+  // レイアウト検証用のフック（テストからのみ使う）
+  window.__peek = function () { return G; };
+  window.__renderStem = function (stem) {
+    render('<div class="q-card two"><div class="q-aside">' + stemHTML(stem) +
+      '</div><div class="q-main"><p class="q-text">検証</p></div></div>');
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

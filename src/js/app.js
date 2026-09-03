@@ -71,6 +71,42 @@
   }
   function vstyle(s) { return ' style="--n:' + vlen(s) + '"'; }
 
+  /** 設問の漢文を組む。漢詩のように「／」で句が区切られている場合は、
+   *  一続きの長い列にせず句ごとの列に分ける（縦組みで読みやすく、はみ出しも防げる）。 */
+  function stemHTML(stem) {
+    if (String(stem).indexOf('／') !== -1) {
+      return '<div class="p-lines stem-lines">' + String(stem).split('／').map(function (ln) {
+        return '<div class="p-line"' + vstyle(ln) + '>' + kanbunHTML(ln) + '</div>';
+      }).join('') + '</div>';
+    }
+    return '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(stem) + '>' + kanbunHTML(stem) + '</div></div>';
+  }
+
+  /** 縦組みの一字あたりの送り（画面上の高さ）を実測して CSS 変数に入れる。
+   *  字数から高さを見積もる方式だと、フォントや字間の差で数 px 足りず、
+   *  最後の一字だけ次の列へ回り込んで見切れることがあった。実測すれば確実に収まる。 */
+  function measureAdvance(cls, varName) {
+    var probe = document.createElement('div');
+    probe.className = cls;
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;' +
+      'height:4000px;max-height:none;width:auto;';
+    probe.textContent = '漢'.repeat(20);
+    document.body.appendChild(probe);
+    var r = document.createRange();
+    r.selectNodeContents(probe);
+    var rect = r.getBoundingClientRect();
+    var vert = document.documentElement.classList.contains('vert');
+    var adv = (vert ? rect.height : rect.width) / 20;
+    document.body.removeChild(probe);
+    if (adv > 4) document.documentElement.style.setProperty(varName, adv.toFixed(2) + 'px');
+  }
+  function measureAdvances() {
+    if (!document.documentElement.classList.contains('vert')) return;
+    measureAdvance('q-stem', '--adv-stem');
+    measureAdvance('ex-k', '--adv-ex');
+    measureAdvance('p-line', '--adv-line');
+  }
+
   /** 読んだ漢文の量として数える文字数（漢字だけを数える） */
   function kanjiCount(s) {
     var m = String(s || '').match(/[\u3400-\u4DBF\u4E00-\u9FFF]/g);
@@ -433,10 +469,11 @@
         '</div>';
     }).join('');
 
-    var foeHTML = window.FOES.map(function (f) {
+    var foeHTML = window.FOES.map(function (f, i) {
       var got = (s.foesCleared || []).indexOf(f.id) !== -1;
-      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="' + esc(f.name) + '">' +
-        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
+      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="第' + (i + 1) + '関門　' +
+          esc(got ? f.name : '未踏') + '">' +
+        foeArt(f, got ? 'mini' : 'mini unknown', got ? '破' : '') +
         '<small>' + esc(got ? f.name : '？？？') + '</small></div>';
     }).join('');
 
@@ -604,18 +641,49 @@
       '</div>';
   }
 
+  /** 相手の水墨画。cls で大きさ・状態を、stamp で朱印の字を変える */
+  function foeArt(f, cls, stamp) {
+    var art = (window.FOE_ART || {})[f.id] || '';
+    return '<span class="foe-figure' + (cls ? ' ' + cls : '') + '">' +
+      '<span class="foe-portrait">' + art + '</span>' +
+      (stamp ? '<span class="foe-stamp">' + esc(stamp) + '</span>' : '') +
+      '</span>';
+  }
+
+  /** 「あと何回当てればよいか」を数えられるよう、気は珠で見せる */
+  function kiPips(left, max) {
+    var s = '';
+    for (var i = 0; i < max; i++) s += '<i class="' + (i < left ? 'on' : '') + '"></i>';
+    return '<span class="ki-pips' + (left <= 2 ? ' low' : '') + '" ' +
+      'role="img" aria-label="相手の気 残り' + left + ' / ' + max + '">' + s + '</span>';
+  }
+
+  /** 体力。朱の玉で、残りと失った分をはっきり分ける */
+  function lifeDots(left, max, extraCls) {
+    var s = '';
+    for (var i = 0; i < max; i++) s += '<i class="' + (i < left ? '' : 'gone') + '"></i>';
+    return '<span class="life' + (left === 1 ? ' warn' : '') + (extraCls ? ' ' + extraCls : '') + '" ' +
+      'role="img" aria-label="残り体力 ' + left + ' / ' + max + '">' + s + '</span>';
+  }
+
   function battleHud() {
     var f = G.foe;
-    var pct = Math.max(0, Math.round(G.ki / G.kiMax * 100));
-    return '<div class="hud"><div class="hud-row">' +
-        '<span class="foe-glyph">' + esc(f.glyph) + '</span>' +
-        '<span class="foe-mini">' +
-          '<b>' + esc(f.name) + '</b>' +
-          '<span class="ki' + (pct <= 34 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span>' +
-        '</span>' +
-        '<span class="hearts" title="残り体力">' + '❤'.repeat(G.hearts) +
-          '<span style="opacity:.22">' + '❤'.repeat(G.maxHearts - G.hearts) + '</span></span>' +
-        '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+    return '<div class="hud"><div class="bhud">' +
+        '<div class="bhud-row">' +
+          foeArt(f, 'hud-foe') +
+          '<span class="foe-mini">' +
+            '<b>' + esc(f.name) + '</b>' +
+            kiPips(G.ki, G.kiMax) +
+          '</span>' +
+          '<span class="ki-label">気 ' + G.ki + '/' + G.kiMax + '</span>' +
+          '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
+        '</div>' +
+        '<div class="bhud-row life-row">' +
+          '<span class="lbl">我が体力</span>' +
+          lifeDots(G.hearts, G.maxHearts) +
+          '<span class="sp"></span>' +
+          '<span class="combo' + (G.combo >= 2 ? ' on' : '') + '">' + G.combo + ' 連鎖</span>' +
+        '</div>' +
       '</div>' +
       '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div></div>';
   }
@@ -633,7 +701,7 @@
       '<div class="q-card' + (q.stem ? ' two' : '') + '" id="qc">' +
         (q.stem ?
           '<div class="q-aside">' +
-            '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(q.stem) + '>' + kanbunHTML(q.stem) + '</div></div>' +
+            stemHTML(q.stem) +
             (q.src ? '<div class="q-src">— ' + esc(q.src) + '</div>' : '') +
           '</div>' : '') +
         '<div class="q-main">' +
@@ -713,13 +781,46 @@
       setTimeout(function () { qc.classList.remove('shake'); }, 350);
     }
 
+    /* 道場破りでは、当てた／喰らったを盤面にも返す */
+    if (G.kind === 'battle') {
+      var pips = $app.querySelector('.ki-pips');
+      var life = $app.querySelector('.life');
+      var label = $app.querySelector('.ki-label');
+      if (ok) {
+        var fig = $app.querySelector('.bhud .foe-figure');
+        if (fig) { fig.classList.add('hit'); }
+        if (pips) {
+          var on = pips.querySelectorAll('i.on');
+          if (on.length) on[on.length - 1].className = '';
+          pips.classList.toggle('low', G.ki <= 2);
+          pips.setAttribute('aria-label', '相手の気 残り' + G.ki + ' / ' + G.kiMax);
+        }
+        if (label) label.textContent = '気 ' + G.ki + '/' + G.kiMax;
+      } else if (life) {
+        var dots = life.querySelectorAll('i:not(.gone)');
+        if (dots.length) dots[dots.length - 1].className = 'gone';
+        life.classList.add('dmg');
+        life.classList.toggle('warn', G.hearts === 1);
+        life.setAttribute('aria-label', '残り体力 ' + G.hearts + ' / ' + G.maxHearts);
+      }
+    }
+
     var last = G.kind === 'battle'
       ? (G.hearts <= 0 || G.ki <= 0)
       : ((G.i >= G.qs.length - 1) || (G.mode.hearts && G.hp <= 0));
     var nextLabel = G.kind === 'battle'
       ? (G.hearts <= 0 ? '結果を見る' : G.ki <= 0 ? '関門突破' : '続ける')
       : (last ? '結果を見る' : '次の問題へ');
-    el('vd').innerHTML =
+    /* 相手の一言。手応えが返ってくると、対戦らしくなる */
+    var say = '';
+    if (G.kind === 'battle') {
+      var line = ok
+        ? (G.ki <= 0 ? null : G.foe.hit)
+        : (G.hearts <= 0 ? null : G.foe.miss);
+      if (line) say = '<div class="foe-say">' + foeArt(G.foe) + '<span>「' + esc(line) + '」</span></div>';
+    }
+
+    el('vd').innerHTML = say +
       '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
         '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') +
           (ok && G.combo >= 3 ? '<span style="font-size:12px;color:var(--shu)">' + G.combo + ' 連鎖！</span>' : '') + '</div>' +
@@ -778,21 +879,39 @@
     screenFoeIntro();
   }
 
+  /** 第一関門から第八関門までの道のり */
+  function gateRoad(cur) {
+    var cleared = window.Store.state.foesCleared || [];
+    var s = '';
+    for (var i = 0; i < window.FOES.length; i++) {
+      if (i) s += '<span></span>';
+      var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
+      s += '<i class="' + st + '" title="第' + (i + 1) + '関門"></i>';
+    }
+    return '<div class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
+      window.FOES.length + '">' + s + '</div>';
+  }
+
   function screenFoeIntro() {
     var f = window.FOES[G.foeIdx];
     var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
     render(
       '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
+      gateRoad(G.foeIdx) +
       '<div class="card foe-card">' +
-        '<div class="foe-glyph big">' + esc(f.glyph) + '</div>' +
+        foeArt(f, 'big') +
         '<div class="foe-name">' + esc(f.name) +
           '<small>' + esc(f.kana) + (cleared ? '　※突破済み' : '') + '</small></div>' +
         '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(f.quote) + '>' + kanbunHTML(f.quote) + '</div></div>' +
         '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
-        '<p class="muted center">出題分野：' + esc(f.cats ? f.cats.join('・') : '全分野') +
-          '　／　正解 ' + f.ki + ' 回で突破　／　体力 ' + G.hearts + '</p>' +
+        '<div class="foe-facts">' +
+          '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
+          '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
+          '<b>体力 ' + G.maxHearts + '</b>' +
+          '<b>一問 ' + BATTLE_TIME + ' 秒</b>' +
+        '</div>' +
         '<div class="btn-row" style="justify-content:center;margin-top:16px">' +
           '<button class="btn shu" data-act="foego">勝負</button></div>' +
       '</div>'
@@ -822,7 +941,8 @@
     var last = G.foeIdx >= window.FOES.length - 1;
     render(
       '<div class="card result">' +
-        '<div class="foe-glyph big beaten">' + esc(f.glyph) + '</div>' +
+        gateRoad(G.foeIdx) +
+        foeArt(f, 'big beaten', '破') +
         '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
         '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
         '<div class="r-grid">' +
@@ -1244,6 +1364,7 @@
     window.Store.state.vertical = window.Store.state.vertical === false;
     window.Store.save();
     applyVertical();
+    measureAdvances();
     toast(window.Store.state.vertical ? '漢文を縦書きで表示します' : '漢文を横書きで表示します');
   }
 
@@ -1251,11 +1372,14 @@
   function measureChrome() {
     var bar = document.querySelector('.topbar');
     if (bar) document.documentElement.style.setProperty('--topbar-h', bar.offsetHeight + 'px');
+    measureAdvances();
   }
 
   function init() {
     $app = el('app');
     $toast = el('toast');
+    /* 水墨画のフィルタ定義。文書に一度だけ置き、各SVGから id で参照する */
+    if (window.FOE_ART_DEFS) document.body.insertAdjacentHTML('afterbegin', window.FOE_ART_DEFS);
     window.Store.load();
     applyTheme();
     applyVertical();
@@ -1270,6 +1394,13 @@
       setTimeout(function () { toast('連続学習 ' + window.Store.state.streak + ' 日目。今日も一問から。'); }, 700);
     }
   }
+
+  // レイアウト検証用のフック（テストからのみ使う）
+  window.__peek = function () { return G; };
+  window.__renderStem = function (stem) {
+    render('<div class="q-card two"><div class="q-aside">' + stemHTML(stem) +
+      '</div><div class="q-main"><p class="q-text">検証</p></div></div>');
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

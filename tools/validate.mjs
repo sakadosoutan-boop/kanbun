@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes'];
+const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art'];
 const CODE = ['store', 'quizgen'];
 
 const sandbox = { window: {}, localStorage: null, console };
@@ -185,6 +185,12 @@ uniq(W.FOES, 'FOES');
     if (f.cats) {
       f.cats.forEach((c) => { if (!allCats.has(c)) err(`FOES ${f.id}: 存在しない分野「${c}」`); });
     }
+    const art = W.FOE_ART && W.FOE_ART[f.id];
+    if (!art) err(`FOES ${f.id}: 水墨画（FOE_ART）が無い`);
+    else if (!/^<svg[\s\S]+<\/svg>$/.test(art)) err(`FOE_ART ${f.id}: SVG になっていない`);
+  });
+  Object.keys(W.FOE_ART || {}).forEach((id) => {
+    if (!W.FOES.some((f) => f.id === id)) err(`FOE_ART ${id}: 対応する関門が無い`);
   });
 }
 

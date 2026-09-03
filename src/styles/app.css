@@ -228,7 +228,9 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .q-main { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .q-main .q-cat { justify-self: start; }
 .q-aside { display: grid; gap: 6px; justify-items: center; min-width: 0; }
-.q-stem-wrap { display: flex; justify-content: center; width: 100%; overflow-x: auto; }
+/* width:100% を付けると、overflow-x:auto と相まって grid の auto 列が
+   最小幅（≒0）に潰れ、縦組みの柱が見切れる。幅は内容に決めさせる。 */
+.q-stem-wrap { display: flex; justify-content: center; max-width: 100%; overflow-x: auto; }
 .q-cat { display: inline-block; font-size: 11px; letter-spacing: .12em; color: var(--ai); background: color-mix(in srgb, var(--ai) 12%, transparent); border: 1px solid color-mix(in srgb, var(--ai) 28%, transparent); padding: 2px 10px; border-radius: 99px; }
 .q-stem {
   font-family: var(--mincho); font-size: clamp(20px, 5.2vw, 27px); letter-spacing: .1em;
@@ -446,9 +448,8 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   letter-spacing: .14em;
   /* 縦組みは inline サイズ（画面上の高さ）が確定しないと 1 列に潰れる。
      字数 --n から必要な高さを求め、画面に収まらないぶんは列を折り返させる。 */
-  --adv: 1.22em;
   --cap: min(38vh, 320px);   /* スマホ縦。これを超える長さは列を折り返す */
-  height: min(var(--cap), calc(var(--n, 12) * var(--adv) + 8px));
+  height: min(var(--cap), calc(var(--n, 12) * var(--adv-stem, 1.24em) + 12px));
   text-align: start;
   padding-block: 2px;             /* 返り点が左にはみ出すぶんの余白 */
 }
@@ -464,7 +465,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .vert .p-lines { align-items: flex-start; }
 .vert .p-lines .p-line {
   writing-mode: vertical-rl; text-orientation: mixed; margin: 0; line-height: 2;
-  height: calc(var(--n, 7) * 1.26em + 6px);
+  height: calc(var(--n, 7) * var(--adv-line, 1.28em) + 12px);
 }
 
 /* 句法図鑑の例文：白文を右に縦組み、書き下し・訳を左に置く */
@@ -476,7 +477,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .vert .ex-k {
   grid-column: 2; grid-row: 1 / span 4;
   writing-mode: vertical-rl; text-orientation: mixed;
-  height: min(250px, calc(var(--n, 8) * 1.2em + 6px));
+  height: min(250px, calc(var(--n, 8) * var(--adv-ex, 1.22em) + 12px));
   line-height: 2.1; letter-spacing: .1em;
 }
 
@@ -536,12 +537,15 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 
 /* --- 横長（タブレット横・PC）：漢文を右の柱に、選択肢を左に置く --- */
 @media (min-width: 760px) and (orientation: landscape) {
-  .q-card.two { grid-template-columns: minmax(0, 1fr) auto; column-gap: 26px; }
+  /* 右の柱は内容ぶんの幅にするが、広くなりすぎないよう fit-content で頭打ちにする。
+     ここで auto 列にすると、中の overflow-x:auto が最小幅 0 を持ち込んで柱が潰れる。 */
+  .q-card.two { grid-template-columns: minmax(0, 1fr) fit-content(42%); column-gap: 26px; }
   .q-card.two .q-main  { order: 1; }
-  .q-card.two .q-aside { order: 2; border-inline-start: 1px solid var(--line); padding-inline-start: 24px; }
+  .q-card.two .q-aside { order: 2; border-inline-start: 1px solid var(--line); padding-inline-start: 24px; max-width: none; }
+  .q-card.two .q-stem-wrap, .q-card.two .stem-lines { overflow-x: visible; }
   .vert .q-card.two .q-stem { --cap: min(62vh, 480px); }
   .q-card.two .q-aside { align-self: stretch; }
-  .q-card.two .q-aside { max-width: 46%; }
+
 }
 
 /* --- 3 列＋広め（PC・タブレット横） --- */
@@ -572,7 +576,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 @media (orientation: landscape) and (max-height: 560px) {
   .vert .q-stem,
   .vert .q-card.two .q-stem { --cap: min(34vh, 165px); }
-  .q-card.two .q-aside { max-width: 42%; padding-inline-start: 16px; }
+  .q-card.two .q-aside { padding-inline-start: 16px; }
   .vert .p-lines .p-line { font-size: 17px; }
 }
 
@@ -609,15 +613,63 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 /* ============================================================
    道場破り
    ============================================================ */
-.foe-card { text-align: center; display: grid; gap: 10px; justify-items: center; }
-.foe-glyph {
-  width: 42px; height: 42px; flex: none; border-radius: 50%; display: grid; place-items: center;
-  font-family: var(--mincho); font-size: 21px; line-height: 1; color: #fff;
-  background: linear-gradient(150deg, var(--shu), color-mix(in srgb, var(--shu) 55%, #4a1410));
-  box-shadow: inset 0 -2px 5px rgba(0,0,0,.22), 0 2px 10px color-mix(in srgb, var(--shu) 34%, transparent);
+
+/* ---- 水墨画のキャラクター ---------------------------------- */
+/* 墨の濃淡はすべて currentColor の不透明度で作る。テーマを切り替えても
+   紙と墨の関係が保たれるようにするため。 */
+/* 濃さは opacity ではなく fill-opacity / stroke-opacity で持たせる。
+   こうしておくと、各図形が個別に指定する濃さが「絶対値」として素直に効く。 */
+.ink { display: block; width: 100%; height: 100%; overflow: visible; }
+.ink .w  { fill: currentColor; fill-opacity: .085; }
+.ink .m  { fill: currentColor; fill-opacity: .42; }
+.ink .b  { fill: currentColor; fill-opacity: .93; }
+.ink .s  { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-opacity: .85; }
+.ink .hl { fill: var(--card); }
+.ink .hl-s { stroke: var(--card); stroke-opacity: .9; }
+.ink .a  { fill: var(--shu); }
+
+/* 朱印は円の外にはみ出すので、絵と印を包む枠を一段かませる */
+.foe-figure {
+  --sz: 46px;
+  position: relative; display: inline-grid; flex: none;
+  width: var(--sz); height: var(--sz);
 }
-.foe-glyph.big { width: 78px; height: 78px; font-size: 38px; }
-.foe-glyph.beaten { filter: grayscale(.75); opacity: .8; }
+.foe-portrait {
+  position: relative; width: 100%; height: 100%;
+  border-radius: 50%; overflow: hidden; color: var(--ink);
+  display: grid; place-items: center;
+  background:
+    radial-gradient(circle at 34% 26%, var(--card), color-mix(in srgb, var(--paper-2) 88%, var(--card)));
+  border: 1px solid var(--line);
+  box-shadow: inset 0 -4px 12px color-mix(in srgb, var(--ink) 9%, transparent);
+}
+.foe-portrait > svg { width: 88%; height: 88%; }
+.foe-figure.big { --sz: clamp(140px, 42vw, 176px); }
+.foe-figure.big .foe-portrait {
+  border-width: 2px; border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
+  box-shadow: inset 0 -8px 26px color-mix(in srgb, var(--ink) 10%, transparent), var(--shadow);
+}
+.foe-figure.mini { --sz: 40px; }
+.foe-figure.hud-foe { --sz: 44px; }
+/* 未踏の相手は姿を伏せる */
+.foe-figure.unknown .foe-portrait { color: var(--ink-3); }
+.foe-figure.unknown .ink { filter: blur(2.4px); opacity: .45; }
+
+/* 「破」の朱印 */
+.foe-figure.beaten .foe-portrait { filter: grayscale(.85); opacity: .82; }
+.foe-stamp {
+  position: absolute; inset: auto -4% -2% auto;
+  width: 29%; min-width: 15px; aspect-ratio: 1; border-radius: 4px;
+  display: grid; place-items: center;
+  font-family: var(--mincho); font-size: calc(var(--sz) * .17); line-height: 1;
+  color: #fff; border: 1px solid color-mix(in srgb, var(--shu) 70%, #000);
+  background: var(--shu);
+  box-shadow: 0 1px 5px color-mix(in srgb, var(--shu) 45%, transparent);
+  transform: rotate(-11deg);
+}
+.foe-figure.mini .foe-stamp { width: 34%; font-size: 8.5px; border-radius: 3px; }
+
+.foe-card { text-align: center; display: grid; gap: 10px; justify-items: center; }
 .foe-name { font-family: var(--mincho); font-size: 22px; letter-spacing: .07em; line-height: 1.4; }
 .foe-name small { display: block; font-family: var(--gothic); font-size: 11px; letter-spacing: .12em; color: var(--ink-3); }
 .foe-taunt {
@@ -627,16 +679,94 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 .gate-clear { font-family: var(--mincho); font-size: clamp(24px, 6vw, 32px); letter-spacing: .1em; color: var(--shu); margin-top: 8px; }
 
-/* 対戦中の HUD */
-.foe-mini { flex: 1; min-width: 0; display: grid; gap: 4px; }
-.foe-mini b { font-family: var(--mincho); font-size: 13.5px; letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ki { display: block; height: 7px; border-radius: 99px; background: var(--paper-2); border: 1px solid var(--line); overflow: hidden; }
-.ki > i {
-  display: block; height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--shu) 70%, #000), var(--shu));
-  transition: width .45s cubic-bezier(.2,.8,.2,1);
+/* 関門の道のり（第一関門から第八関門まで） */
+.gate-road { display: flex; align-items: center; gap: 5px; justify-content: center; margin-bottom: 4px; }
+.gate-road i {
+  width: 9px; height: 9px; border-radius: 50%; flex: none;
+  background: var(--paper-2); border: 1px solid var(--line);
 }
-.ki.low > i { background: linear-gradient(90deg, var(--kin), var(--shu)); }
+.gate-road i.done { background: var(--ink-3); border-color: transparent; }
+.gate-road i.now  { background: var(--shu); border-color: transparent; transform: scale(1.5); box-shadow: 0 0 0 3px color-mix(in srgb, var(--shu) 18%, transparent); }
+.gate-road span { flex: 1; max-width: 18px; height: 1px; background: var(--line); }
+
+/* 相手の見どころ（分野・必要正解数） */
+.foe-facts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.foe-facts b {
+  font: 500 11.5px/1.6 var(--gothic); letter-spacing: .08em; color: var(--ink-2);
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px 11px;
+}
+.foe-facts b.shu { color: var(--shu); border-color: var(--shu-soft); background: color-mix(in srgb, var(--shu) 8%, transparent); }
+
+/* ---- 対戦盤（HUD） ----------------------------------------- */
+.bhud { display: grid; gap: 9px; }
+.bhud-row { display: flex; align-items: center; gap: 11px; }
+.foe-mini { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.foe-mini b {
+  font-family: var(--mincho); font-size: 14px; letter-spacing: .05em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 気：残りを珠の数で見せる。棒より「あと何回当てればよいか」が数えやすい */
+.ki-pips { display: flex; gap: 4px; align-items: center; max-width: 250px; }
+.ki-pips i {
+  flex: 1 1 0; min-width: 6px; height: 8px; border-radius: 99px;
+  background: var(--paper-2); border: 1px solid var(--line);
+  transition: background .3s, border-color .3s;
+}
+.ki-pips i.on {
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 62%, var(--paper)), var(--ink-2));
+}
+.ki-pips.low i.on { background: linear-gradient(180deg, var(--kin), color-mix(in srgb, var(--kin) 60%, var(--shu))); }
+.ki-label { font-size: 10.5px; letter-spacing: .14em; color: var(--ink-3); flex: none; }
+
+/* 体力：朱の玉。失うと輪郭だけ残る */
+.life-row { display: flex; align-items: center; gap: 10px; }
+.life-row .lbl { font-size: 11px; letter-spacing: .16em; color: var(--ink-3); flex: none; }
+.life { display: flex; gap: 7px; }
+.life i {
+  width: 19px; height: 19px; border-radius: 50%; flex: none;
+  background: radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--shu) 40%, #fff), var(--shu));
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--shu) 40%, transparent);
+  transition: transform .2s;
+}
+.life i.gone {
+  background: none; box-shadow: none;
+  border: 2px solid var(--line); opacity: .8;
+}
+.life.warn i:not(.gone) { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.14); } }
+
+/* 命中・被弾の演出 */
+@keyframes foeHit {
+  0%   { transform: translateX(0)   rotate(0); }
+  25%  { transform: translateX(-7px) rotate(-5deg); }
+  55%  { transform: translateX(6px)  rotate(4deg); }
+  100% { transform: translateX(0)   rotate(0); }
+}
+.foe-figure.hit { animation: foeHit .42s cubic-bezier(.36,.07,.19,.97); }
+.foe-figure.hit .foe-portrait::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--shu); animation: fadeOut .55s ease-out forwards;
+}
+@keyframes fadeOut { from { opacity: .55; } to { opacity: 0; } }
+.life.dmg i.gone { animation: crack .45s ease-out; }
+@keyframes crack {
+  0%   { transform: scale(1.55); }
+  60%  { transform: scale(.82); }
+  100% { transform: scale(1); }
+}
+/* 相手の反応 */
+.foe-say {
+  margin: 0 0 11px; font-family: var(--mincho); font-size: 14.5px; letter-spacing: .04em;
+  line-height: 1.7; color: var(--ink-2); display: flex; align-items: center; gap: 10px;
+  animation: pop .25s cubic-bezier(.2,.8,.2,1);
+}
+.foe-say .foe-figure { --sz: 34px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .foe-figure.hit, .life.dmg i, .life.warn i:not(.gone), .foe-say { animation: none; }
+}
 
 /* ============================================================
    返り点ルートの縦組みを一本の列として見せる
@@ -769,8 +899,16 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 
 /* 関門コレクション */
-.foe-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 8px; text-align: center; }
-.foe-slot { display: grid; justify-items: center; gap: 5px; opacity: .34; filter: grayscale(1); transition: all .2s; }
-.foe-slot.got { opacity: 1; filter: none; }
+.foe-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 8px; text-align: center; }
+.foe-slot { display: grid; justify-items: center; gap: 6px; transition: opacity .2s; }
+.foe-slot:not(.got) { opacity: .6; }
 .foe-slot small { font-size: 10.5px; color: var(--ink-3); line-height: 1.4; }
+.foe-slot.got small { color: var(--ink-2); }
 @media (min-width: 620px) { .foe-row { grid-template-columns: repeat(8, 1fr); } }
+
+/* 設問中の漢詩：句ごとに列を分ける */
+.stem-lines { margin: 2px 0; }
+.vert .stem-lines { gap: .3em; max-width: 100%; overflow-x: auto; padding-block: 2px; }
+.stem-lines .p-line { font-family: var(--mincho); font-size: clamp(17px, 4.4vw, 21px); letter-spacing: .12em; }
+:not(.vert) .stem-lines .p-line { text-align: center; line-height: 1.9; }
+.vert .stem-lines .p-line { max-height: min(40vh, 330px); }
