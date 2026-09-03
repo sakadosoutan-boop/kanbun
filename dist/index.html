@@ -20,7 +20,7 @@
   --card:       #fffdf8;
   --ink:        #1f1d1a;
   --ink-2:      #4a453d;
-  --ink-3:      #7d766a;
+  --ink-3:      #6e675a;
   --line:       #d9d0bd;
   --shu:        #b8443a;   /* 朱 */
   --shu-soft:   #e8c3bd;
@@ -48,7 +48,7 @@
     --card:     #23222a;
     --ink:      #eee9df;
     --ink-2:    #c3bcae;
-    --ink-3:    #8d8578;
+    --ink-3:    #98907f;
     --line:     #383641;
     --shu:      #e0685c;
     --shu-soft: #5a2f2c;
@@ -64,14 +64,14 @@
 }
 :root[data-theme="light"] {
   --paper: #f4efe4; --paper-2:#ece5d6; --card:#fffdf8; --ink:#1f1d1a; --ink-2:#4a453d;
-  --ink-3:#7d766a; --line:#d9d0bd; --shu:#b8443a; --shu-soft:#e8c3bd; --kin:#b7913f;
+  --ink-3:#6e675a; --line:#d9d0bd; --shu:#b8443a; --shu-soft:#e8c3bd; --kin:#b7913f;
   --ai:#2f5069; --midori:#4a7a5c; --murasaki:#6b5b8e; --ok:#2f7d54; --ng:#b8443a;
   --shadow:0 1px 2px rgba(31,29,26,.06), 0 6px 20px rgba(31,29,26,.08);
   --shadow-lg:0 2px 6px rgba(31,29,26,.08), 0 18px 48px rgba(31,29,26,.14);
 }
 :root[data-theme="dark"] {
   --paper:#16151a; --paper-2:#1d1c22; --card:#23222a; --ink:#eee9df; --ink-2:#c3bcae;
-  --ink-3:#8d8578; --line:#383641; --shu:#e0685c; --shu-soft:#5a2f2c; --kin:#d5b062;
+  --ink-3:#98907f; --line:#383641; --shu:#e0685c; --shu-soft:#5a2f2c; --kin:#d5b062;
   --ai:#7aa5c4; --midori:#7bb392; --murasaki:#a696cc; --ok:#6cc294; --ng:#e0685c;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
   --shadow-lg:0 2px 6px rgba(0,0,0,.45), 0 18px 48px rgba(0,0,0,.5);
@@ -95,6 +95,20 @@ body {
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; border: none; background: none; }
 h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
+
+/* キーボード操作の現在地をはっきりさせる。マウス操作では出さない */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--shu);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+.choice:focus-visible, .mode:focus-visible, .card:focus-visible { border-radius: var(--radius); }
+/* 読み上げには載せるが、画面には出さない補助ラベル */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
 
 /* ---------- layout ---------- */
 .wrap {
@@ -165,6 +179,10 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .sec-h { display: flex; align-items: center; gap: 10px; margin: 30px 0 12px; }
 .sec-h h2 { font-family: var(--mincho); font-size: 17px; letter-spacing: .14em; }
 .sec-h .rule { flex: 1; height: 1px; background: var(--line); }
+.sec-h .sec-n {
+  flex: none; font-size: 11px; letter-spacing: .1em; color: var(--ink-3);
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px;
+}
 
 /* ---------- mode cards ---------- */
 .modes { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -197,6 +215,34 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   border: 1px solid color-mix(in srgb, var(--accent, var(--kin)) 30%, transparent);
 }
 .mode .m-prog { margin-top: 10px; font-size: 11px; color: var(--ink-3); position: relative; z-index: 1; }
+
+/* ---------- 道場破りだけは別格に見せる ---------- */
+.battle-hero {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center;
+  column-gap: 16px; padding: 16px 18px; margin-bottom: 12px;
+  background:
+    linear-gradient(105deg, color-mix(in srgb, var(--shu) 7%, var(--card)), var(--card) 62%);
+  border-color: color-mix(in srgb, var(--shu) 26%, var(--line));
+}
+.battle-hero::after { width: 120px; height: 120px; inset: auto -34px -40px auto; }
+.battle-hero .foe-figure { --sz: 74px; position: relative; z-index: 1; }
+.bh-body { position: relative; z-index: 1; display: grid; gap: 5px; min-width: 0; }
+.bh-t {
+  font-family: var(--mincho); font-size: 21px; letter-spacing: .07em;
+  padding-inline-end: 48px;
+}
+.bh-d { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+.bh-d b { font-weight: 600; color: var(--shu); }
+.battle-hero .gate-road { justify-content: flex-start; margin: 3px 0 0; }
+.battle-hero .gate-road i { width: 8px; height: 8px; }
+.battle-hero .gate-road i.now { transform: scale(1.35); }
+.battle-hero .gate-road span { max-width: 12px; }
+.bh-n { font-size: 11px; color: var(--ink-3); letter-spacing: .06em; }
+@media (max-width: 539px) {
+  .battle-hero { column-gap: 13px; padding: 14px; }
+  .battle-hero .foe-figure { --sz: 62px; }
+  .bh-t { font-size: 19px; }
+}
 
 /* ---------- generic card / buttons ---------- */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
@@ -360,6 +406,29 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   background: var(--card); font-size: 14px; outline: none;
 }
 .search:focus { border-color: var(--kin); box-shadow: 0 0 0 3px color-mix(in srgb, var(--kin) 18%, transparent); }
+.pill small {
+  font-size: 10px; margin-inline-start: 6px; opacity: .62;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 図鑑：検索と分野の切り替えを上に貼りつける */
+.zk-bar {
+  position: sticky; top: var(--topbar-h); z-index: 20;
+  margin: 0 -16px 14px; padding: 10px 16px 4px;
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+}
+.zk-bar .filters { margin: 10px 0 8px; max-height: 84px; overflow-y: auto; }
+/* 分野の見出し。100 件の平坦な列に手がかりを入れる */
+.zk-group {
+  display: flex; align-items: baseline; gap: 10px;
+  font-family: var(--mincho); font-size: 15px; letter-spacing: .12em;
+  margin: 22px 0 9px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+}
+.zk-group:first-child { margin-top: 4px; }
+.zk-group span {
+  font-family: var(--gothic); font-size: 11px; letter-spacing: .08em; color: var(--ink-3);
+}
 
 .kuho-item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); margin-bottom: 10px; overflow: hidden; box-shadow: var(--shadow); }
 .kuho-head { width: 100%; text-align: left; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
@@ -3726,6 +3795,19 @@ window.LESSONS = [
     return m ? m.length : 0;
   }
 
+  /** 判定と解説を画面に入れてから、次へ進むボタンに送る。
+   *  設問が長いと解説が画面の外に出たままになるため。 */
+  function focusVerdict() {
+    var vd = el('vd');
+    if (!vd) return;
+    if (vd.scrollIntoView) {
+      try { vd.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+      catch (e) { vd.scrollIntoView(false); }
+    }
+    var b = vd.querySelector('.btn');
+    if (b) b.focus({ preventScroll: true });
+  }
+
   /* ============================ モード定義 ============================ */
   var MODES = [
     { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
@@ -3747,6 +3829,29 @@ window.LESSONS = [
   }
 
   /* ============================ ホーム ============================ */
+
+  /** 道場破りだけは、次に立ちはだかる相手の顔を見せて別格に扱う */
+  function battleHero(s) {
+    var cleared = s.foesCleared || [];
+    var idx = 0;
+    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
+    var all = idx >= window.FOES.length;
+    var f = window.FOES[all ? window.FOES.length - 1 : idx];
+    return '<button class="mode battle-hero" data-act="play" data-id="battle" style="--accent:var(--shu)">' +
+      '<span class="m-tag">対戦</span>' +
+      foeArt(f, 'hero-foe' + (all ? ' beaten' : ''), all ? '破' : '') +
+      '<span class="bh-body">' +
+        '<span class="bh-t">道場破り</span>' +
+        '<span class="bh-d">' + (all
+          ? '八つの関門をすべて突破。もう一巡して腕を確かめましょう。'
+          : '次に待つのは<b>' + esc(f.name) + '</b>。' +
+            esc(f.cats ? f.cats.join('・') : '全分野') + 'から、正解 ' + f.ki + ' 回で突破。') + '</span>' +
+        gateRoad(all ? window.FOES.length - 1 : idx, true) +
+        '<span class="bh-n">突破 ' + cleared.length + ' / ' + window.FOES.length + ' 関門</span>' +
+      '</span>' +
+      '</button>';
+  }
+
   function screenHome() {
     var s = window.Store.state;
     var r = window.Store.rankOf(s.xp);
@@ -3755,14 +3860,11 @@ window.LESSONS = [
     var todayChars = window.Store.recentDays(1)[0].chars;
     var slatsAll = Math.floor((s.chars || 0) / SLAT_CHARS);
 
-    var cards = MODES.map(function (m) {
+    var cards = MODES.filter(function (m) { return m.id !== 'battle'; }).map(function (m) {
       var best = s.best[m.id];
       var sub;
       if (m.id === 'weak') {
         sub = weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません';
-      } else if (m.id === 'battle') {
-        var cl = (s.foesCleared || []).length;
-        sub = cl ? '突破 ' + cl + ' / ' + window.FOES.length + ' 関門' : '第一関門から挑戦';
       } else {
         sub = best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦';
       }
@@ -3794,6 +3896,7 @@ window.LESSONS = [
         '</div>' +
       '</section>' +
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
+      battleHero(s) +
       '<div class="modes">' + cards + '</div>' +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
@@ -3822,7 +3925,22 @@ window.LESSONS = [
       return hay.indexOf(zukanState.q) !== -1;
     });
 
+    /* 分野ごとの収録数。どの分野が厚いのかが一目で分かる */
+    var catN = {};
+    window.KUHO.forEach(function (k) { catN[k.cat] = (catN[k.cat] || 0) + 1; });
+    catN['すべて'] = window.KUHO.length;
+
+    /* 絞り込んでいないときは分野の見出しを挟んで、100 件の平坦な列にしない */
+    var grouped = zukanState.cat === 'すべて' && !zukanState.q;
+    var lastCat = null;
+
     var items = list.map(function (k) {
+      var head = '';
+      if (grouped && k.cat !== lastCat) {
+        lastCat = k.cat;
+        head = '<h3 class="zk-group">' + esc(k.cat) +
+          '<span>' + catN[k.cat] + ' 句形</span></h3>';
+      }
       var open = !!zukanState.open[k.id];
       var exHtml = (k.ex || []).map(function (e) {
         return '<div class="ex">' +
@@ -3832,7 +3950,7 @@ window.LESSONS = [
           (e.s ? '<div class="ex-s">— ' + esc(e.s) + '</div>' : '') +
           '</div>';
       }).join('');
-      return '<div class="kuho-item">' +
+      return head + '<div class="kuho-item">' +
         '<button class="kuho-head" data-act="toggle" data-id="' + k.id + '">' +
           '<span class="kh-cat">' + esc(k.cat) + '</span>' +
           '<span class="kh-main"><span class="kh-form">' + kanbunHTML(k.form) + '</span>' +
@@ -3849,10 +3967,14 @@ window.LESSONS = [
     render(
       '<div class="sec-h"><h2>句法図鑑</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
-      '<input class="search" id="zk-q" type="search" placeholder="句形・読み・意味・出典で検索" value="' + esc(zukanState.q) + '">' +
-      '<div class="filters">' + cats.map(function (c) {
-        return '<button class="pill' + (c === zukanState.cat ? ' on' : '') + '" data-act="cat" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
-      }).join('') + '</div>' +
+      /* 検索と分野の切り替えは上に貼りつけ、どこまで下がっても手が届くようにする */
+      '<div class="zk-bar">' +
+        '<input class="search" id="zk-q" type="search" placeholder="句形・読み・意味・出典で検索" value="' + esc(zukanState.q) + '">' +
+        '<div class="filters">' + cats.map(function (c) {
+          return '<button class="pill' + (c === zukanState.cat ? ' on' : '') + '" data-act="cat" data-cat="' + esc(c) + '">' +
+            esc(c) + '<small>' + catN[c] + '</small></button>';
+        }).join('') + '</div>' +
+      '</div>' +
       (list.length ? items : '<div class="empty"><div class="e-ico">🔍</div><p>該当する句形が見つかりません。</p></div>') +
       '<p class="muted center mt">' + list.length + ' / ' + window.KUHO.length + ' 件</p>'
     );
@@ -4210,7 +4332,7 @@ window.LESSONS = [
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
-      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '') +
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><span class="sec-n">' + (res.wrong || []).length + ' 問</span><div class="rule"></div></div><div class="review">' + review + '</div>' : '') +
       (newAch.length ? '' : '')
     );
 
@@ -4442,7 +4564,7 @@ window.LESSONS = [
           '<button class="btn" data-act="next">' + nextLabel + '</button>' +
         '</div>' +
       '</div>';
-    el('vd').querySelector('.btn').focus();
+    focusVerdict();
   }
 
   function nextQuestion() {
@@ -4492,17 +4614,18 @@ window.LESSONS = [
     screenFoeIntro();
   }
 
-  /** 第一関門から第八関門までの道のり */
-  function gateRoad(cur) {
+  /** 第一関門から第八関門までの道のり。inline は入れ子のボタン内に置く用 */
+  function gateRoad(cur, inline) {
     var cleared = window.Store.state.foesCleared || [];
     var s = '';
     for (var i = 0; i < window.FOES.length; i++) {
       if (i) s += '<span></span>';
       var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
-      s += '<i class="' + st + '" title="第' + (i + 1) + '関門"></i>';
+      s += '<i class="' + st + '"></i>';
     }
-    return '<div class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
-      window.FOES.length + '">' + s + '</div>';
+    var tag = inline ? 'span' : 'div';
+    return '<' + tag + ' class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
+      window.FOES.length + '">' + s + '</' + tag + '>';
   }
 
   function screenFoeIntro() {
@@ -4624,7 +4747,7 @@ window.LESSONS = [
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
-      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '')
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><span class="sec-n">' + wrong.length + ' 問</span><div class="rule"></div></div><div class="review">' + review + '</div>' : '')
     );
     if (newAch.length) {
       setTimeout(function () { toast('実績を獲得： ' + newAch.map(function (a) { return a.ico + ' ' + a.t; }).join('、')); }, 500);
@@ -4688,7 +4811,7 @@ window.LESSONS = [
           '<p><b>' + esc(it.yomi) + '</b></p><p>' + esc(it.tip) + '</p>' +
           '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="ktnext">' +
           (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-        el('vd').querySelector('.btn').focus();
+        focusVerdict();
       } else {
         renderKaeriten();
       }
@@ -4774,7 +4897,7 @@ window.LESSONS = [
       '<p>置き字は <b>' + esc(ans.map(function (i) { return it.chars[i]; }).join('・')) + '</b>。書き下し文は「' + esc(it.yomi) + '」' + (it.src ? '（' + esc(it.src) + '）' : '') + '</p>' +
       '<p>' + esc(it.tip) + '</p>' +
       '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="oknext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-    el('vd').querySelector('.btn').focus();
+    focusVerdict();
   }
 
   function okijiNext() {
@@ -4851,7 +4974,7 @@ window.LESSONS = [
       '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') + '</div>' +
       '<p><b>' + esc(it.parts.join('')) + '</b></p><p>' + esc(it.trans) + '（' + esc(it.src) + '）</p>' +
       '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="nbnext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-    el('vd').querySelector('.btn').focus();
+    focusVerdict();
   }
 
   function narabeNext() {

@@ -113,6 +113,19 @@
     return m ? m.length : 0;
   }
 
+  /** 判定と解説を画面に入れてから、次へ進むボタンに送る。
+   *  設問が長いと解説が画面の外に出たままになるため。 */
+  function focusVerdict() {
+    var vd = el('vd');
+    if (!vd) return;
+    if (vd.scrollIntoView) {
+      try { vd.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+      catch (e) { vd.scrollIntoView(false); }
+    }
+    var b = vd.querySelector('.btn');
+    if (b) b.focus({ preventScroll: true });
+  }
+
   /* ============================ モード定義 ============================ */
   var MODES = [
     { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
@@ -134,6 +147,29 @@
   }
 
   /* ============================ ホーム ============================ */
+
+  /** 道場破りだけは、次に立ちはだかる相手の顔を見せて別格に扱う */
+  function battleHero(s) {
+    var cleared = s.foesCleared || [];
+    var idx = 0;
+    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
+    var all = idx >= window.FOES.length;
+    var f = window.FOES[all ? window.FOES.length - 1 : idx];
+    return '<button class="mode battle-hero" data-act="play" data-id="battle" style="--accent:var(--shu)">' +
+      '<span class="m-tag">対戦</span>' +
+      foeArt(f, 'hero-foe' + (all ? ' beaten' : ''), all ? '破' : '') +
+      '<span class="bh-body">' +
+        '<span class="bh-t">道場破り</span>' +
+        '<span class="bh-d">' + (all
+          ? '八つの関門をすべて突破。もう一巡して腕を確かめましょう。'
+          : '次に待つのは<b>' + esc(f.name) + '</b>。' +
+            esc(f.cats ? f.cats.join('・') : '全分野') + 'から、正解 ' + f.ki + ' 回で突破。') + '</span>' +
+        gateRoad(all ? window.FOES.length - 1 : idx, true) +
+        '<span class="bh-n">突破 ' + cleared.length + ' / ' + window.FOES.length + ' 関門</span>' +
+      '</span>' +
+      '</button>';
+  }
+
   function screenHome() {
     var s = window.Store.state;
     var r = window.Store.rankOf(s.xp);
@@ -142,14 +178,11 @@
     var todayChars = window.Store.recentDays(1)[0].chars;
     var slatsAll = Math.floor((s.chars || 0) / SLAT_CHARS);
 
-    var cards = MODES.map(function (m) {
+    var cards = MODES.filter(function (m) { return m.id !== 'battle'; }).map(function (m) {
       var best = s.best[m.id];
       var sub;
       if (m.id === 'weak') {
         sub = weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません';
-      } else if (m.id === 'battle') {
-        var cl = (s.foesCleared || []).length;
-        sub = cl ? '突破 ' + cl + ' / ' + window.FOES.length + ' 関門' : '第一関門から挑戦';
       } else {
         sub = best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦';
       }
@@ -181,6 +214,7 @@
         '</div>' +
       '</section>' +
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
+      battleHero(s) +
       '<div class="modes">' + cards + '</div>' +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
@@ -209,7 +243,22 @@
       return hay.indexOf(zukanState.q) !== -1;
     });
 
+    /* 分野ごとの収録数。どの分野が厚いのかが一目で分かる */
+    var catN = {};
+    window.KUHO.forEach(function (k) { catN[k.cat] = (catN[k.cat] || 0) + 1; });
+    catN['すべて'] = window.KUHO.length;
+
+    /* 絞り込んでいないときは分野の見出しを挟んで、100 件の平坦な列にしない */
+    var grouped = zukanState.cat === 'すべて' && !zukanState.q;
+    var lastCat = null;
+
     var items = list.map(function (k) {
+      var head = '';
+      if (grouped && k.cat !== lastCat) {
+        lastCat = k.cat;
+        head = '<h3 class="zk-group">' + esc(k.cat) +
+          '<span>' + catN[k.cat] + ' 句形</span></h3>';
+      }
       var open = !!zukanState.open[k.id];
       var exHtml = (k.ex || []).map(function (e) {
         return '<div class="ex">' +
@@ -219,7 +268,7 @@
           (e.s ? '<div class="ex-s">— ' + esc(e.s) + '</div>' : '') +
           '</div>';
       }).join('');
-      return '<div class="kuho-item">' +
+      return head + '<div class="kuho-item">' +
         '<button class="kuho-head" data-act="toggle" data-id="' + k.id + '">' +
           '<span class="kh-cat">' + esc(k.cat) + '</span>' +
           '<span class="kh-main"><span class="kh-form">' + kanbunHTML(k.form) + '</span>' +
@@ -236,10 +285,14 @@
     render(
       '<div class="sec-h"><h2>句法図鑑</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">戻る</button></div>' +
-      '<input class="search" id="zk-q" type="search" placeholder="句形・読み・意味・出典で検索" value="' + esc(zukanState.q) + '">' +
-      '<div class="filters">' + cats.map(function (c) {
-        return '<button class="pill' + (c === zukanState.cat ? ' on' : '') + '" data-act="cat" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
-      }).join('') + '</div>' +
+      /* 検索と分野の切り替えは上に貼りつけ、どこまで下がっても手が届くようにする */
+      '<div class="zk-bar">' +
+        '<input class="search" id="zk-q" type="search" placeholder="句形・読み・意味・出典で検索" value="' + esc(zukanState.q) + '">' +
+        '<div class="filters">' + cats.map(function (c) {
+          return '<button class="pill' + (c === zukanState.cat ? ' on' : '') + '" data-act="cat" data-cat="' + esc(c) + '">' +
+            esc(c) + '<small>' + catN[c] + '</small></button>';
+        }).join('') + '</div>' +
+      '</div>' +
       (list.length ? items : '<div class="empty"><div class="e-ico">🔍</div><p>該当する句形が見つかりません。</p></div>') +
       '<p class="muted center mt">' + list.length + ' / ' + window.KUHO.length + ' 件</p>'
     );
@@ -597,7 +650,7 @@
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
-      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '') +
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><span class="sec-n">' + (res.wrong || []).length + ' 問</span><div class="rule"></div></div><div class="review">' + review + '</div>' : '') +
       (newAch.length ? '' : '')
     );
 
@@ -829,7 +882,7 @@
           '<button class="btn" data-act="next">' + nextLabel + '</button>' +
         '</div>' +
       '</div>';
-    el('vd').querySelector('.btn').focus();
+    focusVerdict();
   }
 
   function nextQuestion() {
@@ -879,17 +932,18 @@
     screenFoeIntro();
   }
 
-  /** 第一関門から第八関門までの道のり */
-  function gateRoad(cur) {
+  /** 第一関門から第八関門までの道のり。inline は入れ子のボタン内に置く用 */
+  function gateRoad(cur, inline) {
     var cleared = window.Store.state.foesCleared || [];
     var s = '';
     for (var i = 0; i < window.FOES.length; i++) {
       if (i) s += '<span></span>';
       var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
-      s += '<i class="' + st + '" title="第' + (i + 1) + '関門"></i>';
+      s += '<i class="' + st + '"></i>';
     }
-    return '<div class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
-      window.FOES.length + '">' + s + '</div>';
+    var tag = inline ? 'span' : 'div';
+    return '<' + tag + ' class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
+      window.FOES.length + '">' + s + '</' + tag + '>';
   }
 
   function screenFoeIntro() {
@@ -1011,7 +1065,7 @@
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
-      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><div class="rule"></div></div><div class="review">' + review + '</div>' : '')
+      (review ? '<div class="sec-h"><h2>まちがえたところ</h2><span class="sec-n">' + wrong.length + ' 問</span><div class="rule"></div></div><div class="review">' + review + '</div>' : '')
     );
     if (newAch.length) {
       setTimeout(function () { toast('実績を獲得： ' + newAch.map(function (a) { return a.ico + ' ' + a.t; }).join('、')); }, 500);
@@ -1075,7 +1129,7 @@
           '<p><b>' + esc(it.yomi) + '</b></p><p>' + esc(it.tip) + '</p>' +
           '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="ktnext">' +
           (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-        el('vd').querySelector('.btn').focus();
+        focusVerdict();
       } else {
         renderKaeriten();
       }
@@ -1161,7 +1215,7 @@
       '<p>置き字は <b>' + esc(ans.map(function (i) { return it.chars[i]; }).join('・')) + '</b>。書き下し文は「' + esc(it.yomi) + '」' + (it.src ? '（' + esc(it.src) + '）' : '') + '</p>' +
       '<p>' + esc(it.tip) + '</p>' +
       '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="oknext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-    el('vd').querySelector('.btn').focus();
+    focusVerdict();
   }
 
   function okijiNext() {
@@ -1238,7 +1292,7 @@
       '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') + '</div>' +
       '<p><b>' + esc(it.parts.join('')) + '</b></p><p>' + esc(it.trans) + '（' + esc(it.src) + '）</p>' +
       '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="nbnext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-    el('vd').querySelector('.btn').focus();
+    focusVerdict();
   }
 
   function narabeNext() {
