@@ -173,6 +173,12 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   background: var(--paper-2); border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px;
 }
 
+/* けいこを束ねる小見出し。sec-h より一段軽く、区切り線は引かない */
+.sec-sub { display: flex; align-items: baseline; gap: 9px; margin: 22px 2px 9px; }
+.sec-sub:first-of-type { margin-top: 16px; }
+.sec-sub h3 { font-family: var(--mincho); font-size: 14px; letter-spacing: .1em; color: var(--ink-2); }
+.sec-sub span { font-size: 11px; color: var(--ink-3); }
+
 /* ---------- mode cards ---------- */
 .modes { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .mode {
@@ -204,6 +210,29 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
   border: 1px solid color-mix(in srgb, var(--accent, var(--kin)) 30%, transparent);
 }
 .mode .m-prog { margin-top: 10px; font-size: 11px; color: var(--ink-3); position: relative; z-index: 1; }
+
+/* けいこの小見出しにぶら下がる、一回り軽いカード。16項目が一枚の長い列に
+   なって見渡せない、という指摘への対応。装飾の丸背景は消し、一行に収める。 */
+.modes.compact-list { grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 540px) { .modes.compact-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mode.compact {
+  display: flex; align-items: flex-start; gap: 12px; padding: 11px 13px;
+}
+.mode.compact::after { content: none; }
+.mode.compact .m-ico { width: 32px; height: 32px; font-size: 15px; border-radius: 8px; flex: none; }
+.mode.compact .m-body { min-width: 0; flex: 1; }
+.mode.compact .m-t {
+  margin-top: 0; padding-inline-end: 0; font-size: 14.5px;
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.mode.compact .m-tag {
+  position: static; font-size: 9px; padding: 1px 7px; font-family: var(--gothic); letter-spacing: .08em;
+}
+.mode.compact .m-d {
+  margin-top: 2px; font-size: 11.5px; line-height: 1.5;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+}
+.mode.compact .m-prog { margin-top: 3px; font-size: 10.5px; }
 
 /* ---------- 道場破りだけは別格に見せる ---------- */
 .battle-hero {
@@ -443,15 +472,37 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .l-table { width: 100%; border-collapse: collapse; margin: 4px 0 16px; font-size: 13.5px; }
 .l-table th, .l-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
 .l-table th { background: var(--paper-2); font-weight: 600; font-size: 12.5px; letter-spacing: .04em; }
-.l-table i { color: var(--shu); font-style: normal; font-size: .8em; vertical-align: super; }
 .l-ol { padding-left: 1.3em; margin: 0 0 14px; }
 .l-ol li { margin-bottom: 9px; font-size: 14.5px; }
 .l-flow { display: grid; gap: 10px; margin: 4px 0 16px; }
 .l-step { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; background: var(--paper-2); }
 .l-step b { display: inline-block; font-size: 11px; letter-spacing: .12em; color: var(--shu); }
-.l-step span { display: block; font-family: var(--mincho); font-size: 20px; letter-spacing: .1em; margin: 3px 0; }
-.l-step i { color: var(--shu); font-style: normal; font-size: .65em; vertical-align: super; }
+/* 子孫セレクタにすると、返り点の <span class="kc"> まで拾って
+   display:block にしてしまい、縦組みで箱ごと伸びてしまう。直下の子だけに絞る。 */
+.l-step > span { display: block; font-family: var(--mincho); font-size: 20px; letter-spacing: .1em; margin: 3px 0; }
 .l-step small { color: var(--ink-3); font-size: 11.5px; }
+
+/* 講座中の白文・訓読文の引用。他の設問と同じく、縦書きモードでは縦組みにする。
+   通常サイズは l-flow の各段に、mini は表のセルの中でごく短い例を示す用。
+   font-size はここで確定させる（.l-step 経由にすると、measureAdvance() が
+   作る素の .l-kex プローブに反映されず、字送りの実測値がずれるため）。 */
+.l-kex { font-family: var(--mincho); font-size: 20px; letter-spacing: .1em; margin: 3px 0; }
+.l-kex.mini { font-size: 15px; letter-spacing: .06em; margin: 0; }
+/* 縦組みの例の下に一行で添える。横に並べると、表の狭い列では
+   変な位置で折り返ってしまう。 */
+.l-arrow { display: block; font-family: var(--gothic); font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+.vert .l-kex { writing-mode: vertical-rl; text-orientation: mixed; line-height: 2; }
+/* l-flow の例は、横書き時と同じく「ラベル→例→注釈」の三段に積む。
+   inline-block のままだとラベル・注釈が縦組みの例と横並びの基線に揃ってしまう。 */
+.vert .l-step .l-kex {
+  display: block; margin: 6px 0; text-align: start;
+  height: min(240px, calc(var(--n, 8) * var(--adv-lkex, 1.24em) + 10px));
+}
+.vert .l-table .l-kex.mini {
+  display: inline-block;
+  height: calc(var(--n, 6) * 1.6em + 6px);
+  vertical-align: middle; line-height: 1.7;
+}
 .l-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 16px; }
 .l-cmp > div { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; background: var(--card); }
 .l-cmp > div > b { display: block; font-family: var(--mincho); letter-spacing: .05em; margin-bottom: 6px; color: var(--ai); }

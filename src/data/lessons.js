@@ -5,8 +5,8 @@ window.LESSONS = [
     body: `
 <p>漢文とは、古代中国の文章を、日本語の語順に組みかえて読む方法のことです。もとの中国語は英語に似た語順（主語→動詞→目的語）ですが、日本語は「主語→目的語→動詞」。そこで、返り点で読む順序を指示し、送り仮名で日本語の文法を補うわけです。</p>
 <div class="l-flow">
-  <div class="l-step"><b>白文</b><span>学而時習之</span><small>返り点も送り仮名もない、もとの漢文</small></div>
-  <div class="l-step"><b>訓読文</b><span>学ビテ時ニ習フ<i>レ</i>之ヲ</span><small>返り点・送り仮名をつけたもの</small></div>
+  <div class="l-step"><b>白文</b><span class="l-kex">学而時習之</span><small>返り点も送り仮名もない、もとの漢文</small></div>
+  <div class="l-step"><b>訓読文</b><span class="l-kex">学ビテ時ニ習フ^レ之ヲ</span><small>返り点・送り仮名をつけたもの</small></div>
   <div class="l-step"><b>書き下し文</b><span>学びて時に之を習ふ</span><small>日本語の文として書き直したもの</small></div>
 </div>
 <p class="l-tip"><b>ここが大事</b>　入試で問われるのはほぼ「白文または訓読文 → 書き下し文 → 現代語訳」の橋渡しです。逆に言えば、この三段階を往復できるようになれば、漢文は一気に得点源になります。</p>
@@ -18,11 +18,11 @@ window.LESSONS = [
 <p>返り点は漢字の<b>左下</b>に書かれ、下から上へ返って読む順序を示します。種類は「返る距離」で使い分けます。</p>
 <table class="l-table">
   <tr><th>記号</th><th>働き</th><th>例</th></tr>
-  <tr><td>レ点</td><td>すぐ下の一字を読んでから、一字上へ返る</td><td>読<i>レ</i>書 → 書・読</td></tr>
-  <tr><td>一・二・三点</td><td>二字以上へだてて下から上へ返る</td><td>登<i>二</i>高山<i>一</i> → 高・山・登</td></tr>
-  <tr><td>上・中・下点</td><td>一二点をはさんで、さらに外側へ返る</td><td>有<i>下</i>朋自<i>二</i>遠方<i>一</i>来<i>上</i></td></tr>
+  <tr><td>レ点</td><td>すぐ下の一字を読んでから、一字上へ返る</td><td><span class="l-kex mini">読^レ書</span><span class="l-arrow">→ 書・読</span></td></tr>
+  <tr><td>一・二・三点</td><td>二字以上へだてて下から上へ返る</td><td><span class="l-kex mini">登^二高山^一</span><span class="l-arrow">→ 高・山・登</span></td></tr>
+  <tr><td>上・中・下点</td><td>一二点をはさんで、さらに外側へ返る</td><td><span class="l-kex mini">有^下朋自^二遠方^一来^上</span></td></tr>
   <tr><td>甲・乙・丙点</td><td>上中下点でも足りないときに使う</td><td>（きわめてまれ）</td></tr>
-  <tr><td>一レ・上レ など</td><td>レ点と他の返り点の合体。<b>必ずレ点から処理</b></td><td>使<i>二</i>子路問<i>一レ</i>之</td></tr>
+  <tr><td>一レ・上レ など</td><td>レ点と他の返り点の合体。<b>必ずレ点から処理</b></td><td><span class="l-kex mini">使^二子路問^一レ之</span></td></tr>
 </table>
 <p class="l-tip"><b>順序の鉄則</b>　内側から外側へ。<b>レ点 → 一二点 → 上中下点 → 甲乙丙点</b>の順に処理します。「近いほど内側、遠いほど外側」と覚えましょう。</p>
 `

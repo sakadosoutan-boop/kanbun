@@ -105,6 +105,7 @@
     measureAdvance('q-stem', '--adv-stem');
     measureAdvance('ex-k', '--adv-ex');
     measureAdvance('p-line', '--adv-line');
+    measureAdvance('l-kex', '--adv-lkex');
   }
 
   /** 読んだ漢文の量として数える文字数（漢字だけを数える） */
@@ -127,19 +128,27 @@
   }
 
   /* ============================ モード定義 ============================ */
+  /* group : ホームでの束ね方。多すぎて見渡せないという指摘への対応で、
+   *         けいこを四つの小見出しに分けて表示する。 */
   var MODES = [
-    { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎' },
-    { id: 'saidoku', ico: '再', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎' },
+    { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎', group: 'basics' },
+    { id: 'saidoku', ico: '再', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎', group: 'basics' },
     { id: 'battle', ico: '闘', t: '道場破り', d: '漢文の主たちが立ちはだかる。八つの関門を抜けよ', kind: 'battle', accent: 'var(--shu)', tag: '対戦' },
-    { id: 'kuho', ico: '句', t: '句法ドリル', d: '全句法から通しで15問。一問25秒', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--ai)', perQ: 25, tag: '練習' },
-    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '縦組みの白文を、返り点どおりの順にタップ', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル' },
-    { id: 'okiji', ico: '置', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル' },
-    { id: 'narabe', ico: '序', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル' },
-    { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識' },
-    { id: 'koji', ico: '故', t: '故事成語', d: '意味と出典をセットで覚える', kind: 'choice', pool: 'koji', n: 12, accent: 'var(--kin)', tag: '知識' },
-    { id: 'kanji', ico: '字', t: '頻出漢字の読み', d: '一問十秒。読みを瞬時に引き出す', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答' },
-    { id: 'weak', ico: '弱', t: '弱点復習', d: 'まちがえた問題だけを狙って出し直す', kind: 'choice', pool: 'weak', n: 12, accent: 'var(--shu)', tag: '復習' },
-    { id: 'mogi', ico: '試', t: '実力テスト', d: '全範囲から20問。百点満点で判定', kind: 'choice', pool: 'mogi', n: 20, accent: 'var(--ink)', total: 600, tag: '総合' }
+    { id: 'kuho', ico: '句', t: '句法ドリル', d: '全句法から通しで15問。一問25秒', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--ai)', perQ: 25, tag: '練習', group: 'drill' },
+    { id: 'weak', ico: '弱', t: '弱点復習', d: 'まちがえた問題だけを狙って出し直す', kind: 'choice', pool: 'weak', n: 12, accent: 'var(--shu)', tag: '復習', group: 'drill' },
+    { id: 'mogi', ico: '試', t: '実力テスト', d: '全範囲から20問。百点満点で判定', kind: 'choice', pool: 'mogi', n: 20, accent: 'var(--ink)', total: 600, tag: '総合', group: 'drill' },
+    { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '縦組みの白文を、返り点どおりの順にタップ', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル', group: 'puzzle' },
+    { id: 'okiji', ico: '置', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル', group: 'puzzle' },
+    { id: 'narabe', ico: '序', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル', group: 'puzzle' },
+    { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識', group: 'knowledge' },
+    { id: 'koji', ico: '故', t: '故事成語', d: '意味と出典をセットで覚える', kind: 'choice', pool: 'koji', n: 12, accent: 'var(--kin)', tag: '知識', group: 'knowledge' },
+    { id: 'kanji', ico: '字', t: '頻出漢字の読み', d: '一問十秒。読みを瞬時に引き出す', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答', group: 'knowledge' }
+  ];
+  var MODE_GROUPS = [
+    { id: 'basics', t: '基礎を固める', d: 'まずはここから' },
+    { id: 'drill', t: '句法をきたえる', d: '通し・弱点・総仕上げ' },
+    { id: 'puzzle', t: 'パズルで慣れる', d: '返り点・置き字・語順' },
+    { id: 'knowledge', t: '知識を広げる', d: '漢詩・故事成語・漢字' }
   ];
   function modeById(id) {
     for (var i = 0; i < MODES.length; i++) if (MODES[i].id === id) return MODES[i];
@@ -178,7 +187,7 @@
     var todayChars = window.Store.recentDays(1)[0].chars;
     var slatsAll = Math.floor((s.chars || 0) / SLAT_CHARS);
 
-    var cards = MODES.filter(function (m) { return m.id !== 'battle'; }).map(function (m) {
+    function modeCard(m) {
       var best = s.best[m.id];
       var sub;
       if (m.id === 'weak') {
@@ -186,13 +195,20 @@
       } else {
         sub = best !== undefined ? '自己ベスト ' + best + (m.id === 'mogi' ? ' 点' : '') : '未挑戦';
       }
-      return '<button class="mode" data-act="play" data-id="' + m.id + '" style="--accent:' + m.accent + '">' +
-        '<span class="m-tag">' + esc(m.tag) + '</span>' +
+      return '<button class="mode compact" data-act="play" data-id="' + m.id + '" style="--accent:' + m.accent + '">' +
         '<div class="m-ico">' + m.ico + '</div>' +
-        '<div class="m-t">' + esc(m.t) + '</div>' +
-        '<div class="m-d">' + esc(m.d) + '</div>' +
-        '<div class="m-prog">' + esc(sub) + '</div>' +
-        '</button>';
+        '<div class="m-body">' +
+          '<div class="m-t">' + esc(m.t) + '<span class="m-tag">' + esc(m.tag) + '</span></div>' +
+          '<div class="m-d">' + esc(m.d) + '</div>' +
+          '<div class="m-prog">' + esc(sub) + '</div>' +
+        '</div></button>';
+    }
+
+    /* 一枚の長い列にすると多すぎて見渡せないので、四つの小見出しに束ねる */
+    var groupHTML = MODE_GROUPS.map(function (g) {
+      var ms = MODES.filter(function (m) { return m.group === g.id; });
+      return '<div class="sec-sub"><h3>' + esc(g.t) + '</h3><span>' + esc(g.d) + '</span></div>' +
+        '<div class="modes compact-list">' + ms.map(modeCard).join('') + '</div>';
     }).join('');
 
     render(
@@ -215,7 +231,7 @@
       '</section>' +
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
       battleHero(s) +
-      '<div class="modes">' + cards + '</div>' +
+      groupHTML +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
         '<button class="mode" data-act="go" data-to="lessons" style="--accent:var(--ai)"><div class="m-ico">講</div><div class="m-t">基礎講座</div><div class="m-d">訓読・句法・漢詩のルールを読んで理解する</div></button>' +
@@ -320,6 +336,15 @@
     );
   }
 
+  /** 講座本文中の <span class="l-kex">白文・訓読文</span> を縦組みに組み直す。
+   *  データ側は素の文字（返り点は ^ 付き）で書き、表示だけここで作る。
+   *  書き下し文は日本語の語順のままなので対象にしない（設問の選択肢と同じ扱い）。 */
+  function lessonBodyHTML(body) {
+    return body.replace(/<span class="l-kex( mini)?">([^<]*)<\/span>/g, function (m, mini, raw) {
+      return '<span class="l-kex' + (mini || '') + '"' + vstyle(raw) + '>' + kanbunHTML(raw) + '</span>';
+    });
+  }
+
   function screenLesson(id) {
     var idx = -1;
     window.LESSONS.forEach(function (l, i) { if (l.id === id) idx = i; });
@@ -330,7 +355,7 @@
       '<div class="sec-h"><h2>' + esc(l.title) + '</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="lessons">一覧</button></div>' +
       '<p class="muted">' + esc(l.sub) + '</p>' +
-      '<div class="card mt lesson-body">' + l.body + '</div>' +
+      '<div class="card mt lesson-body">' + lessonBodyHTML(l.body) + '</div>' +
       '<div class="btn-row mt">' +
         (next ? '<button class="btn" data-act="lesson" data-id="' + next.id + '">次の講座：' + esc(next.title) + '</button>' : '') +
         '<button class="btn ghost" data-act="go" data-to="lessons">講座一覧へ</button>' +
