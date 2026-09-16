@@ -1032,3 +1032,40 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .stem-lines .p-line { font-family: var(--mincho); font-size: clamp(17px, 4.4vw, 21px); letter-spacing: .12em; }
 :not(.vert) .stem-lines .p-line { text-align: center; line-height: 1.9; }
 .vert .stem-lines .p-line { max-height: min(40vh, 330px); }
+
+/* 学習の入口と第二巻。既存の紙・墨・朱の色を共用する。 */
+.learning-start { border-top: 3px solid var(--shu); margin-bottom: 28px; }
+.learning-start h2, .intro-card h2 { font-family: var(--mincho); font-size: clamp(20px, 4.8vw, 27px); margin: 6px 0 10px; }
+.eyebrow, .chapter-label { color: var(--shu); font-size: 12px; letter-spacing: .13em; }
+.chapter-label { text-align: center; margin: 16px 0; }
+.learning-start .btn-row { margin-top: 16px; flex-wrap: wrap; }
+.practice-setting { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 20px; }
+.practice-setting span { color: var(--ink-3); font-size: 12px; flex: 1 1 190px; }
+.text-link { color: var(--ink-2); text-decoration: underline; font-size: 12px; background: none; border: 0; cursor: pointer; padding: 12px 0; }
+.intro-card { margin-top: 20px; line-height: 1.9; }
+.intro-example { display: flex; gap: 32px; align-items: center; padding: 24px; background: var(--paper-2); border-radius: 12px; margin: 18px 0; }
+.intro-example > div:last-child { flex: 1; }
+.intro-example .q-stem-wrap { min-width: 60px; }
+.learning-links { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 12px; margin: 12px 0; }
+.learning-links .btn { font-size: 12px; padding: 9px 12px; }
+.feedback-reason { border-left: 3px solid var(--shu); padding-left: 12px; }
+.journey-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0 32px; }
+.journey-stage { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); text-align: left; cursor: pointer; }
+.journey-stage small { display: block; font-size: 11px; color: var(--ink-3); }
+.journey-stage b { display: block; font-family: var(--mincho); font-size: 19px; margin-top: 5px; }
+.journey-stage.cleared { border-color: var(--kin); }
+.journey-stage:disabled { opacity: .5; cursor: not-allowed; }
+.journey-stage:not(:disabled):hover { border-color: var(--shu); background: var(--paper-2); }
+.bh-t small { display: block; font-size: 12px; color: var(--shu); letter-spacing: .05em; margin-top: 5px; }
+.save-warning { padding: 12px 20px; background: var(--shu); color: white; font-size: 14px; }
+.dlg .btn { min-height: 44px; }
+button:focus-visible { outline: 3px solid var(--ai); outline-offset: 3px; }
+@media (max-width: 560px) {
+  .journey-grid { grid-template-columns: 1fr; }
+  .intro-example { padding: 16px; gap: 16px; }
+  .learning-start .btn-row .btn { flex: 1 1 130px; }
+  .learning-links .btn { flex: 1 1 130px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}

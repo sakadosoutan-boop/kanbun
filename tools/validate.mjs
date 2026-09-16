@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art'];
+const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art', 'journey'];
 const CODE = ['store', 'quizgen'];
 
 const sandbox = { window: {}, localStorage: null, console };

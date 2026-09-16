@@ -7,7 +7,12 @@
   "scripts": {
     "validate": "node tools/validate.mjs",
     "build": "node tools/build.mjs",
-    "test": "node tools/validate.mjs && node tools/smoke.mjs"
+    "test": "node tools/validate.mjs && node --test tools/unit.test.mjs && node tools/regression.mjs && node tools/smoke.mjs",
+    "test:unit": "node --test tools/unit.test.mjs",
+    "test:regression": "node tools/regression.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
 }

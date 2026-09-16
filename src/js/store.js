@@ -20,7 +20,13 @@
     ach: [],           // 取得済み実績 id
     foesCleared: [],   // 道場破りで突破した関門の id
     theme: '',         // '', 'light', 'dark'
-    vertical: true     // 漢文本文を縦書きで表示する
+    vertical: true,    // 漢文本文を縦書きで表示する
+    timedPractice: true,
+    onboarding: false,
+    session: null,
+    examLast: null,
+    _perfect: false,
+    _maxCombo: 0
   };
 
   var RANKS = [
@@ -47,7 +53,8 @@
     { id: 'a7',  ico: '連', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
     { id: 'a8',  ico: '詩', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
     { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
-    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '道場破りで全ての関門を突破',      test: function (s) { return (s.foesCleared || []).length >= (window.FOES || []).length && (window.FOES || []).length > 0; } },
+    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '第一巻の八関門を突破', test: function (s) { return ['f1','f2','f3','f4','f5','f6','f7','f8'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
+    { id: 'a14', ico: '極', t: '古典探究', d: '第二巻の八関門を突破', test: function (s) { return ['f9','f10','f11','f12','f13','f14','f15','f16'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } },
     { id: 'a12', ico: '墨', t: '千字文',     d: '漢文を通算1000字読んだ',          test: function (s) { return (s.chars || 0) >= 1000; } },
     { id: 'a13', ico: '万', t: '万巻の書',   d: '漢文を通算10000字読んだ',         test: function (s) { return (s.chars || 0) >= 10000; } }
@@ -70,21 +77,37 @@
   function load() {
     var raw = null;
     try { raw = localStorage.getItem(KEY); } catch (e) { /* privacy mode */ }
-    state = Object.assign({}, DEFAULT);
+    state = JSON.parse(JSON.stringify(DEFAULT));
     if (raw) {
       try {
         var p = JSON.parse(raw);
-        Object.keys(DEFAULT).forEach(function (k) { if (p[k] !== undefined) state[k] = p[k]; });
+        Object.keys(DEFAULT).forEach(function (k) {
+          if (p && p[k] !== undefined && (DEFAULT[k] === null || typeof p[k] === typeof DEFAULT[k])) state[k] = p[k];
+        });
       } catch (e) { /* corrupted -> reset */ }
     }
+    ['srs', 'days', 'best', 'plays'].forEach(function (k) { if (!state[k] || Array.isArray(state[k])) state[k] = {}; });
+    ['ach', 'foesCleared'].forEach(function (k) { if (!Array.isArray(state[k])) state[k] = []; });
+    if (state.session && (!state.session.mode || !state.session.mode.t || !state.session.phase)) state.session = null;
+    // 新しい称号を追加しても、既存のクリア・称号を失わない。
+    checkAchievements();
     return state;
   }
 
+  var saveFailed = false;
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      saveFailed = false;
+      return true;
+    } catch (e) {
+      saveFailed = true;
+      if (window.dispatchEvent && typeof CustomEvent !== 'undefined') window.dispatchEvent(new CustomEvent('save-error'));
+      return false;
+    }
   }
 
-  /** その日の最初のアクセスで連続記録を更新 */
+  /** その日の最初の解答で連続記録を更新 */
   function touchDay() {
     var t = today();
     if (state.lastDay === t) return false;
@@ -92,7 +115,6 @@
     state.streak = (diff === 1) ? state.streak + 1 : 1;
     state.lastDay = t;
     if (state.streak > state.bestDay) state.bestDay = state.streak;
-    save();
     return true;
   }
 
@@ -112,6 +134,7 @@
 
   /** 1問ぶんの結果を記録する。chars はその問題で読んだ漢文の字数。 */
   function record(key, ok, chars) {
+    touchDay();
     state.answered++;
     if (ok) state.correct++;
     state.chars += (chars || 0);
@@ -130,9 +153,20 @@
     if (key) {
       var s = state.srs[key] || { w: 0, r: 0, t: 0 };
       if (ok) s.r++; else s.w++;
+      if (ok) {
+        if (!s.due || now >= s.due) {
+          s.reviews = (s.reviews || 0) + (s.lastCorrectDay && s.lastCorrectDay !== d ? 1 : 0);
+          s.lastCorrectDay = d;
+          s.due = now + [1, 3, 7, 14, 30][Math.min(4, s.reviews)] * 86400000;
+        }
+      } else {
+        s.reviews = 0; s.lastCorrectDay = ''; s.due = now;
+      }
+      s.lastWrong = !ok;
       s.t = now;
       state.srs[key] = s;
     }
+    save();
   }
 
   /** 直近 n 日ぶんの学習量。カレンダー表示に使う。 */
@@ -147,10 +181,10 @@
     return out;
   }
 
-  /** その問題を「習得した」とみなすか（2回以上正解し、正解が誤答を上回る） */
+  /** 最初の正解に加え、間隔をあけた復習を2回通過したら定着。 */
   function isMastered(key) {
     var s = state.srs[key];
-    return !!(s && s.r >= 2 && s.r > s.w);
+    return !!(s && s.reviews >= 2 && !s.lastWrong);
   }
 
   /** 学習した日数 */
@@ -166,16 +200,27 @@
     return rate * 3 + recency * 0.6 + (s.r === 0 ? 0.8 : 0);
   }
 
-  /** 弱点キー一覧（誤答が正答を上回るもの） */
+  /** 直近の誤答。旧記録だけは累積正誤から移行する。 */
   function weakKeys() {
     return Object.keys(state.srs).filter(function (k) {
       var s = state.srs[k];
-      return s.w > 0 && s.w >= s.r;
+      return typeof s.lastWrong === 'boolean' ? s.lastWrong : s.w > 0 && s.w >= s.r;
     });
   }
 
+  function dueKeys() {
+    var now = Date.now();
+    return Object.keys(state.srs).filter(function (k) {
+      var s = state.srs[k];
+      return (s.due || s.t + 86400000) <= now;
+    });
+  }
+
+  function currentStreak() { return dayDiff(state.lastDay, today()) <= 1 ? state.streak : 0; }
+
   function finishSession(modeId, opt) {
     opt = opt || {};
+    state.session = null;
     state.plays[modeId] = (state.plays[modeId] || 0) + 1;
     if (opt.score !== undefined) {
       if (!state.best[modeId] || opt.score > state.best[modeId]) state.best[modeId] = opt.score;
@@ -200,7 +245,7 @@
   }
 
   function reset() {
-    state = Object.assign({}, DEFAULT, { theme: state.theme, vertical: state.vertical });
+    state = Object.assign(JSON.parse(JSON.stringify(DEFAULT)), { theme: state.theme, vertical: state.vertical, timedPractice: state.timedPractice });
     state.best = {}; state.plays = {}; state.srs = {}; state.ach = []; state.foesCleared = [];
     state.days = {}; state.chars = 0; state.secs = 0;
     save();
@@ -208,10 +253,10 @@
 
   window.Store = {
     load: load, save: save, touchDay: touchDay,
-    rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys,
+    rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys, dueKeys: dueKeys, currentStreak: currentStreak,
     mark: mark, recentDays: recentDays, isMastered: isMastered, activeDays: activeDays,
-    finishSession: finishSession, reset: reset,
+    finishSession: finishSession, reset: reset, checkAchievements: checkAchievements,
     RANKS: RANKS, ACHIEVEMENTS: ACHIEVEMENTS,
-    get state() { return state; }
+    get state() { return state; }, get saveFailed() { return saveFailed; }
   };
 })();
