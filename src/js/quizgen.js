@@ -2,8 +2,11 @@
 (function () {
   'use strict';
 
+  var catalogMode = false, cache = {};
+
   function shuffle(a) {
     a = a.slice();
+    if (catalogMode) return a;
     for (var i = a.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var t = a[i]; a[i] = a[j]; a[j] = t;
@@ -66,7 +69,8 @@
       var basis = sameCat.length >= 3 ? sameCat : all.filter(function (x) { return x.id !== k.id; });
 
       // 読み問題では漢字だけを提示する。訓点つきの form には送り仮名が入っていて答えが読めてしまう。
-      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read));
+      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read)) ||
+        makeChoices(k.read, fieldPool(all, 'read', k.read));
       if (c1) out.push({
         key: k.id + ':read', cat: k.cat, level: k.level,
         stem: k.bare, q: 'この句形の読みとして正しいものはどれか。',
@@ -74,7 +78,8 @@
         exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.note ? '　' + k.note : '')
       });
 
-      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean));
+      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean)) ||
+        makeChoices(k.mean, fieldPool(all, 'mean', k.mean));
       if (c2) out.push({
         key: k.id + ':mean', cat: k.cat, level: k.level,
         stem: k.bare, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
@@ -171,7 +176,9 @@
       var same = all.filter(function (x) { return x.grp === k.grp && x.c !== k.c; });
       var basis = same.length >= 4 ? same : all.filter(function (x) { return x.c !== k.c; });
       var pool = [];
-      basis.forEach(function (x) { x.yomi.forEach(function (y) { if (y !== '—') pool.push(y); }); });
+      basis.forEach(function (x) { x.yomi.forEach(function (y) {
+        if (y !== '—' && k.yomi.indexOf(y) === -1) pool.push(y);
+      }); });
       var c = makeChoices(ans, pool);
       if (!c) return;
       out.push({
@@ -228,7 +235,7 @@
         var five = p.form.indexOf('五') === 0;
         var ansR = five ? '偶数句末' : '第一句末と偶数句末';
         var cw = makeChoices(ansR, ['偶数句末', '奇数句末', '第一句末と偶数句末', 'すべての句末']
-          .filter(function (v) { return v !== ansR; }));
+          .filter(function (v) { return v !== ansR; }), 4, true);
         if (cw) out.push({
           key: p.id + ':rule', cat: '漢詩', level: 1,
           stem: body, q: 'この形式の詩は、原則としてどこで押韻するか。',
@@ -264,12 +271,16 @@
         var wr = [];
         for (var i = 1; i < p.lines.length; i++) {
           var lbl = '第' + i + '句と第' + (i + 1) + '句';
-          if (lbl !== ansT) wr.push(lbl);
+          if (!p.tsuiku.some(function (t) { return t[0] === i && t[1] === i + 1; })) wr.push(lbl);
         }
-        var ct = makeChoices(ansT, wr);
+        // 絶句では誤答の隣接組が足りない。非隣接の組も使い、全ての対句を除く。
+        for (var a = 1; a < p.lines.length; a++) {
+          for (var b = a + 2; b <= p.lines.length; b++) wr.push('第' + a + '句と第' + b + '句');
+        }
+        var ct = makeChoices(ansT, wr, 4, true);
         if (ct) out.push({
           key: p.id + ':tsuiku', cat: '漢詩', level: 3,
-          stem: body, q: 'この詩で対句になっているのはどこか。',
+          stem: body, q: p.form.indexOf('律詩') !== -1 ? 'この律詩の頷聯に当たる対句はどこか。' : 'この詩で対句になっているのはどこか。',
           src: p.author + '「' + p.title + '」',
           choices: ct.choices, a: ct.a, exp: p.note
         });
@@ -285,16 +296,19 @@
       .map(function (m) {
         return {
           key: m.id, cat: m.cat, level: m.level, stem: m.stem || '',
-          q: m.q, choices: m.choices.slice(), a: m.a, exp: m.exp, fixed: true
+          q: m.q, choices: m.choices.slice(), a: m.a, exp: m.exp, src: m.src,
+          stage: m.stage, reasons: m.reasons, fixed: true
         };
       });
   }
 
   /** 固定選択肢の問題もシャッフルして出す */
   function randomizeChoices(q) {
-    var correct = q.choices[q.a];
-    var order = shuffle(q.choices);
-    return Object.assign({}, q, { choices: order, a: order.indexOf(correct) });
+    var order = shuffle(q.choices.map(function (_, i) { return i; }));
+    return Object.assign({}, q, {
+      choices: order.map(function (i) { return q.choices[i]; }), a: order.indexOf(q.a),
+      reasons: q.reasons ? order.map(function (i) { return q.reasons[i]; }) : null
+    });
   }
 
   /* ---------------- プール定義 ---------------- */
@@ -327,8 +341,13 @@
   };
 
   function build(id) {
-    var f = POOLS[id] || POOLS.mogi;
-    return f().map(function (q) { return q.fixed ? randomizeChoices(q) : q; });
+    id = POOLS[id] ? id : 'mogi';
+    if (!cache[id]) {
+      catalogMode = true;
+      try { cache[id] = POOLS[id](); }
+      finally { catalogMode = false; }
+    }
+    return cache[id].map(randomizeChoices);
   }
 
   /** 苦手優先でくじ引き（重み付きサンプリング・重複なし） */
@@ -357,46 +376,49 @@
     return all.filter(function (q) { return keys[q.key]; });
   }
 
-  /* ---------------- 学習量の集計に使う「問題の全体像」 ----------------
-     build() は誤答の選び方に乱数が入るため、実行のたびに数個ぶれる。
-     分野ごとの母数を安定させたいので、データから決定的に列挙する。 */
+  /* 実際に出題できるカタログを、復習と習熟率でも共用する。 */
   function universe() {
-    var out = [];
-    var add = function (key, cat) { out.push({ key: key, cat: cat }); };
-
-    window.KUHO.forEach(function (k) {
-      add(k.id + ':read', k.cat);
-      add(k.id + ':mean', k.cat);
-      var mis = (window.MISYOMI || {})[k.id];
-      if (k.ex && k.ex.length && k.ex[0].y && mis && mis.length >= 3) add(k.id + ':ex', k.cat);
-      if (k.cat === '再読文字') {
-        add(k.id + ':second', k.cat);
-        add(k.id + ':katsu', k.cat);
-        var sd = window.KUHO.filter(function (x) { return x.cat === '再読文字'; });
-        if (sd.filter(function (x) { return x.read === k.read; }).length === 1) add(k.id + ':rev-read', k.cat);
-        var uniqMean = sd.filter(function (x) { return x.mean === k.mean; }).length === 1 &&
-          !sd.some(function (x) {
-            return x.id !== k.id && (x.mean.indexOf(k.mean) !== -1 || k.mean.indexOf(x.mean) !== -1);
-          });
-        if (uniqMean) add(k.id + ':rev-mean', k.cat);
-      }
+    var out = build('mogi').map(function (q) {
+      return { key: q.key, cat: q.key.indexOf('kj:') === 0 ? '頻出漢字' : q.cat, kind: 'choice' };
     });
-    window.MONDAI.forEach(function (m) { add(m.id, m.cat); });
-    window.KANJI.forEach(function (k) { if (k.yomi[0] !== '—') add('kj:' + k.c, '頻出漢字'); });
-    window.KOJI.forEach(function (k) { add(k.id + ':mean', '故事成語'); add(k.id + ':rev', '故事成語'); });
-    window.KANSHI.forEach(function (p) {
-      add(p.id + ':form', '漢詩');
-      if (p.regular) { add(p.id + ':rhyme', '漢詩'); add(p.id + ':rule', '漢詩'); }
-      if (p.tsuiku && p.tsuiku.length) add(p.id + ':tsuiku', '漢詩');
-    });
-    (window.KAERITEN || []).forEach(function (k) { add('kt:' + k.id, '返り点'); });
-    (window.OKIJI || []).forEach(function (o) { add('ok:' + o.id, '置き字'); });
-    (window.NARABEKAE || []).forEach(function (n) { add('nb:' + n.id, '書き下し'); });
+    var add = function (key, cat, kind, item) { out.push({ key: key, cat: cat, kind: kind, item: item }); };
+    (window.KAERITEN || []).forEach(function (k) { add('kt:' + k.id, '返り点', 'kaeriten', k); });
+    (window.OKIJI || []).forEach(function (o) { add('ok:' + o.id, '置き字', 'okiji', o); });
+    (window.NARABEKAE || []).forEach(function (n) { add('nb:' + n.id, '書き下し', 'narabe', n); });
     return out;
+  }
+
+  function reviewItems(due) {
+    var keys = due ? window.Store.dueKeys() : window.Store.weakKeys();
+    return universe().filter(function (q) { return keys.indexOf(q.key) !== -1; });
+  }
+
+  // 分野も難度も毎回同じ配分。苦手度による選抜は練習モードだけに使う。
+  var EXAM = [
+    { name: '訓読・識別', pool: 'kundoku', levels: [1, 1, 2, 3] },
+    { name: '再読文字', pool: 'saidoku', levels: [1, 2, 3] },
+    { name: '句法', pool: 'kuho', levels: [1, 1, 2, 2, 3, 3] },
+    { name: '漢詩', pool: 'kanshi', levels: [1, 2, 3] },
+    { name: '故事成語', pool: 'koji', levels: [1, 2] },
+    { name: '頻出漢字', pool: 'kanji', levels: [1, 1] }
+  ];
+  function exam() {
+    var used = {}, out = [];
+    EXAM.forEach(function (part) {
+      var pool = shuffle(build(part.pool)).filter(function (q) { return !q.stage; });
+      part.levels.forEach(function (level) {
+        var q = pool.find(function (q) { return q.level === level && !used[q.key]; });
+        if (!q) throw new Error('実力テストの問題不足: ' + part.name + ' 難度' + level);
+        used[q.key] = true;
+        out.push(Object.assign({}, q, { examField: part.name }));
+      });
+    });
+    return shuffle(out);
   }
 
   window.QuizGen = {
     build: build, pick: pick, weakPool: weakPool,
-    shuffle: shuffle, makeChoices: makeChoices, universe: universe
+    shuffle: shuffle, makeChoices: makeChoices, universe: universe,
+    reviewItems: reviewItems, exam: exam, EXAM: EXAM
   };
 })();

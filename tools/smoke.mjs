@@ -1,18 +1,19 @@
-import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+import { chromium } from 'playwright';
+import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
 const root = process.cwd();
-const OUT = process.env.SHOT_DIR || '/tmp/claude-0/-home-user-kanbun/d56d92a1-992a-58b8-800e-c4bd9b478fb8/scratchpad/shots';
+const OUT = process.env.SHOT_DIR || path.join(root, '.test-output/smoke');
 fs.mkdirSync(OUT, { recursive: true });
 
-const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 430, height: 900 }, deviceScaleFactor: 2 });
+const browser = await chromium.launch({ channel: process.env.PW_CHANNEL || undefined });
+const page = await browser.newPage({ viewport: { width: 430, height: 900 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
 const errors = [];
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
 
-const url = 'file://' + path.join(root, 'index.html');
+const url = pathToFileURL(path.join(root, 'index.html')).href;
 await page.goto(url);
 await page.waitForSelector('.mode');
 await page.screenshot({ path: OUT + '/01-home.png', fullPage: true });
@@ -25,7 +26,7 @@ async function playChoice(id, label) {
     if (await page.$('.result')) break;
     const c = await page.$('.choice:not([disabled])');
     if (c) { await c.click(); await page.waitForTimeout(60); continue; }
-    const nx = await page.$('#vd .btn');
+    const nx = await page.$('[data-act="next"]');
     if (nx) { await nx.click(); await page.waitForTimeout(60); continue; }
     break;
   }
@@ -52,7 +53,7 @@ for (let i = 0; i < 120; i++) {
   if (await page.$('.result')) break;
   const c = await page.$('.choice:not([disabled])');
   if (c) { await c.click(); await page.waitForTimeout(45); continue; }
-  const n = await page.$('#vd .btn');
+  const n = await page.$('[data-act="next"]');
   if (n) { await n.click(); await page.waitForTimeout(45); continue; }
   break;
 }
@@ -93,7 +94,7 @@ for (let round = 0; round < 10; round++) {
   });
   // データから正解順を引く：現在の問題 id を DOM から推定できないので総当りで正解タップ
   for (let step = 0; step < 12; step++) {
-    const done = await page.$('#vd .btn');
+    const done = await page.$('[data-act="ktnext"]');
     if (done) { await done.click(); await page.waitForTimeout(80); break; }
     const btns = await page.$$('.kt-char:not([disabled])');
     if (!btns.length) break;
@@ -103,7 +104,7 @@ for (let round = 0; round < 10; round++) {
       await b.click();
       await page.waitForTimeout(40);
       const after = await page.$$eval('.kt-char.done', e => e.length);
-      if (after > before || await page.$('#vd .btn')) { advanced = true; break; }
+      if (after > before || await page.$('[data-act="ktnext"]')) { advanced = true; break; }
     }
     if (!advanced) break;
   }

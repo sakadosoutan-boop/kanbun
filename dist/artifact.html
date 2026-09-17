@@ -1035,6 +1035,43 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 :not(.vert) .stem-lines .p-line { text-align: center; line-height: 1.9; }
 .vert .stem-lines .p-line { max-height: min(40vh, 330px); }
 
+/* 学習の入口と第二巻。既存の紙・墨・朱の色を共用する。 */
+.learning-start { border-top: 3px solid var(--shu); margin-bottom: 28px; }
+.learning-start h2, .intro-card h2 { font-family: var(--mincho); font-size: clamp(20px, 4.8vw, 27px); margin: 6px 0 10px; }
+.eyebrow, .chapter-label { color: var(--shu); font-size: 12px; letter-spacing: .13em; }
+.chapter-label { text-align: center; margin: 16px 0; }
+.learning-start .btn-row { margin-top: 16px; flex-wrap: wrap; }
+.practice-setting { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 20px; }
+.practice-setting span { color: var(--ink-3); font-size: 12px; flex: 1 1 190px; }
+.text-link { color: var(--ink-2); text-decoration: underline; font-size: 12px; background: none; border: 0; cursor: pointer; padding: 12px 0; }
+.intro-card { margin-top: 20px; line-height: 1.9; }
+.intro-example { display: flex; gap: 32px; align-items: center; padding: 24px; background: var(--paper-2); border-radius: 12px; margin: 18px 0; }
+.intro-example > div:last-child { flex: 1; }
+.intro-example .q-stem-wrap { min-width: 60px; }
+.learning-links { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 12px; margin: 12px 0; }
+.learning-links .btn { font-size: 12px; padding: 9px 12px; }
+.feedback-reason { border-left: 3px solid var(--shu); padding-left: 12px; }
+.journey-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0 32px; }
+.journey-stage { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); text-align: left; cursor: pointer; }
+.journey-stage small { display: block; font-size: 11px; color: var(--ink-3); }
+.journey-stage b { display: block; font-family: var(--mincho); font-size: 19px; margin-top: 5px; }
+.journey-stage.cleared { border-color: var(--kin); }
+.journey-stage:disabled { opacity: .5; cursor: not-allowed; }
+.journey-stage:not(:disabled):hover { border-color: var(--shu); background: var(--paper-2); }
+.bh-t small { display: block; font-size: 12px; color: var(--shu); letter-spacing: .05em; margin-top: 5px; }
+.save-warning { padding: 12px 20px; background: var(--shu); color: white; font-size: 14px; }
+.dlg .btn { min-height: 44px; }
+button:focus-visible { outline: 3px solid var(--ai); outline-offset: 3px; }
+@media (max-width: 560px) {
+  .journey-grid { grid-template-columns: 1fr; }
+  .intro-example { padding: 16px; gap: 16px; }
+  .learning-start .btn-row .btn { flex: 1 1 130px; }
+  .learning-links .btn { flex: 1 1 130px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+
 </style>
 <header class="topbar">
   <div class="topbar-in">
@@ -2951,10 +2988,10 @@ window.LESSONS = [
   {
     id: 'ls01', title: '訓読のしくみ', sub: '漢文は「外国語を日本語の語順で読む技術」',
     body: `
-<p>漢文とは、古代中国の文章を、日本語の語順に組みかえて読む方法のことです。もとの中国語は英語に似た語順（主語→動詞→目的語）ですが、日本語は「主語→目的語→動詞」。そこで、返り点で読む順序を指示し、送り仮名で日本語の文法を補うわけです。</p>
+<p>漢文は、古代中国語で書かれた文章です。それを日本語の語順で読む方法を「訓読」といいます。基本の語順は主語→動詞→目的語ですが、日本語は主語→目的語→動詞。返り点で読む順序を示し、送り仮名で日本語の文法を補います。</p>
 <div class="l-flow">
   <div class="l-step"><b>白文</b><span class="l-kex">学而時習之</span><small>返り点も送り仮名もない、もとの漢文</small></div>
-  <div class="l-step"><b>訓読文</b><span class="l-kex">学ビテ時ニ習フ^レ之ヲ</span><small>返り点・送り仮名をつけたもの</small></div>
+  <div class="l-step"><b>訓点付きの文</b><span class="l-kex" data-example="ls01"></span><small>「而」は読まず、レ点で「之」から「習」へ返る</small></div>
   <div class="l-step"><b>書き下し文</b><span>学びて時に之を習ふ</span><small>日本語の文として書き直したもの</small></div>
 </div>
 <p class="l-tip"><b>ここが大事</b>　入試で問われるのはほぼ「白文または訓読文 → 書き下し文 → 現代語訳」の橋渡しです。逆に言えば、この三段階を往復できるようになれば、漢文は一気に得点源になります。</p>
@@ -2981,7 +3018,7 @@ window.LESSONS = [
 <ol class="l-ol">
   <li><b>送り仮名はひらがな・歴史的仮名遣いで書く。</b>「習フ」→「習ふ」。</li>
   <li><b>助動詞・助詞にあたる漢字はひらがなに直す。</b>「不」→「ず」、「也」→「なり」、「之」（〜の）→「の」。ただし、その字が助詞・助動詞として使われているときだけです。</li>
-  <li><b>置き字は書かない。</b>「而・於・于・乎・矣・焉・兮」は書き下し文に登場しません。</li>
+  <li><b>置き字として使われた字は書かない。</b>代表は「而・於・于・乎・矣・焉・兮」。同じ字でも読む用法があるため、文脈で判断します。</li>
   <li><b>再読文字の二度目の読みはひらがなにする。</b>「未」→「未だ〜ず」。一度目は漢字のまま、二度目だけひらがな。</li>
 </ol>
 <p class="l-tip"><b>判定のコツ</b>　その漢字が<b>実質的な意味</b>を持っていれば漢字のまま、<b>文法的な働き</b>しかしていなければひらがな。「之」を例にすると、「これ（代名詞）」なら漢字、「の（助詞）」ならひらがなです。</p>
@@ -3094,6 +3131,130 @@ window.LESSONS = [
 
 </script>
 <script>
+/* 第二巻。引用は既収録の例文と同じ本文を使用。相手の台詞・解説は学習用の創作。 */
+(function () {
+  'use strict';
+  var stages = [
+    ['f9', '荀', '荀子', 'じゅんし', '荀子・勧学', '青取之於藍、而青於藍', '青は之を藍より取りて、藍よりも青し。', ['比較', '選択'], 6,
+      '同じ「於」でも、起点と比較では働きが違う。文の中で読み分けてみよう。', '学んだ型を、文脈の中でも使えたな。'],
+    ['f10', '孟', '孟子', 'もうし', '孟子・滕文公上', '労力者治於人', '力を労する者は人に治めらる。', ['受身', '使役'], 6,
+      '誰が、誰に、何をするのか。動作の向きを見失わないことだ。', 'させる者と、される者。よく見分けた。'],
+    ['f11', '韓', '韓非子', 'かんぴし', '韓非子・難一', '以子之矛陥子之盾、何如', '子の矛を以て子の盾を陥さば、何如。', ['疑問', '反語', '疑問反語', '部分否定', '二重否定'], 6,
+      '言葉のつじつまを問おう。「どうだ」と「どうする」を混同してはいけない。', '見かけの言葉に惑わされず、筋を通したな。'],
+    ['f12', '荘', '荘子', 'そうし', '荘子・斉物論', '不知周之夢為胡蝶与', '周の夢に胡蝶と為るかを知らず。', ['識別', '限定', '仮定'], 7,
+      '一字には、いくつもの顔がある。暗記した読みを当てはめる前に、前後を見よ。', '字の姿だけでなく、文の働きをつかんだ。'],
+    ['f13', '陶', '陶淵明', 'とうえんめい', '陶淵明・雑詩', '歳月不待人', '歳月人を待たず。', ['否定', '禁止', '再読文字'], 7,
+      '否定なのか、禁止なのか、まだ実現していないのか。短い文ほど丁寧に読もう。', '短い一句の中にも、学ぶことは尽きない。'],
+    ['f14', '王', '王之渙', 'おうしかん', '王之渙・登鸛鵲楼', '欲窮千里目、更上一層楼', '千里の目を窮めんと欲し、更に上る一層の楼。', ['願望', '漢詩', '累加'], 7,
+      'もう一層上へ。句形を見抜き、その先の情景まで読み取ってみよう。', '目の前の一字から、遠くの景色へ進めたな。'],
+    ['f15', '杜', '杜甫', 'とほ', '杜甫・春望', '国破山河在、城春草木深', '国破れて山河在り、城春にして草木深し。', ['漢詩'], 8,
+      '形式、対句、押韻。そして言葉の対照。詩を一つの作品として読んでほしい。', '形と意味を合わせて読む力が、身についてきた。'],
+    ['f16', '史', '司馬遷', 'しばせん', '史記・陳渉世家', '燕雀安知鴻鵠之志哉', '燕雀安くんぞ鴻鵠の志を知らんや。', null, 8,
+      '第二巻の総仕上げだ。句法も語順も文脈も、自分の力でつないで読もう。', '第二巻、踏破。学んだことを携えて、さらに多くの文章へ進もう。']
+  ];
+  stages.forEach(function (s, i) {
+    window.FOES.push({ id: s[0], glyph: s[1], name: s[2], kana: s[3], src: s[4], quote: s[5], qyomi: s[6], cats: s[7], ki: s[8],
+      level: 3, chapter: 2, time: 40, taunt: s[9], beaten: s[10], hit: 'その読みでよい。次の一文へ。', miss: '解説で根拠を確かめて、もう一度進もう。' });
+    // 既存の墨絵と同じSVG方式。帽子・持ち物・背景を変えた第二巻の肖像。
+    var hats = [
+      '<path d="M35 37L42 17H76L85 37Z"/>', '<path d="M33 37L44 27V13H74V27L86 37Z"/>',
+      '<path d="M34 37V22H84V37Z"/><path d="M58 12H68V24H58Z"/>', '<path d="M30 36Q60 0 90 36Z"/>',
+      '<path d="M21 39L60 12L99 39Z"/>', '<path d="M33 36Q30 13 58 21Q86 6 85 36Z"/>',
+      '<path d="M31 38L39 22L79 17L88 38Z"/>', '<path d="M34 38L39 18H80L87 38Z"/><path d="M45 12H73V20H45Z"/>'
+    ];
+    var props = i % 3 === 0 ? '<path d="M14 88L38 67L59 93L36 112Z" fill="var(--paper)"/><path d="M20 86L37 75M25 92L43 80M31 99L48 87" fill="none" stroke="currentColor" stroke-width="2"/>' :
+      i % 3 === 1 ? '<path d="M84 63L104 101L94 107L78 66Z"/><path d="M79 63L78 51L85 60Z"/>' : '<path d="M83 101L105 28" fill="none" stroke="currentColor" stroke-width="4"/>';
+    window.FOE_ART[s[0]] = '<svg class="ink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">' +
+      '<circle cx="60" cy="60" r="51" fill="currentColor" opacity=".06"/><path d="M8 104L30 52L47 89L89 39L114 108Z" fill="currentColor" opacity=".09"/>' +
+      '<g fill="currentColor" filter="url(#sumi-b)"><path d="M24 110Q24 77 45 68L75 68Q97 83 99 110Z" opacity=".8"/>' + hats[i] + '</g>' +
+      '<ellipse cx="60" cy="51" rx="21" ry="25" fill="var(--paper)"/><g fill="none" stroke="currentColor" stroke-linecap="round"><path d="M40 44Q45 36 52 43M67 43Q75 35 80 44" stroke-width="2.5"/>' +
+      '<path d="M59 46L56 57L62 58M46 65Q60 76 75 64M45 70Q48 87 60 94Q74 80 74 68M44 79L58 108L76 80" stroke-width="2"/></g>' +
+      '<g fill="currentColor">' + props + '</g><circle cx="48" cy="47" r="1.7" fill="currentColor"/><circle cx="72" cy="47" r="1.7" fill="currentColor"/></svg>';
+  });
+
+  // 各関門の文脈問題。選択肢ごとの説明はシャッフル時にも一緒に並べ替える。
+  function q(stage, n, cat, stem, question, answers, exp, reasons) {
+    var f = window.FOES.find(function (f) { return f.id === stage; });
+    window.MONDAI.push({ id: 'j' + stage.slice(1) + '-' + n, stage: stage, cat: cat, level: 3,
+      stem: stem.replace(/、/g, '／'), src: f.src, q: question, choices: answers, a: 0, exp: exp,
+      reasons: ['', reasons[0], reasons[1], reasons[2]] });
+  }
+  q('f9', 1, '比較', '青取之於藍、而青於藍', '二つの「於」の働きは、順にどれか。',
+    ['起点・比較', '比較・起点', '受身・比較', '起点・受身'], '「藍より取りて」は取り出す起点。「藍よりも青し」は比較の基準を示す。',
+    ['二つの「より」の意味を逆にしています。取る起点が先です。', '前半は「取られる」ではなく、藍から取り出す意味です。', '後半の「青し」は性質の比較で、受身ではありません。']);
+  q('f9', 2, '比較', '青取之於藍、而青於藍', '後半の書き下しとして適切なのはどれか。',
+    ['藍よりも青し', '藍に青めらる', '藍をして青からしむ', '藍のごとく青し'], '形容詞「青」の後の「於藍」は、藍と比べてより青いことを表す。',
+    ['比較を受身と取り違えています。', '比較を使役と取り違えています。', '「於」はここでは比況ではなく、比較の基準です。']);
+  q('f9', 3, '比較', '青取之於藍、而青於藍', 'この文の対照として適切なのはどれか。',
+    ['藍から生じた青が、もとの藍を上回る', '藍から青を取ることはできない', '青も藍も全く同じ濃さである', '青が藍を作り出す'], '前半が由来、後半がその由来を上回る性質を述べる。',
+    ['本文には「取れない」という否定はありません。', '「青於藍」は同程度ではなく、藍より青いという比較です。', '「取之於藍」の起点は藍です。']);
+  q('f10', 1, '受身', '労力者治於人', '「於人」が示すのは誰か。',
+    ['治める側の人', '治められる側の人', '比較される人', '訪問先の人'], '「人に治めらる」の「人」は、治める動作を行う側。',
+    ['動作を受ける側は「労力者」です。', '「治」はここでは動作で、性質の比較ではありません。', '移動先を示す文ではありません。']);
+  q('f10', 2, '受身', '労力者治於人', '「治」の書き下しとして適切なのはどれか。',
+    ['治めらる', '治めしむ', '治めず', '治むべし'], '動詞＋於＋動作主で受身。「治めらる」と読む。',
+    ['「しむ」は使役。ここは受身です。', '否定の字はありません。', '「べし」を示す字はありません。']);
+  q('f10', 3, '受身', '労力者治於人', '文の動作関係に合う説明はどれか。',
+    ['力を労する者が、他人によって治められる', '力を労する者が、他人を治める', '他人が、力を労する者に治めるよう命じられる', '力を労する者も他人も、誰も治めない'], '「於人」を動作主として捉えると、主語が動作を受ける側だと分かる。',
+    ['能動と受動が逆になっています。', '本文に命令する使役の意味はありません。', '本文に全面的な否定はありません。']);
+  q('f11', 1, '疑問', '以子之矛陥子之盾、何如', '「何如」は何を問うか。',
+    ['そうしたらどうなるか', 'どのような方法でするか', 'どうしてもしないという反語', '誰の矛であるか'], '「何如（いかん）」は状態・結果を問う。ここでは矛で盾を突いたらどうなるか。',
+    ['方法を問う「如何」と区別しましょう。', '「何如」はここでは結果を尋ねる疑問です。', '所有者ではなく、突いた結果を問うています。']);
+  q('f11', 2, '重要語', '以子之矛陥子之盾、何如', '最初の「以」が示すものはどれか。',
+    ['盾を突くための道具', '盾を突いた理由', '矛の所有者', '突くことの禁止'], '「子の矛を以て」は「あなたの矛を使って」。手段・道具を示す。',
+    ['ここでは原因ではなく、何を使うかを示します。', '所有は「子之矛」の「之」がつないでいます。', '「以」に禁止の働きはありません。']);
+  q('f11', 3, '重要語', '以子之矛陥子之盾、何如', '「子之矛」の「之」の働きはどれか。',
+    ['「あなたの矛」と所有関係を結ぶ', '「これ」と矛を指し示す', '「行く」と動作を表す', '読まずに置く'], '「子」と「矛」を結ぶ「之」は助詞「の」。',
+    ['この位置の「之」は代名詞ではありません。', '前後の名詞をつなぐので、移動の動詞ではありません。', 'ここは「の」と読み、書き下しにも残します。']);
+  q('f12', 1, '識別', '不知周之夢為胡蝶与', '「為」の読みとして適切なのはどれか。',
+    ['なル', 'ためニ', 'せラル', 'なカレ'], '「胡蝶と為る」の「為」は「なる」。後ろの胡蝶が変化後の姿を表す。',
+    ['「ために」という目的の用法ではありません。', 'この文の「為」は受身の標識ではありません。', '禁止を表す字ではありません。']);
+  q('f12', 2, '識別', '不知周之夢為胡蝶与', '「不知」が否定している内容はどれか。',
+    ['周が夢で胡蝶となったのか、知ること', '周が存在すること', '胡蝶が飛ぶこと', '夢を見ることを禁じる命令'], '「不」は「知」を否定する。後ろは何を知らないかという内容。',
+    ['存在の否定ではなく、知識の否定です。', '本文には「飛ぶ」という動詞はありません。', '「不」はここでは禁止ではありません。']);
+  q('f12', 3, '識別', '不知周之夢為胡蝶与', 'この文の「与」の読みとして適切なのはどれか。',
+    ['か', 'あたフ', 'ともニ', 'よリ'], '文末の「与」は疑問の「か」。文中の「与える」などの用法とは区別する。',
+    ['文末では、授与の動詞として読んでいません。', '共同行為の「ともに」ではありません。', '比較の基準を示す字ではありません。']);
+  q('f13', 1, '否定', '歳月不待人', '否定されている動作はどれか。',
+    ['歳月が人を待つこと', '人が歳月を数えること', '歳月が流れること', '人が生きること'], '主語は歳月、動詞は待、目的語は人。「人を待たず」と読む。',
+    ['「数える」という動詞はありません。', '時間の流れ自体を否定しているのではありません。', '「生きる」という内容は述べられていません。']);
+  q('f13', 2, '否定', '歳月不待人', '書き下しの語順として適切なのはどれか。',
+    ['歳月 → 人を → 待たず', '人 → 歳月を → 待たず', '待たず → 歳月 → 人を', '歳月 → 待たず → 人は'], '漢文の主語・動詞・目的語を、日本語の主語・目的語・動詞に組み替える。',
+    ['主語と目的語が逆です。', '動詞は日本語では目的語の後に置きます。', '「人」は主語ではなく「待つ」の目的語です。']);
+  q('f13', 3, '否定', '歳月不待人', '「不」の意味を保つ訳はどれか。',
+    ['歳月は人を待たない', '歳月は人を待ってはいけない', '歳月はまだ人を待っていない', '歳月は人を待つ必要がある'], '「不」は打消。「勿」の禁止や「未」の未実現と区別する。',
+    ['禁止なら「勿」などを用います。', '「まだ」という意味は「未」と区別します。', '必要を述べる文ではありません。']);
+  q('f14', 1, '願望', '欲窮千里目、更上一層楼', '「欲」が表す気持ちはどれか。',
+    ['遠くまで見渡したい', '遠くを見ることを禁じたい', '楼から下りたい', 'もう見る必要はない'], '「千里の目を窮めんと欲す」は遠くまで見きわめたいという願望。',
+    ['禁止ではなく、自分の願望です。', '後半は「上る」であって「下りる」ではありません。', '不要という否定はありません。']);
+  q('f14', 2, '累加', '欲窮千里目、更上一層楼', '「更」が付け加える内容はどれか。',
+    ['さらにもう一階上へ登る', 'もう一度同じ階へ戻る', 'ようやく楼の外へ出る', 'これ以上登らない'], '「更に」はさらに・その上という意味。視野を広げるため、もう一層登る。',
+    ['「上」の方向を落としています。', '「外へ出る」という内容はありません。', '否定を表す字はありません。']);
+  q('f14', 3, '願望', '欲窮千里目、更上一層楼', '二句の関係として適切なのはどれか。',
+    ['遠くを見たいという目的と、そのために登る行動', '登ることの禁止と、それに従う行動', '下りたいという願望と、下りられない理由', '見渡せないという断定と、諦めの行動'], '前句の願望を実現するために、後句の行動を取っている。',
+    ['禁止する句法はありません。', '「下りる」でも「できない」でもありません。', '諦めず、さらに上る行動を述べています。']);
+  q('f15', 1, '漢詩', '国破山河在、城春草木深', '第一句で対照されているものはどれか。',
+    ['破壊された国都と、残っている山河', '山河の破壊と、栄える国都', '春と秋の草木', '都を去る人と、帰る人'], '「国破」と「山河在」の対照を読む。景色が残ることが、国都の荒廃を際立たせる。',
+    ['破れたものと残ったものが逆です。', '秋は本文にありません。', 'この二句には人の往来は述べられていません。']);
+  q('f15', 2, '漢詩', '国破山河在／城春草木深／感時花濺涙／恨別鳥驚心／烽火連三月／家書抵万金／白頭掻更短／渾欲不勝簪', '頷聯と頸聯に当たる対句を、両方含むのはどれか。',
+    ['第3・4句と第5・6句', '第1・2句と第7・8句', '第2・3句と第4・5句', '第1・3句と第5・7句'], '律詩の中央の二聯、頷聯と頸聯を確認する。どちらか片方だけに限定しない。',
+    ['それらは首聯と尾聯です。', '聯は第1・2句から二句ずつ区切ります。', '対句はこのような一つ飛ばしの組ではありません。']);
+  q('f15', 3, '漢詩', '国破山河在／城春草木深／感時花濺涙／恨別鳥驚心／烽火連三月／家書抵万金／白頭掻更短／渾欲不勝簪', 'この詩の押韻字をすべて含む組はどれか。',
+    ['深・心・金・簪', '在・涙・月・短', '深・涙・金・短', '在・心・月・簪'], '「春望」は偶数句末の「深・心・金・簪」で押韻する。',
+    ['奇数句末を選んでいます。', '偶数句末と奇数句末が混在しています。', '第2・6句の押韻字が抜けています。']);
+  q('f16', 1, '反語', '燕雀安知鴻鵠之志哉', '「安〜哉」の働きはどれか。',
+    ['知るはずがないという反語', '知る場所を尋ねる疑問', '知るように命じる使役', 'まだ知らないという再読'], '「安くんぞ〜知らんや」は、どうして知ろうか、いや知るはずがないという反語。',
+    ['ここでは場所を尋ねていません。', '使役の句法ではありません。', '「未」の再読とは違います。']);
+  q('f16', 2, '重要語', '燕雀安知鴻鵠之志哉', '「鴻鵠之志」の構造として適切なのはどれか。',
+    ['鴻鵠の志', '鴻鵠が志へ行く', '志が鴻鵠を知る', '鴻鵠と志を比べる'], '名詞の間の「之」は「の」と読む。',
+    ['この「之」は移動の動詞ではありません。', '主語と目的語を置き換えています。', '比較を示す構造ではありません。']);
+  q('f16', 3, '反語', '燕雀安知鴻鵠之志哉', '文意に合う訳はどれか。',
+    ['小さな鳥に、どうして大きな鳥の志が分かろうか', '大きな鳥は、小さな鳥の志をよく知っている', '小さな鳥にも、大きな鳥の志は必ず分かる', '大きな鳥に志を教えさせよう'], '反語の否定と、「燕雀」が知る側だという関係をともに押さえる。',
+    ['知る側と知られる側が逆です。', '反語の否定を肯定に変えてしまっています。', '本文に使役・勧誘はありません。']);
+})();
+
+</script>
+<script>
 /* 進捗の保存・段位・実績・弱点管理 */
 (function () {
   'use strict';
@@ -3116,7 +3277,13 @@ window.LESSONS = [
     ach: [],           // 取得済み実績 id
     foesCleared: [],   // 道場破りで突破した関門の id
     theme: '',         // '', 'light', 'dark'
-    vertical: true     // 漢文本文を縦書きで表示する
+    vertical: true,    // 漢文本文を縦書きで表示する
+    timedPractice: true,
+    onboarding: false,
+    session: null,
+    examLast: null,
+    _perfect: false,
+    _maxCombo: 0
   };
 
   var RANKS = [
@@ -3143,7 +3310,8 @@ window.LESSONS = [
     { id: 'a7',  ico: '連', t: '十連鎖',     d: '10問連続正解',                  test: function (s) { return (s._maxCombo || 0) >= 10; } },
     { id: 'a8',  ico: '詩', t: '詩心',       d: '漢詩モードをクリア',            test: function (s) { return (s.plays.kanshi || 0) >= 1; } },
     { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
-    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '道場破りで全ての関門を突破',      test: function (s) { return (s.foesCleared || []).length >= (window.FOES || []).length && (window.FOES || []).length > 0; } },
+    { id: 'a10', ico: '伝', t: '免許皆伝',   d: '第一巻の八関門を突破', test: function (s) { return ['f1','f2','f3','f4','f5','f6','f7','f8'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
+    { id: 'a14', ico: '極', t: '古典探究', d: '第二巻の八関門を突破', test: function (s) { return ['f9','f10','f11','f12','f13','f14','f15','f16'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } },
     { id: 'a12', ico: '墨', t: '千字文',     d: '漢文を通算1000字読んだ',          test: function (s) { return (s.chars || 0) >= 1000; } },
     { id: 'a13', ico: '万', t: '万巻の書',   d: '漢文を通算10000字読んだ',         test: function (s) { return (s.chars || 0) >= 10000; } }
@@ -3166,21 +3334,37 @@ window.LESSONS = [
   function load() {
     var raw = null;
     try { raw = localStorage.getItem(KEY); } catch (e) { /* privacy mode */ }
-    state = Object.assign({}, DEFAULT);
+    state = JSON.parse(JSON.stringify(DEFAULT));
     if (raw) {
       try {
         var p = JSON.parse(raw);
-        Object.keys(DEFAULT).forEach(function (k) { if (p[k] !== undefined) state[k] = p[k]; });
+        Object.keys(DEFAULT).forEach(function (k) {
+          if (p && p[k] !== undefined && (DEFAULT[k] === null || typeof p[k] === typeof DEFAULT[k])) state[k] = p[k];
+        });
       } catch (e) { /* corrupted -> reset */ }
     }
+    ['srs', 'days', 'best', 'plays'].forEach(function (k) { if (!state[k] || Array.isArray(state[k])) state[k] = {}; });
+    ['ach', 'foesCleared'].forEach(function (k) { if (!Array.isArray(state[k])) state[k] = []; });
+    if (state.session && (!state.session.mode || !state.session.mode.t || !state.session.phase)) state.session = null;
+    // 新しい称号を追加しても、既存のクリア・称号を失わない。
+    checkAchievements();
     return state;
   }
 
+  var saveFailed = false;
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      saveFailed = false;
+      return true;
+    } catch (e) {
+      saveFailed = true;
+      if (window.dispatchEvent && typeof CustomEvent !== 'undefined') window.dispatchEvent(new CustomEvent('save-error'));
+      return false;
+    }
   }
 
-  /** その日の最初のアクセスで連続記録を更新 */
+  /** その日の最初の解答で連続記録を更新 */
   function touchDay() {
     var t = today();
     if (state.lastDay === t) return false;
@@ -3188,7 +3372,6 @@ window.LESSONS = [
     state.streak = (diff === 1) ? state.streak + 1 : 1;
     state.lastDay = t;
     if (state.streak > state.bestDay) state.bestDay = state.streak;
-    save();
     return true;
   }
 
@@ -3208,6 +3391,7 @@ window.LESSONS = [
 
   /** 1問ぶんの結果を記録する。chars はその問題で読んだ漢文の字数。 */
   function record(key, ok, chars) {
+    touchDay();
     state.answered++;
     if (ok) state.correct++;
     state.chars += (chars || 0);
@@ -3226,9 +3410,20 @@ window.LESSONS = [
     if (key) {
       var s = state.srs[key] || { w: 0, r: 0, t: 0 };
       if (ok) s.r++; else s.w++;
+      if (ok) {
+        if (!s.due || now >= s.due) {
+          s.reviews = (s.reviews || 0) + (s.lastCorrectDay && s.lastCorrectDay !== d ? 1 : 0);
+          s.lastCorrectDay = d;
+          s.due = now + [1, 3, 7, 14, 30][Math.min(4, s.reviews)] * 86400000;
+        }
+      } else {
+        s.reviews = 0; s.lastCorrectDay = ''; s.due = now;
+      }
+      s.lastWrong = !ok;
       s.t = now;
       state.srs[key] = s;
     }
+    save();
   }
 
   /** 直近 n 日ぶんの学習量。カレンダー表示に使う。 */
@@ -3243,10 +3438,10 @@ window.LESSONS = [
     return out;
   }
 
-  /** その問題を「習得した」とみなすか（2回以上正解し、正解が誤答を上回る） */
+  /** 最初の正解に加え、間隔をあけた復習を2回通過したら定着。 */
   function isMastered(key) {
     var s = state.srs[key];
-    return !!(s && s.r >= 2 && s.r > s.w);
+    return !!(s && s.reviews >= 2 && !s.lastWrong);
   }
 
   /** 学習した日数 */
@@ -3262,16 +3457,27 @@ window.LESSONS = [
     return rate * 3 + recency * 0.6 + (s.r === 0 ? 0.8 : 0);
   }
 
-  /** 弱点キー一覧（誤答が正答を上回るもの） */
+  /** 直近の誤答。旧記録だけは累積正誤から移行する。 */
   function weakKeys() {
     return Object.keys(state.srs).filter(function (k) {
       var s = state.srs[k];
-      return s.w > 0 && s.w >= s.r;
+      return typeof s.lastWrong === 'boolean' ? s.lastWrong : s.w > 0 && s.w >= s.r;
     });
   }
 
+  function dueKeys() {
+    var now = Date.now();
+    return Object.keys(state.srs).filter(function (k) {
+      var s = state.srs[k];
+      return (s.due || s.t + 86400000) <= now;
+    });
+  }
+
+  function currentStreak() { return dayDiff(state.lastDay, today()) <= 1 ? state.streak : 0; }
+
   function finishSession(modeId, opt) {
     opt = opt || {};
+    state.session = null;
     state.plays[modeId] = (state.plays[modeId] || 0) + 1;
     if (opt.score !== undefined) {
       if (!state.best[modeId] || opt.score > state.best[modeId]) state.best[modeId] = opt.score;
@@ -3296,7 +3502,7 @@ window.LESSONS = [
   }
 
   function reset() {
-    state = Object.assign({}, DEFAULT, { theme: state.theme, vertical: state.vertical });
+    state = Object.assign(JSON.parse(JSON.stringify(DEFAULT)), { theme: state.theme, vertical: state.vertical, timedPractice: state.timedPractice });
     state.best = {}; state.plays = {}; state.srs = {}; state.ach = []; state.foesCleared = [];
     state.days = {}; state.chars = 0; state.secs = 0;
     save();
@@ -3304,11 +3510,11 @@ window.LESSONS = [
 
   window.Store = {
     load: load, save: save, touchDay: touchDay,
-    rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys,
+    rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys, dueKeys: dueKeys, currentStreak: currentStreak,
     mark: mark, recentDays: recentDays, isMastered: isMastered, activeDays: activeDays,
-    finishSession: finishSession, reset: reset,
+    finishSession: finishSession, reset: reset, checkAchievements: checkAchievements,
     RANKS: RANKS, ACHIEVEMENTS: ACHIEVEMENTS,
-    get state() { return state; }
+    get state() { return state; }, get saveFailed() { return saveFailed; }
   };
 })();
 
@@ -3318,8 +3524,11 @@ window.LESSONS = [
 (function () {
   'use strict';
 
+  var catalogMode = false, cache = {};
+
   function shuffle(a) {
     a = a.slice();
+    if (catalogMode) return a;
     for (var i = a.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var t = a[i]; a[i] = a[j]; a[j] = t;
@@ -3382,7 +3591,8 @@ window.LESSONS = [
       var basis = sameCat.length >= 3 ? sameCat : all.filter(function (x) { return x.id !== k.id; });
 
       // 読み問題では漢字だけを提示する。訓点つきの form には送り仮名が入っていて答えが読めてしまう。
-      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read));
+      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read)) ||
+        makeChoices(k.read, fieldPool(all, 'read', k.read));
       if (c1) out.push({
         key: k.id + ':read', cat: k.cat, level: k.level,
         stem: k.bare, q: 'この句形の読みとして正しいものはどれか。',
@@ -3390,7 +3600,8 @@ window.LESSONS = [
         exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.note ? '　' + k.note : '')
       });
 
-      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean));
+      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean)) ||
+        makeChoices(k.mean, fieldPool(all, 'mean', k.mean));
       if (c2) out.push({
         key: k.id + ':mean', cat: k.cat, level: k.level,
         stem: k.bare, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
@@ -3487,7 +3698,9 @@ window.LESSONS = [
       var same = all.filter(function (x) { return x.grp === k.grp && x.c !== k.c; });
       var basis = same.length >= 4 ? same : all.filter(function (x) { return x.c !== k.c; });
       var pool = [];
-      basis.forEach(function (x) { x.yomi.forEach(function (y) { if (y !== '—') pool.push(y); }); });
+      basis.forEach(function (x) { x.yomi.forEach(function (y) {
+        if (y !== '—' && k.yomi.indexOf(y) === -1) pool.push(y);
+      }); });
       var c = makeChoices(ans, pool);
       if (!c) return;
       out.push({
@@ -3544,7 +3757,7 @@ window.LESSONS = [
         var five = p.form.indexOf('五') === 0;
         var ansR = five ? '偶数句末' : '第一句末と偶数句末';
         var cw = makeChoices(ansR, ['偶数句末', '奇数句末', '第一句末と偶数句末', 'すべての句末']
-          .filter(function (v) { return v !== ansR; }));
+          .filter(function (v) { return v !== ansR; }), 4, true);
         if (cw) out.push({
           key: p.id + ':rule', cat: '漢詩', level: 1,
           stem: body, q: 'この形式の詩は、原則としてどこで押韻するか。',
@@ -3580,12 +3793,16 @@ window.LESSONS = [
         var wr = [];
         for (var i = 1; i < p.lines.length; i++) {
           var lbl = '第' + i + '句と第' + (i + 1) + '句';
-          if (lbl !== ansT) wr.push(lbl);
+          if (!p.tsuiku.some(function (t) { return t[0] === i && t[1] === i + 1; })) wr.push(lbl);
         }
-        var ct = makeChoices(ansT, wr);
+        // 絶句では誤答の隣接組が足りない。非隣接の組も使い、全ての対句を除く。
+        for (var a = 1; a < p.lines.length; a++) {
+          for (var b = a + 2; b <= p.lines.length; b++) wr.push('第' + a + '句と第' + b + '句');
+        }
+        var ct = makeChoices(ansT, wr, 4, true);
         if (ct) out.push({
           key: p.id + ':tsuiku', cat: '漢詩', level: 3,
-          stem: body, q: 'この詩で対句になっているのはどこか。',
+          stem: body, q: p.form.indexOf('律詩') !== -1 ? 'この律詩の頷聯に当たる対句はどこか。' : 'この詩で対句になっているのはどこか。',
           src: p.author + '「' + p.title + '」',
           choices: ct.choices, a: ct.a, exp: p.note
         });
@@ -3601,16 +3818,19 @@ window.LESSONS = [
       .map(function (m) {
         return {
           key: m.id, cat: m.cat, level: m.level, stem: m.stem || '',
-          q: m.q, choices: m.choices.slice(), a: m.a, exp: m.exp, fixed: true
+          q: m.q, choices: m.choices.slice(), a: m.a, exp: m.exp, src: m.src,
+          stage: m.stage, reasons: m.reasons, fixed: true
         };
       });
   }
 
   /** 固定選択肢の問題もシャッフルして出す */
   function randomizeChoices(q) {
-    var correct = q.choices[q.a];
-    var order = shuffle(q.choices);
-    return Object.assign({}, q, { choices: order, a: order.indexOf(correct) });
+    var order = shuffle(q.choices.map(function (_, i) { return i; }));
+    return Object.assign({}, q, {
+      choices: order.map(function (i) { return q.choices[i]; }), a: order.indexOf(q.a),
+      reasons: q.reasons ? order.map(function (i) { return q.reasons[i]; }) : null
+    });
   }
 
   /* ---------------- プール定義 ---------------- */
@@ -3643,8 +3863,13 @@ window.LESSONS = [
   };
 
   function build(id) {
-    var f = POOLS[id] || POOLS.mogi;
-    return f().map(function (q) { return q.fixed ? randomizeChoices(q) : q; });
+    id = POOLS[id] ? id : 'mogi';
+    if (!cache[id]) {
+      catalogMode = true;
+      try { cache[id] = POOLS[id](); }
+      finally { catalogMode = false; }
+    }
+    return cache[id].map(randomizeChoices);
   }
 
   /** 苦手優先でくじ引き（重み付きサンプリング・重複なし） */
@@ -3673,47 +3898,106 @@ window.LESSONS = [
     return all.filter(function (q) { return keys[q.key]; });
   }
 
-  /* ---------------- 学習量の集計に使う「問題の全体像」 ----------------
-     build() は誤答の選び方に乱数が入るため、実行のたびに数個ぶれる。
-     分野ごとの母数を安定させたいので、データから決定的に列挙する。 */
+  /* 実際に出題できるカタログを、復習と習熟率でも共用する。 */
   function universe() {
-    var out = [];
-    var add = function (key, cat) { out.push({ key: key, cat: cat }); };
-
-    window.KUHO.forEach(function (k) {
-      add(k.id + ':read', k.cat);
-      add(k.id + ':mean', k.cat);
-      var mis = (window.MISYOMI || {})[k.id];
-      if (k.ex && k.ex.length && k.ex[0].y && mis && mis.length >= 3) add(k.id + ':ex', k.cat);
-      if (k.cat === '再読文字') {
-        add(k.id + ':second', k.cat);
-        add(k.id + ':katsu', k.cat);
-        var sd = window.KUHO.filter(function (x) { return x.cat === '再読文字'; });
-        if (sd.filter(function (x) { return x.read === k.read; }).length === 1) add(k.id + ':rev-read', k.cat);
-        var uniqMean = sd.filter(function (x) { return x.mean === k.mean; }).length === 1 &&
-          !sd.some(function (x) {
-            return x.id !== k.id && (x.mean.indexOf(k.mean) !== -1 || k.mean.indexOf(x.mean) !== -1);
-          });
-        if (uniqMean) add(k.id + ':rev-mean', k.cat);
-      }
+    var out = build('mogi').map(function (q) {
+      return { key: q.key, cat: q.key.indexOf('kj:') === 0 ? '頻出漢字' : q.cat, kind: 'choice' };
     });
-    window.MONDAI.forEach(function (m) { add(m.id, m.cat); });
-    window.KANJI.forEach(function (k) { if (k.yomi[0] !== '—') add('kj:' + k.c, '頻出漢字'); });
-    window.KOJI.forEach(function (k) { add(k.id + ':mean', '故事成語'); add(k.id + ':rev', '故事成語'); });
-    window.KANSHI.forEach(function (p) {
-      add(p.id + ':form', '漢詩');
-      if (p.regular) { add(p.id + ':rhyme', '漢詩'); add(p.id + ':rule', '漢詩'); }
-      if (p.tsuiku && p.tsuiku.length) add(p.id + ':tsuiku', '漢詩');
-    });
-    (window.KAERITEN || []).forEach(function (k) { add('kt:' + k.id, '返り点'); });
-    (window.OKIJI || []).forEach(function (o) { add('ok:' + o.id, '置き字'); });
-    (window.NARABEKAE || []).forEach(function (n) { add('nb:' + n.id, '書き下し'); });
+    var add = function (key, cat, kind, item) { out.push({ key: key, cat: cat, kind: kind, item: item }); };
+    (window.KAERITEN || []).forEach(function (k) { add('kt:' + k.id, '返り点', 'kaeriten', k); });
+    (window.OKIJI || []).forEach(function (o) { add('ok:' + o.id, '置き字', 'okiji', o); });
+    (window.NARABEKAE || []).forEach(function (n) { add('nb:' + n.id, '書き下し', 'narabe', n); });
     return out;
+  }
+
+  function reviewItems(due) {
+    var keys = due ? window.Store.dueKeys() : window.Store.weakKeys();
+    return universe().filter(function (q) { return keys.indexOf(q.key) !== -1; });
+  }
+
+  // 分野も難度も毎回同じ配分。苦手度による選抜は練習モードだけに使う。
+  var EXAM = [
+    { name: '訓読・識別', pool: 'kundoku', levels: [1, 1, 2, 3] },
+    { name: '再読文字', pool: 'saidoku', levels: [1, 2, 3] },
+    { name: '句法', pool: 'kuho', levels: [1, 1, 2, 2, 3, 3] },
+    { name: '漢詩', pool: 'kanshi', levels: [1, 2, 3] },
+    { name: '故事成語', pool: 'koji', levels: [1, 2] },
+    { name: '頻出漢字', pool: 'kanji', levels: [1, 1] }
+  ];
+  function exam() {
+    var used = {}, out = [];
+    EXAM.forEach(function (part) {
+      var pool = shuffle(build(part.pool)).filter(function (q) { return !q.stage; });
+      part.levels.forEach(function (level) {
+        var q = pool.find(function (q) { return q.level === level && !used[q.key]; });
+        if (!q) throw new Error('実力テストの問題不足: ' + part.name + ' 難度' + level);
+        used[q.key] = true;
+        out.push(Object.assign({}, q, { examField: part.name }));
+      });
+    });
+    return shuffle(out);
   }
 
   window.QuizGen = {
     build: build, pick: pick, weakPool: weakPool,
-    shuffle: shuffle, makeChoices: makeChoices, universe: universe
+    shuffle: shuffle, makeChoices: makeChoices, universe: universe,
+    reviewItems: reviewItems, exam: exam, EXAM: EXAM
+  };
+})();
+
+</script>
+<script>
+/* 教材と練習を結ぶ情報。描画・出題・記録の共通ルール。 */
+(function () {
+  'use strict';
+  var tips = {
+    '訓読': ['ls01', '主語・目的語・動詞を見つけ、日本語の語順に直しましょう。'],
+    '返り点': ['ls02', '内側の返りから処理し、読む順を一字ずつ追いましょう。'],
+    '置き字': ['ls04', '字を見ただけで決めず、この文での働きを確かめましょう。'],
+    '書き下し': ['ls03', '主語と目的語を先に決め、句法の語尾まで組み立てましょう。'],
+    '再読文字': ['ls05', '一度目の副詞と、二度目の語尾を組にして確認しましょう。'],
+    '否定': ['ls07', '不は打消、勿は禁止、未は「まだ〜ない」。否定の範囲も確かめましょう。'],
+    '禁止': ['ls03', '禁止の「なかれ」と、打消の「ず」を区別しましょう。'],
+    '二重否定': ['ls07', '否定を二回重ねたとき、最終的に肯定になるかを確かめましょう。'],
+    '部分否定': ['ls07', '不必と必不は逆の語順です。「必ずしも〜ない」か「必ず〜ない」かを確認しましょう。'],
+    '疑問': ['ls06', '何如は状態・結果。如何は方法など。文脈と文末を合わせて見ましょう。'],
+    '反語': ['ls06', '「どうして〜だろうか」の後に「いや〜ない」が続くかを考えましょう。'],
+    '疑問反語': ['ls06', '尋ねているのか、強く否定しているのかを文末と文脈で区別しましょう。'],
+    '使役': ['ls08', '誰が誰に動作をさせるのか、「〜しむ」の向きを確認しましょう。'],
+    '受身': ['ls08', '誰が動作を受けるのか、「〜らる」の主語を確認しましょう。'],
+    '比較': ['ls08', '「より」と「よりも」を区別し、比較する二つを見つけましょう。'],
+    '選択': ['ls08', '「〜よりは、むしろ…」のどちらを選ぶ文か確認しましょう。'],
+    '識別': ['ls04', '同じ字にも複数の用法があります。位置だけでなく前後の語も見ましょう。'],
+    '漢詩': ['ls09', '句数・字数、句末の字、対になる言葉を順に確かめましょう。']
+  };
+  function guide(cat) { return tips[cat] || ['ls08', '句形の読み・意味と、文中での働きを結びつけましょう。']; }
+  function feedback(q, idx) {
+    if (idx < 0) return '時間切れです。練習では時間制限を外して、根拠を確かめながら解くこともできます。';
+    if (q.reasons && q.reasons[idx]) return q.reasons[idx];
+    var chosen = q.choices[idx];
+    var alt = window.KUHO.find(function (k) { return k.read === chosen || k.mean === chosen; });
+    return (alt && alt.cat !== q.cat ? '選んだ答えは「' + alt.cat + '」の用法です。' : '') + guide(q.cat)[1];
+  }
+
+  // 一字ごとに漢字・送り仮名・返り点を保持。旧 ^ 記法も最寄りの漢字に結び付ける。
+  var MARK = /^(一レ|上レ|甲レ|レ|一|二|三|四|上|中|下|甲|乙|丙)/;
+  function tokens(text) {
+    var out = [], anchor = null;
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charAt(i);
+      if (c === '^') {
+        var m = MARK.exec(text.slice(i + 1));
+        if (m && anchor) { anchor.mark = m[1]; i += m[1].length; continue; }
+      }
+      if (/[\u3400-\u9fff]/.test(c)) { anchor = { c: c, okuri: '', mark: '' }; out.push(anchor); }
+      else if (/[ぁ-ヿー]/.test(c) && anchor) anchor.okuri += c;
+      else { out.push({ c: c, okuri: '', mark: '' }); anchor = null; }
+    }
+    return out;
+  }
+  window.Learning = { guide: guide, feedback: feedback, tokens: tokens };
+  window.KUNDOKU_EXAMPLES = {
+    ls01: [{ c: '学', okuri: 'ビテ' }, { c: '而' }, { c: '時', okuri: 'ニ' }, { c: '習', okuri: 'フ', mark: 'レ' }, { c: '之', okuri: 'ヲ' }]
   };
 })();
 
@@ -3723,7 +4007,7 @@ window.LESSONS = [
 (function () {
   'use strict';
 
-  var $app, $toast;
+  var $app, $toast, modalOpen = false;
 
   /* ============================ ユーティリティ ============================ */
   function esc(s) {
@@ -3747,28 +4031,46 @@ window.LESSONS = [
     toastTimer = setTimeout(function () { $toast.classList.remove('on'); }, 2200);
   }
   /** 確認ダイアログ。ブラウザの confirm は埋め込み表示だとブロックされることがあるので自前で出す。 */
-  function ask(msg, okLabel, onOk) {
+  function ask(msg, okLabel, onOk, onCancel) {
+    if (modalOpen) return;
+    modalOpen = true;
+    var previous = document.activeElement;
     var wrap = document.createElement('div');
     wrap.className = 'ovl';
     wrap.innerHTML = '<div class="dlg" role="dialog" aria-modal="true">' +
-      '<p>' + esc(msg) + '</p>' +
+      '<p id="dialog-message">' + esc(msg) + '</p>' +
       '<div class="btn-row" style="justify-content:flex-end;margin-top:18px">' +
         '<button class="btn ghost" data-x="c">やめる</button>' +
         '<button class="btn shu" data-x="o">' + esc(okLabel) + '</button>' +
       '</div></div>';
-    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); document.removeEventListener('keydown', onEsc); }
-    function onEsc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+    function close(ok) {
+      if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+      document.removeEventListener('keydown', onEsc, true);
+      modalOpen = false;
+      if (previous && previous.isConnected) previous.focus();
+      if (!ok && onCancel) onCancel();
+    }
+    function onEsc(e) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(false); }
+      if (e.key === 'Tab') {
+        var buttons = wrap.querySelectorAll('button');
+        if (e.shiftKey && document.activeElement === buttons[0]) { e.preventDefault(); buttons[1].focus(); }
+        else if (!e.shiftKey && document.activeElement === buttons[1]) { e.preventDefault(); buttons[0].focus(); }
+      }
+    }
     wrap.addEventListener('click', function (e) {
-      if (e.target === wrap) return close();
+      if (e.target === wrap) return close(false);
       var t = e.target.closest('[data-x]');
       if (!t) return;
       e.stopPropagation();
-      close();
-      if (t.getAttribute('data-x') === 'o') onOk();
+      var ok = t.getAttribute('data-x') === 'o';
+      close(ok);
+      if (ok) onOk();
     });
-    document.addEventListener('keydown', onEsc);
+    document.addEventListener('keydown', onEsc, true);
     document.body.appendChild(wrap);
-    wrap.querySelector('[data-x="o"]').focus();
+    wrap.querySelector('.dlg').setAttribute('aria-labelledby', 'dialog-message');
+    wrap.querySelector('[data-x="c"]').focus();
   }
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -3779,9 +4081,12 @@ window.LESSONS = [
    *  返り点は直前の一字を包んで絶対配置し、縦書きなら左下・横書きなら右下に出す。 */
   var MARKS = '一レ|上レ|甲レ|レ|一|二|三|四|上|中|下|甲|乙|丙';
   function kanbunHTML(s) {
-    return esc(s).replace(new RegExp('([^\\s^])\\^(' + MARKS + ')', 'g'), function (m, ch, mk) {
-      return '<span class="kc">' + ch + '<i class="mark">' + mk + '</i></span>';
-    }).replace(new RegExp('\\^(' + MARKS + ')', 'g'), '<i class="mark">$1</i>');
+    return tokenHTML(Array.isArray(s) ? s : window.Learning.tokens(String(s || '')));
+  }
+  function tokenHTML(tokens) {
+    return tokens.map(function (t) {
+      return (t.mark ? '<span class="kc" data-kanji="' + esc(t.c) + '">' + esc(t.c) + '<i class="mark">' + esc(t.mark) + '</i></span>' : esc(t.c)) + esc(t.okuri || '');
+    }).join('');
   }
 
   /** 縦書きの高さは文字数から決める。
@@ -3831,7 +4136,7 @@ window.LESSONS = [
 
   /** 読んだ漢文の量として数える文字数（漢字だけを数える） */
   function kanjiCount(s) {
-    var m = String(s || '').match(/[\u3400-\u4DBF\u4E00-\u9FFF]/g);
+    var m = String(s || '').replace(new RegExp('\\^(' + MARKS + ')', 'g'), '').match(/[\u3400-\u4DBF\u4E00-\u9FFF]/g);
     return m ? m.length : 0;
   }
 
@@ -3844,7 +4149,7 @@ window.LESSONS = [
       try { vd.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
       catch (e) { vd.scrollIntoView(false); }
     }
-    var b = vd.querySelector('.btn');
+    var b = vd.querySelector('[data-act="next"], [data-act="ktnext"], [data-act="oknext"], [data-act="nbnext"]');
     if (b) b.focus({ preventScroll: true });
   }
 
@@ -3854,16 +4159,19 @@ window.LESSONS = [
   var MODES = [
     { id: 'kundoku', ico: '訓', t: '訓読の基本', d: '返り点・置き字・書き下しのきまりを固める', kind: 'choice', pool: 'kundoku', n: 10, accent: 'var(--ai)', tag: '基礎', group: 'basics' },
     { id: 'saidoku', ico: '再', t: '再読文字ドリル', d: '十字を読みと意味ごと完全に定着させる', kind: 'choice', pool: 'saidoku', n: 12, accent: 'var(--midori)', tag: '基礎', group: 'basics' },
-    { id: 'battle', ico: '闘', t: '道場破り', d: '漢文の主たちが立ちはだかる。八つの関門を抜けよ', kind: 'battle', accent: 'var(--shu)', tag: '対戦' },
+    { id: 'battle', ico: '闘', t: '道場破り', d: '第一巻・第二巻、十六の関門に挑む', kind: 'battle', accent: 'var(--shu)', tag: '対戦' },
     { id: 'kuho', ico: '句', t: '句法ドリル', d: '全句法から通しで15問。一問25秒', kind: 'choice', pool: 'kuho', n: 15, accent: 'var(--ai)', perQ: 25, tag: '練習', group: 'drill' },
     { id: 'weak', ico: '弱', t: '弱点復習', d: 'まちがえた問題だけを狙って出し直す', kind: 'choice', pool: 'weak', n: 12, accent: 'var(--shu)', tag: '復習', group: 'drill' },
     { id: 'mogi', ico: '試', t: '実力テスト', d: '全範囲から20問。百点満点で判定', kind: 'choice', pool: 'mogi', n: 20, accent: 'var(--ink)', total: 600, tag: '総合', group: 'drill' },
     { id: 'kaeriten', ico: '点', t: '返り点ルート', d: '縦組みの白文を、返り点どおりの順にタップ', kind: 'kaeriten', accent: 'var(--murasaki)', tag: 'パズル', group: 'puzzle' },
     { id: 'okiji', ico: '置', t: '置き字ハンター', d: '文中にひそむ「読まない字」を見つけ出す', kind: 'okiji', accent: 'var(--murasaki)', tag: 'パズル', group: 'puzzle' },
     { id: 'narabe', ico: '序', t: '書き下し組立', d: '語のかたまりを並べて書き下し文を作る', kind: 'narabe', accent: 'var(--murasaki)', tag: 'パズル', group: 'puzzle' },
-    { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句・作者を見抜く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識', group: 'knowledge' },
+    { id: 'kanshi', ico: '詩', t: '漢詩の間', d: '形式・押韻・対句を読み解く', kind: 'choice', pool: 'kanshi', n: 12, accent: 'var(--ai)', tag: '知識', group: 'knowledge' },
     { id: 'koji', ico: '故', t: '故事成語', d: '意味と出典をセットで覚える', kind: 'choice', pool: 'koji', n: 12, accent: 'var(--kin)', tag: '知識', group: 'knowledge' },
-    { id: 'kanji', ico: '字', t: '頻出漢字の読み', d: '一問十秒。読みを瞬時に引き出す', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答', group: 'knowledge' }
+    { id: 'kanji', ico: '字', t: '頻出漢字の読み', d: '一問12秒。時間制限なしにも切替可能', kind: 'choice', pool: 'kanji', n: 15, accent: 'var(--kin)', perQ: 12, tag: '速答', group: 'knowledge' },
+    { id: 'daily', t: '今日の5問', kind: 'choice', pool: 'mogi', n: 5 },
+    { id: 'intro', t: '入門の確認3問', kind: 'choice', pool: 'kundoku', n: 3 },
+    { id: 'related', t: '別の問題で確認', kind: 'choice', pool: 'mogi', n: 3 }
   ];
   var MODE_GROUPS = [
     { id: 'basics', t: '基礎を固める', d: 'まずはここから' },
@@ -3874,6 +4182,117 @@ window.LESSONS = [
   function modeById(id) {
     for (var i = 0; i < MODES.length; i++) if (MODES[i].id === id) return MODES[i];
     return null;
+  }
+
+  function homeLearningHTML() {
+    var s = window.Store.state, due = window.QuizGen.reviewItems(true).length;
+    return '<section class="card learning-start" aria-label="今日の学習">' +
+      '<div><span class="eyebrow">一日ひと筆</span><h2>' + (!s.onboarding && !s.answered ? 'まずは3分の入門から' : '今日の学びを始める') + '</h2>' +
+      '<p class="muted">' + (due ? '時間を置いて確かめたい問題が ' + due + ' 問あります。' : '短い練習を重ねて、少しずつ読めるように。') + '</p></div>' +
+      '<div class="btn-row">' + (s.session ? '<button class="btn shu" data-act="resume">続きから：' + esc(s.session.mode.t) + '</button>' : '') +
+      (!s.onboarding && !s.answered ? '<button class="btn shu" data-act="onboard">3分の入門</button>' : '') +
+      '<button class="btn" data-act="play" data-id="daily">今日の5問</button>' +
+      '<button class="btn ghost" data-act="review">弱点・復習予定</button></div>' +
+      '<div class="practice-setting"><button class="btn ghost" data-act="practice-time" aria-pressed="' + !s.timedPractice + '">練習：' + (s.timedPractice ? '時間制限あり' : '時間制限なし') + '</button>' +
+      '<span>句法・漢字の練習に適用。道場破りと実力テストは制限あり。</span></div>' +
+      '<button class="text-link" data-act="onboard">入門を読み直す</button></section>';
+  }
+
+  function screenIntro(step) {
+    stopTick(); G = null;
+    if (step === 1) {
+      startKaeriten([window.KAERITEN[0]]);
+      G.tutorial = true;
+      $app.querySelector('.q-text').innerHTML = '「読」のレ点で一字下へ。まず <b>書</b>、次に <b>読</b> をタップしましょう。';
+      checkpoint(); return;
+    }
+    render('<div class="sec-h"><h2>3分の入門</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
+      '<div class="card intro-card"><span class="eyebrow">' + (step === 2 ? '03 / 自分で確かめる' : '01 / 例を見る') + '</span>' +
+      '<h2>' + (step === 2 ? '今度は自分の力で3問' : '漢字の順番を、日本語の順番へ') + '</h2>' +
+      (step === 2 ? '<p>正解できなくても大丈夫。解説を読んで、読む順や置き字の働きを確かめましょう。時間制限はありません。</p>' +
+        '<button class="btn shu" data-act="play" data-id="intro">確認の3問へ</button>' :
+        '<div class="intro-example">' + stemHTML('読^レ書') + '<div><b>書 → 読</b><p>「書を読む」と読みます。レ点は、下の一字を先に読んでから戻る目印です。</p></div></div>' +
+        '<p>次は漢字を実際にタップして、読む順をたどってみましょう。</p><button class="btn shu" data-act="intro-demo">02 / 一問触ってみる</button>') + '</div>');
+  }
+
+  var REVIEW_TYPES = [['choice', '四択で確認'], ['kaeriten', '返り点ルート'], ['okiji', '置き字ハンター'], ['narabe', '書き下し組立']];
+  function screenReview() {
+    stopTick(); G = null;
+    var weak = window.QuizGen.reviewItems(false), due = window.QuizGen.reviewItems(true);
+    function cards(items, isDue) {
+      if (!items.length) return '<p class="muted">今は対象の問題がありません。</p>';
+      return '<div class="modes">' + REVIEW_TYPES.map(function (t) {
+        var n = items.filter(function (q) { return q.kind === t[0]; }).length;
+        return n ? '<button class="mode compact" data-act="review-kind" data-kind="' + t[0] + '" data-due="' + (isDue ? '1' : '0') + '"><span class="m-body"><b>' + t[1] + '</b><span class="m-d">' + n + ' 問待機・一回最大12問</span></span></button>' : '';
+      }).join('') + '</div>';
+    }
+    render('<div class="sec-h"><h2>弱点・復習予定</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
+      '<p>四択もパズルも、間違えた形式のまま練習できます。正解した問題は翌日・3日後・7日後と間隔を広げて確認します。</p>' +
+      '<h3>いま直したい弱点 · ' + weak.length + ' 問</h3>' + cards(weak, false) +
+      '<h3 class="mt-l">今日までの復習予定 · ' + due.length + ' 問</h3>' + cards(due, true) +
+      '<p class="muted">同じ問題が両方に表示されることがあります。段位は学習量、「定着」は日をあけた正解の記録です。</p>');
+  }
+  function startReview(kind, due) {
+    var items = window.QuizGen.reviewItems(due).filter(function (q) { return q.kind === kind; });
+    items = window.QuizGen.pick(items, 12);
+    if (!items.length) return screenReview();
+    var mode = Object.assign({}, modeById(kind === 'choice' ? 'weak' : kind), { t: (due ? '予定の復習・' : '弱点復習・') + REVIEW_TYPES.find(function (t) { return t[0] === kind; })[1], reviewKind: kind, reviewDue: due, perQ: 0 });
+    if (kind === 'choice') {
+      var keys = items.map(function (q) { return q.key; });
+      startChoice(mode, window.QuizGen.build('mogi').filter(function (q) { return keys.indexOf(q.key) !== -1; }));
+    } else {
+      var set = items.map(function (q) { return q.item; });
+      if (kind === 'kaeriten') startKaeriten(set, mode);
+      if (kind === 'okiji') startOkiji(set, mode);
+      if (kind === 'narabe') startNarabe(set, mode);
+    }
+  }
+
+  function checkpoint() {
+    if (!G) return;
+    var copy = Object.assign({}, G);
+    delete copy.master;
+    window.Store.state.session = JSON.parse(JSON.stringify(copy));
+    window.Store.save();
+  }
+  function resumeSession() {
+    var saved = window.Store.state.session;
+    if (!saved || !saved.mode || !saved.phase) { window.Store.state.session = null; window.Store.save(); return screenHome(); }
+    stopTick(); G = JSON.parse(JSON.stringify(saved));
+    window.Store.mark();
+    if (G.kind === 'battle') G.master = window.QuizGen.build('mogi');
+    if (G.phase === 'foe-intro') return screenFoeIntro();
+    if (G.phase === 'foe-clear') return screenFoeCleared(true);
+    if (G.phase === 'choice') {
+      var locked = G.locked, idx = G.lastAnswer;
+      renderChoice(true);
+      if (locked) answer(idx, true);
+    } else if (G.phase === 'kaeriten') { renderKaeriten(); if (G.done) kaeritenFeedback(); }
+    else if (G.phase === 'okiji') { renderOkiji(); if (G.done) okijiJudge(true); }
+    else if (G.phase === 'narabe') { renderNarabe(); if (G.done) narabeJudge(true); }
+    else { G = null; window.Store.state.session = null; window.Store.save(); screenHome(); }
+  }
+  function feedbackLinks(q) {
+    var label = q.cat === '漢詩' ? '漢詩集で確認' : window.KUHO.some(function (k) { return k.cat === q.cat; }) ? '図鑑で確認' : '基本を確認';
+    return '<div class="learning-links"><button class="btn ghost" data-act="learn" data-cat="' + esc(q.cat) + '">関連する講座</button>' +
+      '<button class="btn ghost" data-act="dictionary" data-cat="' + esc(q.cat) + '">' + label + '</button>' +
+      '<button class="btn ghost" data-act="related" data-key="' + esc(q.key || '') + '" data-cat="' + esc(q.cat) + '">類題3問へ切替</button></div>';
+  }
+
+  function screenJourney() {
+    stopTick(); G = null;
+    var cleared = window.Store.state.foesCleared;
+    render('<div class="sec-h"><h2>道場破り・関門一覧</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
+      [0, 8].map(function (start) {
+        return '<h3>' + (start ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</h3>' +
+          '<p class="muted">' + (start ? '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
+          '<div class="journey-grid">' + window.FOES.slice(start, start + 8).map(function (f, j) {
+            var i = start + j, open = i === 0 || window.FOES.slice(0, i).every(function (p) { return cleared.indexOf(p.id) !== -1; });
+            var done = cleared.indexOf(f.id) !== -1;
+            return '<button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
+              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
+          }).join('') + '</div>';
+      }).join(''));
   }
 
   /* ============================ ホーム ============================ */
@@ -3889,9 +4308,9 @@ window.LESSONS = [
       '<span class="m-tag">対戦</span>' +
       foeArt(f, 'hero-foe' + (all ? ' beaten' : ''), all ? '破' : '') +
       '<span class="bh-body">' +
-        '<span class="bh-t">道場破り</span>' +
+        '<span class="bh-t">道場破り <small>' + (idx >= 8 ? '第二巻・諸子と詩人の試練' : '第一巻・八つの関門') + '</small></span>' +
         '<span class="bh-d">' + (all
-          ? '八つの関門をすべて突破。もう一巡して腕を確かめましょう。'
+          ? '十六の関門を突破。関門一覧から好きな相手に再挑戦できます。'
           : '次に待つのは<b>' + esc(f.name) + '</b>。' +
             esc(f.cats ? f.cats.join('・') : '全分野') + 'から、正解 ' + f.ki + ' 回で突破。') + '</span>' +
         gateRoad(all ? window.FOES.length - 1 : idx, true) +
@@ -3904,12 +4323,12 @@ window.LESSONS = [
     var s = window.Store.state;
     var r = window.Store.rankOf(s.xp);
     var acc = s.answered ? Math.round(s.correct / s.answered * 100) : 0;
-    var weakN = window.Store.weakKeys().length;
+    var weakN = window.QuizGen.reviewItems(false).length;
     var todayChars = window.Store.recentDays(1)[0].chars;
     var slatsAll = Math.floor((s.chars || 0) / SLAT_CHARS);
 
     function modeCard(m) {
-      var best = s.best[m.id];
+      var best = s.best[m.perQ && !s.timedPractice ? m.id + ':untimed' : m.id];
       var sub;
       if (m.id === 'weak') {
         sub = weakN ? '苦手 ' + weakN + ' 問が待機中' : 'まだ弱点は記録されていません';
@@ -3947,11 +4366,13 @@ window.LESSONS = [
         '<div class="stats">' +
           '<div class="stat"><b>' + fmtNum(todayChars) + '</b><span>今日読んだ字</span></div>' +
           '<div class="stat"><b>' + fmtNum(s.answered) + '</b><span>のべ解答数</span></div>' +
-          '<div class="stat"><b>' + s.streak + '</b><span>連続学習日</span></div>' +
+          '<div class="stat"><b>' + window.Store.currentStreak() + '</b><span>連続学習日</span></div>' +
         '</div>' +
       '</section>' +
+      homeLearningHTML() +
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
       battleHero(s) +
+      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button></div>' +
       groupHTML +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
@@ -4061,7 +4482,11 @@ window.LESSONS = [
    *  データ側は素の文字（返り点は ^ 付き）で書き、表示だけここで作る。
    *  書き下し文は日本語の語順のままなので対象にしない（設問の選択肢と同じ扱い）。 */
   function lessonBodyHTML(body) {
-    return body.replace(/<span class="l-kex( mini)?">([^<]*)<\/span>/g, function (m, mini, raw) {
+    return body.replace(/<span class="l-kex" data-example="([^"]+)"><\/span>/g, function (_, id) {
+      var tokens = window.KUNDOKU_EXAMPLES[id] || [];
+      var raw = tokens.map(function (t) { return t.c + (t.okuri || ''); }).join('');
+      return '<span class="l-kex"' + vstyle(raw) + '>' + tokenHTML(tokens) + '</span>';
+    }).replace(/<span class="l-kex( mini)?">([^<]*)<\/span>/g, function (m, mini, raw) {
       return '<span class="l-kex' + (mini || '') + '"' + vstyle(raw) + '>' + kanbunHTML(raw) + '</span>';
     });
   }
@@ -4245,7 +4670,7 @@ window.LESSONS = [
     var flds = fieldStats();
     var masteredAll = flds.reduce(function (a, f) { return a + f.mastered; }, 0);
     var totalAll = flds.reduce(function (a, f) { return a + f.total; }, 0);
-    var weakN = window.Store.weakKeys().length;
+    var weakN = window.QuizGen.reviewItems(false).length;
 
     var fieldHTML = flds.map(function (f) {
       var mp = Math.round(f.mastered / f.total * 100);
@@ -4253,7 +4678,7 @@ window.LESSONS = [
       var rate = (f.r + f.w) ? Math.round(f.r / (f.r + f.w) * 100) : null;
       return '<div class="fld">' +
         '<div class="fld-h"><b>' + esc(f.t) + '</b>' +
-          '<span>' + f.mastered + ' / ' + f.total + ' 習得</span></div>' +
+          '<span>' + f.mastered + ' / ' + f.total + ' 定着</span></div>' +
         '<div class="fld-bar"><i class="t" style="width:' + tp + '%"></i><i class="m" style="width:' + mp + '%"></i></div>' +
         '<div class="fld-sub">' + (f.touched ? '挑戦 ' + f.touched + ' 問' + (rate !== null ? '・正答率 ' + rate + '%' : '') : 'まだ手つかず') + '</div>' +
         '</div>';
@@ -4293,13 +4718,13 @@ window.LESSONS = [
         '<div class="rt-label">今日読んだ漢文</div>' +
         '<div class="rt-num">' + fmtNum(today.chars) + '<small>字</small></div>' +
         '<p class="rt-say">' + esc(tatoe(today.chars)) + '</p>' +
-        '<div class="rt-sub">今日の解答 ' + today.n + ' 問（正解 ' + today.c + '）　／　連続 ' + s.streak + ' 日</div>' +
+        '<div class="rt-sub">今日の解答 ' + today.n + ' 問（正解 ' + today.c + '）　／　連続 ' + window.Store.currentStreak() + ' 日</div>' +
       '</div>' +
 
       /* 三つの数字 */
       '<div class="rec-nums">' +
         '<div class="rn"><b>' + fmtNum(chars) + '<small>字</small></b><span>読んだ漢文</span></div>' +
-        '<div class="rn"><b>' + fmtNum(masteredAll) + '<small>問</small></b><span>習得した問題</span></div>' +
+        '<div class="rn"><b>' + fmtNum(masteredAll) + '<small>問</small></b><span>日をあけて定着</span></div>' +
         '<div class="rn"><b>' + fmtNum(weakN) + '<small>問</small></b><span>要復習</span></div>' +
       '</div>' +
 
@@ -4330,9 +4755,9 @@ window.LESSONS = [
 
       /* 分野別 */
       '<div class="sec-h"><h2>分野別の習熟</h2><div class="rule"></div></div>' +
-      '<p class="muted">濃い帯は「習得した問題」（2回以上正解し、正解が誤答を上回るもの）。薄い帯は一度でも解いた問題です。</p>' +
+      '<p class="muted">段位・修錬値は学習量の目安です。濃い帯の「定着」は、最初の正解の後、翌日以降とさらに3日後以降の復習に正解した問題。薄い帯は一度でも解いた問題です。以前の正解回数も残り、今後の復習で定着を確かめます。</p>' +
       '<div class="card mt fld-list">' + fieldHTML +
-        '<div class="fld-total">合計　' + masteredAll + ' / ' + totalAll + ' 問を習得</div>' +
+        '<div class="fld-total">合計　' + masteredAll + ' / ' + totalAll + ' 問が定着</div>' +
       '</div>' +
 
       /* 踏破 */
@@ -4362,10 +4787,22 @@ window.LESSONS = [
   }
 
   function screenResult(mode, res) {
+    window.Store.state.session = null;
+    if (mode.id === 'intro') window.Store.state.onboarding = true;
+    var examHTML = '';
+    if (mode.id === 'mogi') {
+      var previous = window.Store.state.examLast;
+      window.Store.state.examLast = { at: Date.now(), correct: res.correct, fields: res.fields || {} };
+      examHTML = '<div class="card mt"><h3>分野別の結果</h3><p class="muted">配分・難度は毎回共通。未回答は不正解として集計します。</p>' +
+        (previous ? '<p>前回 ' + previous.correct * 5 + ' 点 → 今回 ' + res.correct * 5 + ' 点</p>' : '') +
+        '<table class="l-table"><tr><th>分野</th><th>正解</th><th>前回</th></tr>' + window.QuizGen.EXAM.map(function (p) {
+          return '<tr><td>' + esc(p.name) + '</td><td>' + ((res.fields || {})[p.name] || 0) + ' / ' + p.levels.length + '</td><td>' + (previous ? (previous.fields[p.name] || 0) + ' / ' + p.levels.length : '—') + '</td></tr>';
+        }).join('') + '</table></div>';
+    }
     var pct = res.total ? Math.round(res.correct / res.total * 100) : 0;
     var g = gradeOf(pct);
     var xp = res.correct * 8 + Math.floor(res.maxCombo * 3) + (pct === 100 ? 30 : 0);
-    var newAch = window.Store.finishSession(mode.id, {
+    var newAch = window.Store.finishSession(mode.recordId || mode.id, {
       score: mode.id === 'mogi' ? pct : res.score,
       xp: xp, perfect: pct === 100 && res.total >= 5, maxCombo: res.maxCombo
     });
@@ -4389,13 +4826,14 @@ window.LESSONS = [
         '<div class="r-grid">' +
           '<div class="stat"><b>+' + xp + '</b><span>修錬値</span></div>' +
           '<div class="stat"><b>' + res.maxCombo + '</b><span>最大連鎖</span></div>' +
-          '<div class="stat"><b>' + (window.Store.state.best[mode.id] !== undefined ? window.Store.state.best[mode.id] : '—') + '</b><span>自己ベスト</span></div>' +
+          '<div class="stat"><b>' + (window.Store.state.best[mode.recordId || mode.id] !== undefined ? window.Store.state.best[mode.recordId || mode.id] : '—') + '</b><span>自己ベスト</span></div>' +
         '</div>' +
         '<div class="btn-row mt-l" style="justify-content:center">' +
-          '<button class="btn shu" data-act="play" data-id="' + mode.id + '">もう一度</button>' +
+          (mode.reviewKind ? '<button class="btn shu" data-act="review">復習一覧へ</button>' : '<button class="btn shu" data-act="play" data-id="' + mode.id + '">もう一度</button>') +
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
+      examHTML +
       (review ? '<div class="sec-h"><h2>まちがえたところ</h2><span class="sec-n">' + (res.wrong || []).length + ' 問</span><div class="rule"></div></div><div class="review">' + review + '</div>' : '') +
       (newAch.length ? '' : '')
     );
@@ -4411,16 +4849,27 @@ window.LESSONS = [
 
   function stopTick() { if (tick) { clearInterval(tick); tick = null; } }
 
-  function startChoice(mode) {
-    var pool = mode.pool === 'weak' ? window.QuizGen.weakPool() : window.QuizGen.build(mode.pool);
+  function startChoice(mode, supplied) {
+    mode = Object.assign({}, mode);
+    if (mode.perQ && !window.Store.state.timedPractice) {
+      mode.perQ = 0; mode.recordId = mode.id + ':untimed'; mode.t += '（時間制限なし）';
+    }
+    var pool = supplied || (mode.pool === 'weak' ? window.QuizGen.weakPool() : window.QuizGen.build(mode.pool));
     if (!pool.length) {
       toast(mode.pool === 'weak' ? 'まだ弱点が記録されていません。まず他のモードに挑戦しましょう。' : '問題を用意できませんでした。');
       return screenHome();
     }
-    var qs = window.QuizGen.pick(pool, Math.min(mode.n, pool.length));
+    var qs = mode.id === 'mogi' ? window.QuizGen.exam() : window.QuizGen.pick(pool, Math.min(mode.n, pool.length));
+    if (mode.id === 'intro') qs = window.QuizGen.shuffle(pool.filter(function (q) { return q.cat === '訓読' && q.level === 1; })).slice(0, 3);
+    if (mode.id === 'daily') {
+      var due = window.Store.dueKeys();
+      var priority = window.QuizGen.pick(pool.filter(function (q) { return due.indexOf(q.key) !== -1; }), 5);
+      var used = priority.map(function (q) { return q.key; });
+      qs = priority.concat(window.QuizGen.pick(pool.filter(function (q) { return used.indexOf(q.key) === -1; }), 5 - priority.length));
+    }
     G = {
       kind: 'choice', mode: mode, qs: qs, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0,
-      hp: mode.hearts || 0, wrong: [], locked: false,
+      hp: mode.hearts || 0, wrong: [], locked: false, fields: {},
       left: mode.perQ || 0, totalLeft: mode.total || 0
     };
     renderChoice();
@@ -4487,7 +4936,8 @@ window.LESSONS = [
       '<div class="timer" id="tm"><i id="tmb" style="width:100%"></i></div></div>';
   }
 
-  function renderChoice() {
+  function renderChoice(restoring) {
+    G.phase = 'choice';
     var m = G.mode, q = G.qs[G.i];
     var hud = G.kind === 'battle' ? battleHud() : normalHud();
 
@@ -4512,8 +4962,8 @@ window.LESSONS = [
       '</div>');
 
     G.locked = false;
-    if (G.kind === 'battle') { G.left = BATTLE_TIME; runTimer(); }
-    else if (m.perQ) { G.left = m.perQ; runTimer(); }
+    if (G.kind === 'battle') { if (!restoring) G.left = G.foe.time || BATTLE_TIME; runTimer(); }
+    else if (m.perQ) { if (!restoring) G.left = m.perQ; runTimer(); }
     else if (m.total) { runTimer(); }
   }
 
@@ -4522,17 +4972,19 @@ window.LESSONS = [
     var m = G.mode;
     var bar = el('tmb'), wrap = el('tm');
     if (!bar) return;
-    var perQ = G.kind === 'battle' ? BATTLE_TIME : m.perQ;
+    var perQ = G.kind === 'battle' ? (G.foe.time || BATTLE_TIME) : m.perQ;
+    var last = Date.now();
     tick = setInterval(function () {
-      if (!G || G.locked) return;
+      var now = Date.now(), elapsed = (now - last) / 1000; last = now;
+      if (!G || G.locked || modalOpen || document.hidden) return;
       if (perQ) {
-        G.left -= 0.1;
+        G.left -= elapsed;
         var p = Math.max(0, G.left / perQ * 100);
         bar.style.width = p + '%';
         wrap.classList.toggle('warn', p < 34);
         if (G.left <= 0) { stopTick(); answer(-1); }
       } else if (m.total) {
-        G.totalLeft -= 0.1;
+        G.totalLeft -= elapsed;
         var p2 = Math.max(0, G.totalLeft / m.total * 100);
         bar.style.width = p2 + '%';
         wrap.classList.toggle('warn', p2 < 25);
@@ -4541,19 +4993,22 @@ window.LESSONS = [
     }, 100);
   }
 
-  function answer(idx) {
-    if (G.locked) return;
+  function answer(idx, replay) {
+    if (!G || (G.locked && !replay)) return;
     G.locked = true;
     stopTick();
     var q = G.qs[G.i];
     var ok = idx === q.a;
 
+    if (!replay) {
+    G.lastAnswer = idx;
     window.Store.record(q.key, ok, kanjiCount(q.stem));
+    if (ok && q.examField) G.fields[q.examField] = (G.fields[q.examField] || 0) + 1;
     if (ok) {
       G.correct++;
       G.combo++;
       G.maxCombo = Math.max(G.maxCombo, G.combo);
-      var perQ = G.kind === 'battle' ? BATTLE_TIME : G.mode.perQ;
+      var perQ = G.kind === 'battle' ? (G.foe.time || BATTLE_TIME) : G.mode.perQ;
       var timeBonus = perQ ? Math.round(Math.max(0, G.left) / perQ * 40) : 0;
       G.score += 100 + Math.min(100, (G.combo - 1) * 20) + timeBonus;
       if (G.kind === 'battle') G.ki--;
@@ -4562,10 +5017,11 @@ window.LESSONS = [
       if (G.kind === 'battle') G.hearts--;
       else if (G.mode.hearts) G.hp--;
       G.wrong.push({
-        stem: q.stem, q: q.q, exp: q.exp,
+        stem: q.stem, q: q.q, exp: window.Learning.feedback(q, idx) + ' ' + q.exp,
         answer: q.choices[q.a],
         your: idx >= 0 ? q.choices[idx] : '（時間切れ）'
       });
+    }
     }
 
     var btns = $app.querySelectorAll('.choice');
@@ -4623,12 +5079,15 @@ window.LESSONS = [
       '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
         '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') +
           (ok && G.combo >= 3 ? '<span style="font-size:12px;color:var(--shu)">' + G.combo + ' 連鎖！</span>' : '') + '</div>' +
-        (q.exp ? '<p>' + esc(q.exp) + '</p>' : '') +
+        (!ok ? '<p class="feedback-reason"><b>見直すポイント</b><br>' + esc(window.Learning.feedback(q, idx)) + '</p>' : '') +
+        (q.exp ? '<p>' + kanbunHTML(q.exp) + '</p>' : '') +
+        (!ok ? feedbackLinks(q) : '') +
         '<div class="btn-row" style="margin-top:12px">' +
           '<button class="btn" data-act="next">' + nextLabel + '</button>' +
         '</div>' +
       '</div>';
     focusVerdict();
+    checkpoint();
   }
 
   function nextQuestion() {
@@ -4647,7 +5106,7 @@ window.LESSONS = [
 
   function finishChoice() {
     stopTick();
-    var res = { correct: G.correct, total: G.qs.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
+    var res = { correct: G.correct, total: G.qs.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong, fields: G.fields };
     var m = G.mode; G = null;
     screenResult(m, res);
   }
@@ -4657,18 +5116,23 @@ window.LESSONS = [
 
   /** その関門の担当分野から問題を集める。足りなければ全分野から。 */
   function foePool(foe) {
-    if (!foe.cats) return G.master;
+    var base = G.master.filter(function (q) { return !q.stage && (!foe.chapter || q.level >= 2); });
+    if (!foe.cats) return base;
     var set = {};
     foe.cats.forEach(function (c) { set[c] = 1; });
-    var p = G.master.filter(function (q) { return set[q.cat]; });
-    return p.length >= foe.ki + 4 ? p : G.master;
+    var p = base.filter(function (q) { return set[q.cat]; });
+    return p.length >= foe.ki ? p : base;
   }
 
-  function startBattle(mode) {
+  function startBattle(mode, selected) {
     var cleared = window.Store.state.foesCleared || [];
     var idx = 0;
     while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
     if (idx >= window.FOES.length) idx = 0;      // 全突破後はもう一巡できる
+    if (selected !== undefined) {
+      if (!window.FOES[selected] || !window.FOES.slice(0, selected).every(function (f) { return cleared.indexOf(f.id) !== -1; })) return screenJourney();
+      idx = selected;
+    }
     G = {
       kind: 'battle', mode: mode, master: window.QuizGen.build('mogi'),
       foeIdx: idx, hearts: 3, maxHearts: 3,
@@ -4682,8 +5146,9 @@ window.LESSONS = [
   function gateRoad(cur, inline) {
     var cleared = window.Store.state.foesCleared || [];
     var s = '';
-    for (var i = 0; i < window.FOES.length; i++) {
-      if (i) s += '<span></span>';
+    var start = cur >= 8 ? 8 : 0;
+    for (var i = start; i < Math.min(start + 8, window.FOES.length); i++) {
+      if (i > start) s += '<span></span>';
       var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
       s += '<i class="' + st + '"></i>';
     }
@@ -4693,51 +5158,56 @@ window.LESSONS = [
   }
 
   function screenFoeIntro() {
+    G.phase = 'foe-intro';
     var f = window.FOES[G.foeIdx];
     var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
     render(
       '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
       gateRoad(G.foeIdx) +
+      '<p class="chapter-label">' + (f.chapter === 2 ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</p>' +
       '<div class="card foe-card">' +
         foeArt(f, 'big') +
         '<div class="foe-name">' + esc(f.name) +
           '<small>' + esc(f.kana) + (cleared ? '　※突破済み' : '') + '</small></div>' +
-        '<div class="q-stem-wrap"><div class="q-stem"' + vstyle(f.quote) + '>' + kanbunHTML(f.quote) + '</div></div>' +
+        stemHTML(f.quote.replace(/、/g, '／')) +
         '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
         '<div class="foe-facts">' +
           '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
           '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
           '<b>体力 ' + G.maxHearts + '</b>' +
-          '<b>一問 ' + BATTLE_TIME + ' 秒</b>' +
+          '<b>一問 ' + (f.time || BATTLE_TIME) + ' 秒</b>' +
         '</div>' +
         '<div class="btn-row" style="justify-content:center;margin-top:16px">' +
           '<button class="btn shu" data-act="foego">勝負</button></div>' +
       '</div>'
     );
     var b = $app.querySelector('[data-act="foego"]');
-    if (b) b.focus();
+    if (b) b.focus({ preventScroll: true });
   }
 
   function beginFoe() {
     var f = window.FOES[G.foeIdx];
     G.foe = f; G.ki = f.ki; G.kiMax = f.ki;
     G.hearts = G.maxHearts;
-    G.qs = window.QuizGen.pick(foePool(f), 20);
+    var fresh = window.QuizGen.shuffle(G.master.filter(function (q) { return q.stage === f.id; }));
+    G.qs = fresh.concat(window.QuizGen.pick(foePool(f), 20 - fresh.length));
     G.i = 0;
     renderChoice();
   }
 
-  function screenFoeCleared() {
+  function screenFoeCleared(restoring) {
     stopTick();
+    G.phase = 'foe-clear';
     var f = G.foe;
     var st = window.Store.state;
     st.foesCleared = st.foesCleared || [];
     if (st.foesCleared.indexOf(f.id) === -1) st.foesCleared.push(f.id);
     window.Store.save();
-    G.gates++;
-    G.score += 300;
+    if (!restoring) { G.gates++; G.score += 300; }
+    window.Store.checkAchievements();
+    checkpoint();
     var last = G.foeIdx >= window.FOES.length - 1;
     render(
       '<div class="card result">' +
@@ -4750,7 +5220,7 @@ window.LESSONS = [
           '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
           '<div class="stat"><b>' + G.hearts + '</b><span>残り体力</span></div>' +
         '</div>' +
-        '<p class="muted mt">体力を回復して次へ進みます。</p>' +
+        '<p class="muted mt">' + (last ? '第二巻まで踏破しました。' : G.foeIdx === 7 ? '第一巻を踏破。第二巻「諸子と詩人の試練」が開きました。' : '体力を回復して次へ進みます。') + '</p>' +
         '<div class="btn-row mt" style="justify-content:center">' +
           (last
             ? '<button class="btn shu" data-act="bend">結果を見る</button>'
@@ -4795,10 +5265,10 @@ window.LESSONS = [
       '<div class="card result mt">' +
         '<div class="r-rank">' + (win || allDone ? '皆伝' : '第' + reached + '関門') + '</div>' +
         '<div class="r-sub">' + (win || allDone
-          ? '八つの関門をすべて突破しました。'
+          ? '第一巻・第二巻の十六関門をすべて突破しました。'
           : 'この回で突破した関門：' + gates + '　／　到達：第' + reached + '関門') + '</div>' +
         '<p class="r-msg">' + (win || allDone
-          ? '孔子まで抜いたなら、入試の漢文で困ることはまずありません。'
+          ? '次は間隔をあけて復習し、別の文章でも読める力を確かめましょう。'
           : gates > 0 ? '突破した関門は記録されています。次は続きから始まります。'
                       : 'まずは基礎講座と再読文字ドリルで足場を作ってから、もう一度。') + '</p>' +
         '<div class="r-grid">' +
@@ -4819,14 +5289,15 @@ window.LESSONS = [
   }
 
   /* ============================ ゲーム：返り点ルート ============================ */
-  function startKaeriten() {
-    var set = window.QuizGen.shuffle(window.KAERITEN).slice(0, 8)
+  function startKaeriten(items, mode) {
+    var set = items || window.QuizGen.shuffle(window.KAERITEN).slice(0, 8)
       .sort(function (a, b) { return a.level - b.level; });
-    G = { mode: modeById('kaeriten'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], step: 0, mistakes: 0, done: false };
+    G = { mode: mode || modeById('kaeriten'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], step: 0, mistakes: 0, done: false };
     renderKaeriten();
   }
 
   function renderKaeriten() {
+    G.phase = 'kaeriten';
     var it = G.items[G.i];
     var chars = it.chars.map(function (c, i) {
       var pos = it.order.indexOf(i);
@@ -4869,13 +5340,7 @@ window.LESSONS = [
         if (clean) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 100 + Math.min(100, (G.combo - 1) * 20); }
         else { G.combo = 0; G.wrong.push({ stem: it.chars.map(function (c) { return c.c; }).join(''), q: it.label + 'の読む順序', answer: it.yomi, exp: it.tip, your: null }); }
         renderKaeriten();
-        var last = G.i >= G.items.length - 1;
-        el('vd').innerHTML = '<div class="verdict ' + (clean ? 'ok' : 'ng') + '">' +
-          '<div class="v-h">' + (clean ? '◯ 完成' : '△ 完成（ミスあり）') + '</div>' +
-          '<p><b>' + esc(it.yomi) + '</b></p><p>' + esc(it.tip) + '</p>' +
-          '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="ktnext">' +
-          (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
-        focusVerdict();
+        kaeritenFeedback();
       } else {
         renderKaeriten();
       }
@@ -4891,7 +5356,17 @@ window.LESSONS = [
     }
   }
 
+  function kaeritenFeedback() {
+    var it = G.items[G.i], clean = G.mistakes === 0, last = G.i >= G.items.length - 1;
+    el('vd').innerHTML = '<div class="verdict ' + (clean ? 'ok' : 'ng') + '"><div class="v-h">' + (clean ? '◯ 完成' : '△ 完成（ミスあり）') + '</div>' +
+      '<p><b>' + esc(it.yomi) + '</b></p><p>' + esc(it.tip) + '</p>' +
+      (!clean ? feedbackLinks({ cat: '返り点', key: 'kt:' + it.id }) : '') +
+      '<button class="btn" data-act="ktnext">' + (G.tutorial ? '自力の3問へ' : last ? '結果を見る' : '次の問題へ') + '</button></div>';
+    focusVerdict();
+  }
+
   function kaeritenNext() {
+    if (G.tutorial) { window.Store.state.session = null; window.Store.save(); return screenIntro(2); }
     G.i++; G.step = 0; G.mistakes = 0; G.done = false;
     if (G.i >= G.items.length) {
       var res = { correct: G.correct, total: G.items.length, score: G.score, maxCombo: G.maxCombo, wrong: G.wrong };
@@ -4901,13 +5376,14 @@ window.LESSONS = [
   }
 
   /* ============================ ゲーム：置き字ハンター ============================ */
-  function startOkiji() {
-    var set = window.QuizGen.shuffle(window.OKIJI).slice(0, 8);
-    G = { mode: modeById('okiji'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], sel: {}, done: false };
+  function startOkiji(items, mode) {
+    var set = items || window.QuizGen.shuffle(window.OKIJI).slice(0, 8);
+    G = { mode: mode || modeById('okiji'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], sel: {}, done: false };
     renderOkiji();
   }
 
   function renderOkiji() {
+    G.phase = 'okiji';
     var it = G.items[G.i];
     var chars = it.chars.map(function (c, i) {
       var cls = '';
@@ -4937,13 +5413,15 @@ window.LESSONS = [
     );
   }
 
-  function okijiJudge() {
+  function okijiJudge(replay) {
+    if (!G || (G.done && !replay)) return;
     var it = G.items[G.i];
     var picked = Object.keys(G.sel).filter(function (k) { return G.sel[k]; }).map(Number).sort(function (a, b) { return a - b; });
     var ans = it.okiji.slice().sort(function (a, b) { return a - b; });
     var ok = picked.length === ans.length && picked.every(function (v, i) { return v === ans[i]; });
 
     G.done = true;
+    if (!replay) {
     window.Store.record('ok:' + it.id, ok, it.chars.length);
     if (ok) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 100 + Math.min(100, (G.combo - 1) * 20); }
     else {
@@ -4954,12 +5432,14 @@ window.LESSONS = [
         your: picked.length ? picked.map(function (i) { return it.chars[i]; }).join('・') : '（選択なし）'
       });
     }
+    }
     renderOkiji();
     var last = G.i >= G.items.length - 1;
     el('vd').innerHTML = '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
       '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') + '</div>' +
       '<p>置き字は <b>' + esc(ans.map(function (i) { return it.chars[i]; }).join('・')) + '</b>。書き下し文は「' + esc(it.yomi) + '」' + (it.src ? '（' + esc(it.src) + '）' : '') + '</p>' +
       '<p>' + esc(it.tip) + '</p>' +
+      (!ok ? feedbackLinks({ cat: '置き字', key: 'ok:' + it.id }) : '') +
       '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="oknext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
     focusVerdict();
   }
@@ -4974,15 +5454,16 @@ window.LESSONS = [
   }
 
   /* ============================ ゲーム：書き下し組立 ============================ */
-  function startNarabe() {
-    var set = window.QuizGen.shuffle(window.NARABEKAE).slice(0, 8)
+  function startNarabe(items, mode) {
+    var set = items || window.QuizGen.shuffle(window.NARABEKAE).slice(0, 8)
       .sort(function (a, b) { return a.level - b.level; });
-    G = { mode: modeById('narabe'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], placed: [], shuffled: [], done: false };
+    G = { mode: mode || modeById('narabe'), items: set, i: 0, correct: 0, score: 0, combo: 0, maxCombo: 0, wrong: [], placed: [], shuffled: [], done: false };
     G.shuffled = window.QuizGen.shuffle(set[0].parts.map(function (p, i) { return i; }));
     renderNarabe();
   }
 
   function renderNarabe() {
+    G.phase = 'narabe';
     var it = G.items[G.i];
     var slot = G.placed.map(function (pi, k) {
       var cls = 'chip placed';
@@ -5019,10 +5500,13 @@ window.LESSONS = [
     );
   }
 
-  function narabeJudge() {
+  function narabeJudge(replay) {
+    if (!G || (G.done && !replay)) return;
     var it = G.items[G.i];
-    var ok = G.placed.every(function (v, i) { return v === i; });
+    if (G.placed.length !== it.parts.length) return;
+    var ok = G.placed.map(function (i) { return it.parts[i]; }).join('') === it.parts.join('');
     G.done = true;
+    if (!replay) {
     window.Store.record('nb:' + it.id, ok, kanjiCount(it.kanbun));
     if (ok) { G.correct++; G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.score += 120 + Math.min(120, (G.combo - 1) * 20); }
     else {
@@ -5032,11 +5516,13 @@ window.LESSONS = [
         answer: it.parts.join(''), your: G.placed.map(function (p) { return it.parts[p]; }).join('')
       });
     }
+    }
     renderNarabe();
     var last = G.i >= G.items.length - 1;
     el('vd').innerHTML = '<div class="verdict ' + (ok ? 'ok' : 'ng') + '">' +
       '<div class="v-h">' + (ok ? '◯ 正解' : '✗ 不正解') + '</div>' +
       '<p><b>' + esc(it.parts.join('')) + '</b></p><p>' + esc(it.trans) + '（' + esc(it.src) + '）</p>' +
+      (!ok ? feedbackLinks({ cat: '書き下し', key: 'nb:' + it.id }) : '') +
       '<div class="btn-row" style="margin-top:12px"><button class="btn" data-act="nbnext">' + (last ? '結果を見る' : '次の問題へ') + '</button></div></div>';
     focusVerdict();
   }
@@ -5055,9 +5541,9 @@ window.LESSONS = [
   function play(id) {
     var m = modeById(id);
     if (!m) return screenHome();
-    window.Store.touchDay();
     window.Store.mark();
     stopTick();
+    if (id === 'weak') return screenReview();
     if (m.kind === 'choice') return startChoice(m);
     if (m.kind === 'battle') return startBattle(m);
     if (m.kind === 'kaeriten') return startKaeriten();
@@ -5066,6 +5552,7 @@ window.LESSONS = [
   }
 
   function go(to) {
+    checkpoint();
     stopTick(); G = null;
     if (to === 'home') return screenHome();
     if (to === 'zukan') return screenZukan();
@@ -5077,10 +5564,44 @@ window.LESSONS = [
 
   /* ---------- イベント委譲 ---------- */
   function onClick(e) {
+    if (modalOpen) return;
     var t = e.target.closest('[data-act]');
     if (!t) return;
     var act = t.getAttribute('data-act');
     switch (act) {
+      case 'resume': resumeSession(); break;
+      case 'onboard': checkpoint(); screenIntro(0); break;
+      case 'intro-demo': screenIntro(1); break;
+      case 'review': checkpoint(); screenReview(); break;
+      case 'review-kind': window.Store.mark(); startReview(t.getAttribute('data-kind'), t.getAttribute('data-due') === '1'); break;
+      case 'practice-time':
+        window.Store.state.timedPractice = !window.Store.state.timedPractice;
+        window.Store.save(); screenHome(); break;
+      case 'journey': checkpoint(); screenJourney(); break;
+      case 'stage': window.Store.mark(); startBattle(modeById('battle'), Number(t.getAttribute('data-i'))); break;
+      case 'learn':
+        checkpoint(); stopTick(); G = null;
+        screenLesson(window.Learning.guide(t.getAttribute('data-cat'))[0]); break;
+      case 'dictionary':
+        checkpoint(); stopTick(); G = null;
+        var dc = t.getAttribute('data-cat');
+        if (dc === '漢詩') screenShishu();
+        else if (!window.KUHO.some(function (k) { return k.cat === dc; })) screenLesson(window.Learning.guide(dc)[0]);
+        else { zukanState.cat = 'すべて'; zukanState.q = dc; screenZukan(); }
+        break;
+      case 'related':
+        var cat = t.getAttribute('data-cat'), key = t.getAttribute('data-key');
+        stopTick(); window.Store.mark();
+        if (cat === '返り点') startKaeriten(window.QuizGen.shuffle(window.KAERITEN.filter(function (it) { return 'kt:' + it.id !== key; })).slice(0, 3));
+        else if (cat === '置き字') startOkiji(window.QuizGen.shuffle(window.OKIJI.filter(function (it) { return 'ok:' + it.id !== key; })).slice(0, 3));
+        else if (cat === '書き下し') startNarabe(window.QuizGen.shuffle(window.NARABEKAE.filter(function (it) { return 'nb:' + it.id !== key; })).slice(0, 3));
+        else {
+          var all = window.QuizGen.build('mogi'), old = all.find(function (q) { return q.key === key; });
+          var pool = all.filter(function (q) { return q.cat === cat && q.key !== key && (!old || q.stem !== old.stem); });
+          if (!pool.length) pool = all.filter(function (q) { return q.cat === cat && q.key !== key; });
+          startChoice(modeById('related'), pool);
+        }
+        break;
       case 'go': go(t.getAttribute('data-to')); break;
       case 'play': play(t.getAttribute('data-id')); break;
       case 'lesson': screenLesson(t.getAttribute('data-id')); break;
@@ -5094,9 +5615,10 @@ window.LESSONS = [
       case 'next': nextQuestion(); break;
       case 'quit':
         stopTick();
-        ask('中断してホームに戻りますか？　ここまでの解答記録は保存されます。', '中断する', function () {
-          window.Store.save(); go('home');
-        });
+        checkpoint();
+        ask('中断してホームに戻りますか？　解答記録と続きは保存されます。', '中断する', function () {
+          go('home');
+        }, function () { if (G && G.phase === 'choice' && !G.locked) runTimer(); });
         break;
       case 'foego': beginFoe(); break;
       case 'foenext': nextFoe(); break;
@@ -5104,14 +5626,19 @@ window.LESSONS = [
       case 'kt': kaeritenTap(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'ktnext': kaeritenNext(); break;
       case 'ok':
+        if (!G || G.done) break;
         var oi = t.getAttribute('data-i');
         G.sel[oi] = !G.sel[oi];
         renderOkiji();
         break;
       case 'okjudge': okijiJudge(); break;
       case 'oknext': okijiNext(); break;
-      case 'nbpush': G.placed.push(parseInt(t.getAttribute('data-i'), 10)); renderNarabe(); break;
-      case 'nbpull': G.placed.splice(parseInt(t.getAttribute('data-k'), 10), 1); renderNarabe(); break;
+      case 'nbpush':
+        if (!G || G.done) break;
+        var pi = parseInt(t.getAttribute('data-i'), 10);
+        if (G.placed.indexOf(pi) === -1) G.placed.push(pi);
+        renderNarabe(); break;
+      case 'nbpull': if (G && !G.done) { G.placed.splice(parseInt(t.getAttribute('data-k'), 10), 1); renderNarabe(); } break;
       case 'nbjudge': narabeJudge(); break;
       case 'nbnext': narabeNext(); break;
       case 'theme': toggleTheme(); break;
@@ -5122,12 +5649,14 @@ window.LESSONS = [
         });
         break;
     }
+    checkpoint();
   }
 
   function onKey(e) {
-    if (!G || !G.qs || G.locked) return;
+    if (modalOpen || !G || !G.qs || G.phase !== 'choice' || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (G.locked) return; // 判定後のEnterはフォーカス済みの次へボタンに任せる
     var n = '1234'.indexOf(e.key);
-    if (n >= 0 && n < G.qs[G.i].choices.length) { answer(n); return; }
+    if (n >= 0 && n < G.qs[G.i].choices.length) { e.preventDefault(); answer(n); return; }
     if (e.key === 'Enter') {
       var b = $app.querySelector('#vd .btn');
       if (b) b.click();
@@ -5184,15 +5713,21 @@ window.LESSONS = [
     applyTheme();
     applyVertical();
     measureChrome();
-    var first = window.Store.touchDay();
+    window.addEventListener('save-error', function () {
+      var banner = el('save-warning');
+      if (!banner) { banner = document.createElement('div'); banner.id = 'save-warning'; banner.className = 'save-warning'; banner.setAttribute('role', 'alert'); document.body.prepend(banner); }
+      banner.textContent = '記録を保存できませんでした。この画面を閉じると今回の記録が失われる可能性があります。ブラウザの保存設定・空き容量を確認してください。';
+    });
+    window.addEventListener('pagehide', checkpoint);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { checkpoint(); stopTick(); }
+      else if (G && G.phase === 'choice' && !G.locked && !modalOpen) runTimer();
+    });
     document.addEventListener('click', onClick);
     document.addEventListener('keydown', onKey);
     window.addEventListener('resize', measureChrome);
     window.addEventListener('orientationchange', function () { setTimeout(measureChrome, 200); });
     screenHome();
-    if (first && window.Store.state.streak > 1) {
-      setTimeout(function () { toast('連続学習 ' + window.Store.state.streak + ' 日目。今日も一問から。'); }, 700);
-    }
   }
 
   // レイアウト検証用のフック（テストからのみ使う）
