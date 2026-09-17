@@ -575,6 +575,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 .q-stem-wrap { align-items: flex-start; }
 .vert .kc .mark { right: auto; left: -.40em; bottom: -.04em; }
+.vert .latin-upright { text-orientation: upright; }
 
 /* 漢詩：句を右から左へ列で並べる */
 .p-lines { display: block; }
@@ -1056,6 +1057,18 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .journey-stage.cleared { border-color: var(--kin); }
 .journey-stage:disabled { opacity: .5; cursor: not-allowed; }
 .journey-stage:not(:disabled):hover { border-color: var(--shu); background: var(--paper-2); }
+.journey-entry { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.journey-entry .journey-stage { width: 100%; flex: 1; }
+.lore-link { width: 100%; font-size: 12px; }
+.lore-locked { color: var(--ink-3); text-align: center; padding: 8px; }
+.lore-unlocked { margin: 22px 0; padding: 16px; border: 1px solid var(--kin); border-radius: 12px; text-align: left; }
+.lore-unlocked summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+.foe-lore { text-align: left; max-width: 760px; margin: 18px auto 0; }
+.foe-lore h4 { margin: 22px 0 6px; font-size: 13px; color: var(--ink-3); }
+.foe-lore p { font-size: 15px; line-height: 1.95; }
+.foe-lore .p-lines { overflow-x: auto; justify-content: flex-start; }
+.lore-card > .foe-figure { display: block; margin-inline: auto; }
+.ki-pips { flex-wrap: wrap; row-gap: 3px; }
 .bh-t small { display: block; font-size: 12px; color: var(--shu); letter-spacing: .05em; margin-top: 5px; }
 .save-warning { padding: 12px 20px; background: var(--shu); color: white; font-size: 14px; }
 .dlg .btn { min-height: 44px; }

@@ -11,7 +11,7 @@ function boot(initial) {
   class Clock extends Date { constructor(...a) { super(...(a.length ? a : [now])); } static now() { return now; } }
   const ctx = { window: {}, Date: Clock, localStorage: { getItem: k => storage.get(k), setItem: (k,v) => storage.set(k,v) } };
   vm.createContext(ctx);
-  for (const f of ['kuho','mondai','misyomi','kaeriten','okiji','narabekae','kanshi','koji','kanji','lessons','foes','foe-art','journey'])
+  for (const f of ['kuho','mondai','misyomi','kaeriten','okiji','narabekae','kanshi','koji','kanji','lessons','foes','foe-art','journey','foe-lore'])
     vm.runInContext(fs.readFileSync(path.join(root, 'src/data', f + '.js'), 'utf8'), ctx);
   for (const f of ['store','quizgen','learning']) vm.runInContext(fs.readFileSync(path.join(root, 'src/js', f + '.js'), 'utf8'), ctx);
   const w = ctx.window; w.Store.load();
@@ -89,13 +89,51 @@ test('kaeriten anchor is the kanji, never the okurigana', () => {
   assert.equal(marked.c,'習'); assert.equal(marked.okuri,'フ'); assert.equal(marked.mark,'レ');
   assert.equal(w.KUNDOKU_EXAMPLES.ls01.find(t=>t.mark).c,'習');
 });
-test('all eight new gates have art, three contextual questions and valid explanations', () => {
+test('all eight new gates have art, contextual questions and valid explanations', () => {
   const {w}=boot();
   assert.equal(w.FOES.length,16);
   for(const f of w.FOES.slice(8)) {
     assert.equal(f.chapter,2); assert.ok(w.FOE_ART[f.id].startsWith('<svg'));
     const qs=w.QuizGen.build('mogi').filter(q=>q.stage===f.id);
-    assert.equal(qs.length,3);
+    assert.equal(qs.length,f.id==='f9'?4:3);
     for(const q of qs) { assert.equal(q.reasons[q.a],''); q.reasons.forEach((r,i)=>{if(i!==q.a)assert.ok(r.length>5);}); }
+  }
+});
+
+test('enemy HP grows from gate two; thematic decks remain playable and separate passages', () => {
+  const {w}=boot();
+  assert.equal(w.FOES[0].ki,3); assert.equal(w.FOES[1].ki,5);
+  for(let i=0;i<w.FOES.length;i++) {
+    const foe=w.FOES[i];
+    if(i) assert.ok(foe.ki>w.FOES[i-1].ki);
+    assert.ok(foe.lore.origin && foe.lore.translation && foe.lore.note);
+    const pool=w.QuizGen.battlePool(foe);
+    assert.ok(pool.every(q=>q.stage===foe.id || !q.stage && (!foe.cats || foe.cats.includes(q.cat))));
+    for(let trial=0;trial<30;trial++) {
+      const deck=w.QuizGen.battleDeck(foe,24);
+      assert.ok(deck.length>=foe.ki+2,foe.id+': enough for two misses');
+      assert.equal(new Set(deck.map(q=>q.key)).size,deck.length);
+      const distinct=new Set(pool.map(w.QuizGen.passageKey)).size;
+      assert.equal(new Set(deck.slice(0,Math.min(distinct,deck.length)).map(w.QuizGen.passageKey)).size,Math.min(distinct,deck.length),foe.id+': unseen first');
+      for(let j=1;j<deck.length;j++) assert.notEqual(w.QuizGen.passageKey(deck[j]),w.QuizGen.passageKey(deck[j-1]),foe.id);
+    }
+  }
+  assert.ok(w.QuizGen.battlePool(w.FOES[6]).every(q=>q.cat==='漢詩'));
+});
+
+test('reported distractors preserve the same subject and grammar; hypothesis is not read twice',()=>{
+  const {w}=boot(); const qs=w.QuizGen.build('mogi');
+  const command=qs.find(q=>q.key==='si04:read');
+  assert.ok(command.choices.every(c=>c.includes('A')&&c.includes('B')&&c.includes('めい')));
+  const only=qs.find(q=>q.key==='ru02:mean');
+  assert.ok(only.choices.every(c=>c.includes('A')));
+  const conditional=qs.find(q=>q.key==='kt05:ex');
+  assert.equal(conditional.choices[conditional.a],'天下をして農夫無からしめば、挙世皆餓死せん。');
+  assert.ok(conditional.choices.every(c=>!c.includes('使し')&&!c.includes('しむれば')));
+  assert.ok(qs.find(q=>q.key==='j9-3').exp.includes('原料となる植物'));
+  for(const q of qs.filter(q=>q.key.endsWith(':rhyme'))) {
+    const poem=w.KANSHI.find(p=>q.key.startsWith(p.id+':'));
+    const ends=poem.lines.map(l=>l.at(-1));
+    assert.ok(q.choices.every(c=>c.split('・').every(x=>ends.includes(x))));
   }
 });

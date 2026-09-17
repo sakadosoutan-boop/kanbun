@@ -127,14 +127,17 @@ try {
     for(let gate=8;gate<16;gate++) {
       assert.equal(await p.evaluate(()=>__peek().foeIdx),gate);
       await click(p,'foego');
-      assert.ok(await p.evaluate(()=>__peek().qs.slice(0,3).every(q=>q.stage===__peek().foe.id)));
+      assert.ok(await p.evaluate(()=>{
+        const qs=__peek().qs;
+        return qs.every((q,i)=>!i || QuizGen.passageKey(q)!==QuizGen.passageKey(qs[i-1]));
+      }));
       if(gate===8) {
         await p.screenshot({path:path.join(out,'volume-two-question.png'),fullPage:true});
         await click(p,'quit'); await p.keyboard.press('Escape');
         const t=await p.evaluate(()=>__peek().left); await p.waitForTimeout(250);
         assert.ok(await p.evaluate(()=>__peek().left)<t);
       }
-      for(let step=0;step<10;step++) {
+      for(let step=0;step<24;step++) {
         await answer(p); await click(p,'next');
         if(await p.locator('.gate-clear').count()) break;
       }

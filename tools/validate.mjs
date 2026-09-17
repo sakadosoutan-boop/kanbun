@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art', 'journey'];
+const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art', 'journey', 'foe-lore'];
 const CODE = ['store', 'quizgen'];
 
 const sandbox = { window: {}, localStorage: null, console };
@@ -180,7 +180,8 @@ uniq(W.FOES, 'FOES');
     ['glyph', 'name', 'kana', 'src', 'quote', 'qyomi', 'taunt', 'beaten'].forEach((k) => {
       if (!f[k]) err(`FOES ${f.id}: ${k} が空`);
     });
-    if (!(f.ki >= 3 && f.ki <= 8)) err(`FOES ${f.id}: ki が不正 (${f.ki})`);
+    if (!(f.ki >= 3 && f.ki <= 20)) err(`FOES ${f.id}: ki が不正 (${f.ki})`);
+    if (!f.lore || !f.lore.origin || !f.lore.translation || !f.lore.note) err(`FOES ${f.id}: 突破解説が無い`);
     if ([...f.glyph].length !== 1) err(`FOES ${f.id}: glyph は一字にする`);
     if (f.cats) {
       f.cats.forEach((c) => { if (!allCats.has(c)) err(`FOES ${f.id}: 存在しない分野「${c}」`); });

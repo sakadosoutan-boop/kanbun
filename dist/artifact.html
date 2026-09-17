@@ -577,6 +577,7 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 }
 .q-stem-wrap { align-items: flex-start; }
 .vert .kc .mark { right: auto; left: -.40em; bottom: -.04em; }
+.vert .latin-upright { text-orientation: upright; }
 
 /* 漢詩：句を右から左へ列で並べる */
 .p-lines { display: block; }
@@ -1058,6 +1059,18 @@ h1,h2,h3,h4 { line-height: 1.35; margin: 0; }
 .journey-stage.cleared { border-color: var(--kin); }
 .journey-stage:disabled { opacity: .5; cursor: not-allowed; }
 .journey-stage:not(:disabled):hover { border-color: var(--shu); background: var(--paper-2); }
+.journey-entry { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.journey-entry .journey-stage { width: 100%; flex: 1; }
+.lore-link { width: 100%; font-size: 12px; }
+.lore-locked { color: var(--ink-3); text-align: center; padding: 8px; }
+.lore-unlocked { margin: 22px 0; padding: 16px; border: 1px solid var(--kin); border-radius: 12px; text-align: left; }
+.lore-unlocked summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+.foe-lore { text-align: left; max-width: 760px; margin: 18px auto 0; }
+.foe-lore h4 { margin: 22px 0 6px; font-size: 13px; color: var(--ink-3); }
+.foe-lore p { font-size: 15px; line-height: 1.95; }
+.foe-lore .p-lines { overflow-x: auto; justify-content: flex-start; }
+.lore-card > .foe-figure { display: block; margin-inline: auto; }
+.ki-pips { flex-wrap: wrap; row-gap: 3px; }
 .bh-t small { display: block; font-size: 12px; color: var(--shu); letter-spacing: .05em; margin-top: 5px; }
 .save-warning { padding: 12px 20px; background: var(--shu); color: white; font-size: 14px; }
 .dlg .btn { min-height: 44px; }
@@ -1536,7 +1549,7 @@ window.KUHO = [
   },
   {
     id: 'si03', cat: '使役', level: 2,
-    bare: '遣AB', form: '遣ハシテA（ヲシテ）B（未然形）シム', read: 'AヲシテB（セ）しム', mean: 'AをやってBさせる',
+    bare: '遣AB', form: '遣ハシテA（ヲシテ）B（未然形）シム', read: 'AヲつかハシテB（セ）しム', mean: 'AをやってBさせる',
     note: '「遣」は人を派遣して〜させる、という具体的な使役。',
     ex: [
       { k: '遣使者告之。', y: '使者を遣はして之に告げしむ。', t: '使者をやってこれを告げさせた。', s: '' }
@@ -1544,7 +1557,7 @@ window.KUHO = [
   },
   {
     id: 'si04', cat: '使役', level: 3,
-    bare: '命A B', form: '命ジテA（ニ）B（未然形）シム', read: 'AニめいジテB（セ）しム', mean: 'AにBするよう命じる',
+    bare: '命AB', form: '命ジテA（ニ）B（未然形）シム', read: 'AニめいジテB（セ）しム', mean: 'AにBするよう命じる',
     note: '「命・召・説・勧」など、意味の上で使役を含む動詞。使役の助字がなくても「しむ」を補って読む。',
     ex: [
       { k: '命子路問之。', y: '子路に命じて之を問はしむ。', t: '子路に命じてこれを尋ねさせた。', s: '' }
@@ -1596,7 +1609,7 @@ window.KUHO = [
   },
   {
     id: 'hk02', cat: '比較', level: 2,
-    bare: '莫如A（莫若・無如）', form: '莫如A（莫若A・無如A）', read: 'AニしクハなシA', mean: 'Aに及ぶものはない（Aが一番だ）',
+    bare: '莫如A（莫若・無如）', form: '莫如A（莫若A・無如A）', read: 'Aニしクハなシ', mean: 'Aに及ぶものはない（Aが一番だ）',
     note: '最上級。「不如」が二者比較なのに対し、「莫如」は全体の中での最上を表す。',
     ex: [
       { k: '知子莫若父。', y: '子を知るは父に若くは莫し。', t: '子を知る点では父に及ぶ者はない。', s: '' }
@@ -1607,7 +1620,7 @@ window.KUHO = [
     bare: 'A（形容詞）於B', form: 'A（形容詞）於B', read: 'AハBヨリ（モ）〜', mean: 'AはBより〜だ',
     note: '形容詞の下の「於（于・乎）」は比較の基準を示す置き字。「〜より（も）」と送る。',
     ex: [
-      { k: '青取之於藍、而青於藍。', y: '青は之を藍より取りて、藍よりも青し。', t: '青色は藍から取るが、藍よりも青い。（＝出藍の誉れ）', s: '荀子・勧学' },
+      { k: '青取之於藍、而青於藍。', y: '青は之を藍より取りて、藍よりも青し。', t: '青色の染料は藍という植物から作るが、もとの藍よりも青い。学びによって、もとの自分を超えられるというたとえ。', s: '荀子・勧学' },
       { k: '霜葉紅於二月花。', y: '霜葉は二月の花よりも紅なり。', t: '霜にあたった紅葉は、春の花よりも赤い。', s: '杜牧・山行' }
     ]
   },
@@ -1639,7 +1652,7 @@ window.KUHO = [
   },
   {
     id: 'sn03', cat: '選択', level: 3,
-    bare: '孰与A（孰若）', form: '孰与A（孰若A）', read: 'AニいづレゾA', mean: 'Aと比べてどちらがよいか（Aの方がよいのではないか）',
+    bare: '孰与A（孰若）', form: '孰与A（孰若A）', read: 'Aニいづレゾ', mean: 'Aと比べてどちらがよいか（Aの方がよいのではないか）',
     note: '形は疑問だが、後者を選ばせる含みを持つ。',
     ex: [
       { k: '救趙孰与勿救。', y: '趙を救ふは救ふ勿きに孰与れぞ。', t: '趙を救うのと救わないのと、どちらがよいか。', s: '戦国策' }
@@ -1681,10 +1694,10 @@ window.KUHO = [
   },
   {
     id: 'kt05', cat: '仮定', level: 3,
-    bare: '使（令）', form: '使メバ〜（令バ〜）', read: 'もシ〜シメバ', mean: 'もし〜であったなら',
-    note: '「使・令」が文頭にあり仮定を表す用法。使役と紛らわしい。',
+    bare: '使AB（仮定）', form: '使メバA（ヲシテ）B（未然形）', read: 'AヲシテB（セ）しメバ', mean: 'もしAがBするならば',
+    note: '仮定を表す「使」は「AをしてBせしめば」と訓読する。「もし」は現代語訳に補う。この読みでは文頭に「使し」を重ねない。',
     ex: [
-      { k: '使天下無農夫、挙世皆餓死。', y: '使し天下に農夫無からしめば、挙世皆餓死せん。', t: 'もし世に農民がいなかったら、世界中みな餓死するだろう。', s: '' }
+      { k: '使天下無農夫、挙世皆餓死矣。', y: '天下をして農夫無からしめば、挙世皆餓死せん。', t: 'もし世の中に農民がいなかったら、世の人々はみな餓死するだろう。', s: '鄭燮・范県署中寄舎弟墨第四書（節録）' }
     ]
   },
   {
@@ -1707,7 +1720,7 @@ window.KUHO = [
   },
   {
     id: 'gt02', cat: '限定', level: 1,
-    bare: '耳（爾・已・而已・而已矣）', form: 'A耳（爾・已・而已・而已矣）', read: 'AノミA', mean: 'Aだけだ／Aにすぎない',
+    bare: '耳（爾・已・而已・而已矣）', form: 'A耳（爾・已・而已・而已矣）', read: 'Aノミ', mean: 'Aだけだ／Aにすぎない',
     note: '文末の限定。「而已」は「のみ」の二字表記。',
     ex: [
       { k: '直不百歩耳、是亦走也。', y: '直だ百歩ならざるのみ、是も亦た走るなり。', t: 'ただ百歩でなかっただけで、これも逃げたことに変わりはない。', s: '孟子・梁恵王上' }
@@ -1785,7 +1798,7 @@ window.KUHO = [
   },
   {
     id: 'et05', cat: '詠嘆', level: 2,
-    bare: 'A哉（A夫・A矣）', form: 'A哉（A夫・A矣）', read: 'AかなA', mean: 'Aだなあ',
+    bare: 'A哉（A夫・A矣）', form: 'A哉（A夫・A矣）', read: 'Aかな', mean: 'Aだなあ',
     note: '文末の詠嘆。連体形・体言を受けて「かな」。',
     ex: [
       { k: '賢哉回也。', y: '賢なるかな回や。', t: '賢いなあ、顔回は。', s: '論語・雍也' }
@@ -1941,7 +1954,7 @@ window.KUHO = [
   },
   {
     id: 'jy15', cat: '重要語', level: 2,
-    bare: '与A', form: '与A（共ニ）', read: 'AトともニA', mean: 'Aと一緒に',
+    bare: '与A', form: '与A（共ニ）', read: 'Aトともニ', mean: 'Aと一緒に',
     note: '「与」は「と／ともニ／くみス／あづかル／か（疑問）」と多義。',
     ex: [
       { k: '与朋友交而不信乎。', y: '朋友と交はりて信ならざるか。', t: '友人と交際して誠実でなかったか。', s: '論語・学而' }
@@ -2148,7 +2161,7 @@ window.MISYOMI = {
   kt01: ['如し王者有らば、必ず世にして後に仁ならず。', '如し王者有らんとすれば、必ず世にして後に仁ならん。', '王者有るがごとし、必ず世にして後に仁ならん。'],
   kt02: ['苟くも仁に志せば、悪しきこと無かれ。', '縦ひ仁に志すとも、悪しきこと無きなり。', '苟くも仁に志せば、悪しきこと有るなり。'],
   kt04: ['嘉肴有りと雖も、食らへば其の旨きを知らざるなり。', '嘉肴有りと雖も、食らはずんば其の旨きを知るなり。', '嘉肴有らば、食らはずんば其の旨きを知らざるなり。'],
-  kt05: ['天下をして農夫無からしむれば、挙世皆餓死せん。', '使し天下に農夫無からしめば、挙世皆餓死せず。', '使し天下に農夫無からしめば、挙世皆餓死せんや。'],
+  kt05: ['天下をして農夫有らしめば、挙世皆餓死せん。', '天下をして農夫無からしめば、挙世皆餓死せず。', '天下をして農夫無からしめば、挙世皆餓死せんや。'],
   kt06: ['管仲微かなれば、吾其れ髪を被り衽を左にせん。', '管仲微かりせば、吾其れ髪を被り衽を左にせず。', '管仲微かりせば、吾其れ髪を被り衽を左にせんや。'],
 
   /* --- 限定・累加・抑揚 --- */
@@ -2186,6 +2199,42 @@ window.MISYOMI = {
   jy15: ['朋友を与へて交はりて信ならざるか。', '朋友と交はりて信ならざらんや。', '朋友と共に交はりて信なるか。']
 };
 
+/* 読み・意味の誤答。A/Bの役割、否定の範囲、助動詞など、比較する点をそろえる。
+ * 同義の句形が多く、同分類から三つの誤答を取れないものもここで補う。 */
+window.KUHO_CHOICES = {
+  si01: {read:['AニB（セ）らル','AヲシテB（セ）ず','AヲシテB（セ）んとす'],mean:['AにBされる','AがBすることを禁じる','AがBしようとする']},
+  si02: {read:['AニB（セ）らル','AヲシテB（セ）ず','AヲシテB（セ）んとす'],mean:['AにBされる','AがBすることを禁じる','AがBしようとする']},
+  si03: {read:['AヲつかハシテB（セ）らル','AヲつかハサずB（セ）しム','AヲつかハシテB（セ）ず'],mean:['AをやってBされる','AをやらずにBさせる','AをやってBを禁じる']},
+  si04: {read:['AニめいジテB（セ）らル','AニめいゼラレテBス','AニめいジテB（セ）ず'],mean:['AからBするよう命じられる','AにBをしないよう命じる','AにBしたかどうかを尋ねる']},
+  uk01: {read:['〜（セ）しム','〜（セ）ず','〜（セ）んとす'],mean:['〜させる','〜しない','〜しようとする']},
+  uk02: {read:['〜（セ）しム','〜（セ）ず','〜（セ）んとす'],mean:['〜させる','〜しない','〜しようとする']},
+  uk03: {read:['AヲシテB（セ）しム','AノB（スル）ところトなラず','AノB（スル）ところヲなス'],mean:['AにBさせる','AにBされない','AのためにBする']},
+  uk04: {read:['Aニ〜（セ）しム','Aニ〜（セ）ず','Aヨリモ〜'],mean:['Aに〜させる','Aのために〜する','Aよりも〜する']},
+  hk01: {read:['AハBニしク','BハAニしカず','AハBニしカザルハなシ'],mean:['AはBより優れている','AとBは等しい','AもBも優れていない']},
+  hk02: {read:['Aニしカず','Aニしクモノあリ','Aニしクハなカレ'],mean:['Aは他に及ばない','Aに及ぶものがある','Aと比べることを禁じる']},
+  hk03: {read:['AハBノごとシ','AハBニ〜（セ）らル','AハBヲシテ〜（セ）しム'],mean:['AはBと同じくらい〜だ','AはBに〜される','AはBに〜させる']},
+  hk04: {read:['これヨリ〜あリ','これニ〜（セ）らル','これヨリ〜なカレ'],mean:['これより〜なものがある','これと同じ程度だ','これより〜になることを禁じる']},
+  sn01: {read:['そノBセンヨリハ、むしロAセヨ','そノAセンヨリハ、むしロBスルなカレ','そノAセンヨリハ、むしロBセず'],mean:['BするよりはむしろAせよ','AもBもしてはいけない','Aするなら必ずBする']},
+  sn02: {read:['そノBセンヨリハ、Aニしカず','そノAセンヨリハ、Bニしク','そノAセンヨリハ、Bニしクハなシ'],mean:['BするよりはAの方がよい','AとBは同じくらいよい','AするならBしてはいけない']},
+  sn03: {read:['Aニしカず','Aニしクハなシ','Aニなにヲカ〜'],mean:['Aより必ず劣っている','Aに及ぶものがないと断定する','Aを選ぶことを禁じる']},
+  kt05: {read:['AヲシテB（セ）しム','AヲシテB（セ）しメず','AニB（セ）らル'],mean:['AにBさせる','AはBしてはいけない','AはBされる']},
+  gt01: {read:['たダAノミナラず','Aニしクハなシ','Aスラ〜'],mean:['Aだけではない','Aでさえそうだ','Aより優れている']},
+  gt02: {read:['Aノミナラず','Aニあらズ','Aスラ〜'],mean:['Aだけではない','Aではない','Aでさえそうだ']},
+  ru01: {read:['たダニAノミ、Bニあらズ','たダニBノミナラず、A','たダニAノミナラんや、B'],mean:['AだけでBではない','AではなくBだけだ','AもBも成り立たない']},
+  ru02: {read:['あニたダニAノミナルや','あニたダニAノミナラず','たダニAノミナリ'],mean:['ただAだけであって、ほかには及ばない','Aではなく、ほかのものだけである','Aを含めて、どれも当てはまらない']},
+  yy01: {read:['AスラかツB、いはンヤCノミ','AノミB、いはンヤCヲや','AスラかツB、いはンヤCニあらズ'],mean:['AだけがBで、CはBではない','AはBでないが、CはBである','AもCもBではない']},
+  yy02: {read:['AスラなホB、いはンヤCノミ','AノミB、いはンヤCヲや','AスラなホB、いはンヤCニあらズ'],mean:['AだけがBで、CはBではない','AはBでないが、CはBである','AもCもBではない']},
+  et01: {read:['まタA（セ）んや','まタA（セ）ず','まタAノミ'],mean:['Aではないと強く否定する','Aだけに限る','Aすることを禁じる']},
+  et02: {read:['あニA（セ）んや','あニAノミ','A（セ）ず'],mean:['Aではないと強く否定する','Aだけに限る','Aすることを禁じる']},
+  et03: {read:['なんゾそレA（セ）んや','なにヲカそレA（スル）や','そレAノミ'],mean:['Aではないと強く否定する','何をAするかと対象を尋ねる','Aだけに限る']},
+  et04: {read:['いかん','けだシ','たダ'],mean:['どのようであるか（疑問）','おそらく（推測）','ただ〜だけ（限定）']},
+  et05: {read:['Aノミ','A（セ）んや','Aニあらズ'],mean:['Aにすぎない','Aだろうか、いや違う','Aではない']},
+  gn01: {read:['〜（スル）なカレ','〜（セ）ざルベカラず','〜（スル）あたハず'],mean:['〜してはならない','必ず〜しなければならない','〜することができない']},
+  gn02: {read:['〜（スル）なカレ','〜（セ）ざルベカラず','〜（セ）らル'],mean:['〜してはいけない','必ず〜しなければならない','〜するよう命じられる']},
+  gn03: {read:['〜（セ）んや','〜（セ）ざルヲえず','〜（セ）ず'],mean:['〜しないつもりだ','〜せずにはいられない','〜してはいけない']},
+  gn04: {read:['〜（スル）なカレ','〜（セ）ざルベカラず','〜（スル）あたハず'],mean:['〜してはいけない','必ず〜しなければならない','〜することができない']}
+};
+
 </script>
 <script>
 /* 道場破り：関門の相手
@@ -2208,7 +2257,7 @@ window.FOES = [
   },
   {
     id: 'f2', glyph: '雀', name: '燕雀', kana: 'えんじゃく',
-    src: '史記・陳渉世家', ki: 4, level: 1,
+    src: '史記・陳渉世家', ki: 5, level: 1,
     cats: ['疑問', '反語', '疑問反語'],
     quote: '燕雀安知鴻鵠之志哉', qyomi: '燕雀安くんぞ鴻鵠の志を知らんや。',
     taunt: 'どうして小雀に大鳥の志が分かろうか——さて、その「どうして」は疑問か、反語か。',
@@ -2217,7 +2266,7 @@ window.FOES = [
   },
   {
     id: 'f3', glyph: '兎', name: '守株の農夫', kana: 'しゅしゅののうふ',
-    src: '韓非子・五蠹', ki: 4, level: 2,
+    src: '韓非子・五蠹', ki: 6, level: 2,
     cats: ['再読文字'],
     quote: '因釈其耒而守株', qyomi: '因りて其の耒を釈きて株を守る。',
     taunt: 'わしは待つ。ひたすら待つ。「未だ」「将に」「当に」——待つ者の言葉なら、わしに聞け。',
@@ -2226,7 +2275,7 @@ window.FOES = [
   },
   {
     id: 'f4', glyph: '矛', name: '矛盾の商人', kana: 'むじゅんのしょうにん',
-    src: '韓非子・難一', ki: 5, level: 2,
+    src: '韓非子・難一', ki: 7, level: 2,
     cats: ['二重否定', '部分否定'],
     quote: '以子之矛陥子之盾、何如', qyomi: '子の矛を以て子の盾を陥さば、何如。',
     taunt: '通さぬ盾と、通す矛。二つ重ねた否定のからくりを、解いてみせろ。',
@@ -2235,7 +2284,7 @@ window.FOES = [
   },
   {
     id: 'f5', glyph: '狐', name: '虎の威を借る狐', kana: 'とらのいをかるきつね',
-    src: '戦国策・楚策', ki: 5, level: 2,
+    src: '戦国策・楚策', ki: 8, level: 2,
     cats: ['使役', '受身'],
     quote: '天帝使我長百獣', qyomi: '天帝我をして百獣に長たらしむ。',
     taunt: '「しむ」か「らる」か。させるのか、されるのか。取り違えれば、虎の餌だ。',
@@ -2244,7 +2293,7 @@ window.FOES = [
   },
   {
     id: 'f6', glyph: '蝶', name: '胡蝶', kana: 'こちょう',
-    src: '荘子・斉物論', ki: 5, level: 3,
+    src: '荘子・斉物論', ki: 9, level: 3,
     cats: ['限定', '累加', '抑揚', '詠嘆', '願望'],
     quote: '不知周之夢為胡蝶与', qyomi: '周の夢に胡蝶と為るかを知らず。',
     taunt: 'ただ夢か、夢だけではないのか。「たダ〜ノミ」「いはンヤ〜ヲヤ」——境目を見極めよ。',
@@ -2253,8 +2302,8 @@ window.FOES = [
   },
   {
     id: 'f7', glyph: '李', name: '李白', kana: 'りはく',
-    src: '詩仙', ki: 5, level: 3,
-    cats: ['漢詩', '比較', '選択'],
+    src: '李白・静夜思', ki: 10, level: 3,
+    cats: ['漢詩'],
     quote: '挙頭望明月、低頭思故郷', qyomi: '頭を挙げて明月を望み、頭を低れて故郷を思ふ。',
     taunt: '酒を一杯。……そのあいだに、絶句と律詩の見分けくらいはつくだろうな。',
     beaten: '押韻も対句も押さえたか。よい耳をしている。',
@@ -2262,7 +2311,7 @@ window.FOES = [
   },
   {
     id: 'f8', glyph: '孔', name: '孔子', kana: 'こうし',
-    src: '論語', ki: 6, level: 3,
+    src: '論語・為政', ki: 11, level: 3,
     cats: null,   // null = 全分野
     quote: '温故而知新、可以為師矣', qyomi: '故きを温めて新しきを知れば、以て師と為るべし。',
     taunt: '学びて時に之を習う。さて——ここまで温めてきたものを、問おう。',
@@ -3131,45 +3180,30 @@ window.LESSONS = [
 
 </script>
 <script>
-/* 第二巻。引用は既収録の例文と同じ本文を使用。相手の台詞・解説は学習用の創作。 */
+/* 第二巻。相手の台詞・解説は学習用の創作。引用資料は docs/content-review.md を参照。 */
 (function () {
   'use strict';
   var stages = [
-    ['f9', '荀', '荀子', 'じゅんし', '荀子・勧学', '青取之於藍、而青於藍', '青は之を藍より取りて、藍よりも青し。', ['比較', '選択'], 6,
-      '同じ「於」でも、起点と比較では働きが違う。文の中で読み分けてみよう。', '学んだ型を、文脈の中でも使えたな。'],
-    ['f10', '孟', '孟子', 'もうし', '孟子・滕文公上', '労力者治於人', '力を労する者は人に治めらる。', ['受身', '使役'], 6,
+    ['f9', '荀', '荀子', 'じゅんし', '荀子・勧学', '青取之於藍、而青於藍', '青は之を藍より取りて、藍よりも青し。', ['比較', '選択'], 12,
+      '学びによって、人は変わる。一字の働きを、前後の文脈から見極めてみよう。', '学んだ型を、文脈の中でも使えたな。'],
+    ['f10', '孟', '孟子', 'もうし', '孟子・滕文公上', '労力者治於人', '力を労する者は人に治めらる。', ['受身', '使役'], 13,
       '誰が、誰に、何をするのか。動作の向きを見失わないことだ。', 'させる者と、される者。よく見分けた。'],
-    ['f11', '韓', '韓非子', 'かんぴし', '韓非子・難一', '以子之矛陥子之盾、何如', '子の矛を以て子の盾を陥さば、何如。', ['疑問', '反語', '疑問反語', '部分否定', '二重否定'], 6,
+    ['f11', '韓', '韓非子', 'かんぴし', '韓非子・難一', '以子之矛陥子之盾、何如', '子の矛を以て子の盾を陥さば、何如。', ['疑問', '反語', '疑問反語', '部分否定', '二重否定'], 14,
       '言葉のつじつまを問おう。「どうだ」と「どうする」を混同してはいけない。', '見かけの言葉に惑わされず、筋を通したな。'],
-    ['f12', '荘', '荘子', 'そうし', '荘子・斉物論', '不知周之夢為胡蝶与', '周の夢に胡蝶と為るかを知らず。', ['識別', '限定', '仮定'], 7,
+    ['f12', '荘', '荘子', 'そうし', '荘子・斉物論', '不知周之夢為胡蝶与', '周の夢に胡蝶と為るかを知らず。', ['識別', '限定', '仮定'], 15,
       '一字には、いくつもの顔がある。暗記した読みを当てはめる前に、前後を見よ。', '字の姿だけでなく、文の働きをつかんだ。'],
-    ['f13', '陶', '陶淵明', 'とうえんめい', '陶淵明・雑詩', '歳月不待人', '歳月人を待たず。', ['否定', '禁止', '再読文字'], 7,
+    ['f13', '陶', '陶淵明', 'とうえんめい', '陶淵明・雑詩', '歳月不待人', '歳月人を待たず。', ['否定', '禁止', '再読文字'], 16,
       '否定なのか、禁止なのか、まだ実現していないのか。短い文ほど丁寧に読もう。', '短い一句の中にも、学ぶことは尽きない。'],
-    ['f14', '王', '王之渙', 'おうしかん', '王之渙・登鸛鵲楼', '欲窮千里目、更上一層楼', '千里の目を窮めんと欲し、更に上る一層の楼。', ['願望', '漢詩', '累加'], 7,
+    ['f14', '王', '王之渙', 'おうしかん', '王之渙・登鸛鵲楼', '欲窮千里目、更上一層楼', '千里の目を窮めんと欲し、更に上る一層の楼。', ['願望', '漢詩', '累加'], 17,
       'もう一層上へ。句形を見抜き、その先の情景まで読み取ってみよう。', '目の前の一字から、遠くの景色へ進めたな。'],
-    ['f15', '杜', '杜甫', 'とほ', '杜甫・春望', '国破山河在、城春草木深', '国破れて山河在り、城春にして草木深し。', ['漢詩'], 8,
+    ['f15', '杜', '杜甫', 'とほ', '杜甫・春望', '国破山河在、城春草木深', '国破れて山河在り、城春にして草木深し。', ['漢詩'], 18,
       '形式、対句、押韻。そして言葉の対照。詩を一つの作品として読んでほしい。', '形と意味を合わせて読む力が、身についてきた。'],
-    ['f16', '史', '司馬遷', 'しばせん', '史記・陳渉世家', '燕雀安知鴻鵠之志哉', '燕雀安くんぞ鴻鵠の志を知らんや。', null, 8,
+    ['f16', '史', '司馬遷', 'しばせん', '史記・陳渉世家', '燕雀安知鴻鵠之志哉', '燕雀安くんぞ鴻鵠の志を知らんや。', null, 20,
       '第二巻の総仕上げだ。句法も語順も文脈も、自分の力でつないで読もう。', '第二巻、踏破。学んだことを携えて、さらに多くの文章へ進もう。']
   ];
-  stages.forEach(function (s, i) {
+  stages.forEach(function (s) {
     window.FOES.push({ id: s[0], glyph: s[1], name: s[2], kana: s[3], src: s[4], quote: s[5], qyomi: s[6], cats: s[7], ki: s[8],
-      level: 3, chapter: 2, time: 40, taunt: s[9], beaten: s[10], hit: 'その読みでよい。次の一文へ。', miss: '解説で根拠を確かめて、もう一度進もう。' });
-    // 既存の墨絵と同じSVG方式。帽子・持ち物・背景を変えた第二巻の肖像。
-    var hats = [
-      '<path d="M35 37L42 17H76L85 37Z"/>', '<path d="M33 37L44 27V13H74V27L86 37Z"/>',
-      '<path d="M34 37V22H84V37Z"/><path d="M58 12H68V24H58Z"/>', '<path d="M30 36Q60 0 90 36Z"/>',
-      '<path d="M21 39L60 12L99 39Z"/>', '<path d="M33 36Q30 13 58 21Q86 6 85 36Z"/>',
-      '<path d="M31 38L39 22L79 17L88 38Z"/>', '<path d="M34 38L39 18H80L87 38Z"/><path d="M45 12H73V20H45Z"/>'
-    ];
-    var props = i % 3 === 0 ? '<path d="M14 88L38 67L59 93L36 112Z" fill="var(--paper)"/><path d="M20 86L37 75M25 92L43 80M31 99L48 87" fill="none" stroke="currentColor" stroke-width="2"/>' :
-      i % 3 === 1 ? '<path d="M84 63L104 101L94 107L78 66Z"/><path d="M79 63L78 51L85 60Z"/>' : '<path d="M83 101L105 28" fill="none" stroke="currentColor" stroke-width="4"/>';
-    window.FOE_ART[s[0]] = '<svg class="ink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">' +
-      '<circle cx="60" cy="60" r="51" fill="currentColor" opacity=".06"/><path d="M8 104L30 52L47 89L89 39L114 108Z" fill="currentColor" opacity=".09"/>' +
-      '<g fill="currentColor" filter="url(#sumi-b)"><path d="M24 110Q24 77 45 68L75 68Q97 83 99 110Z" opacity=".8"/>' + hats[i] + '</g>' +
-      '<ellipse cx="60" cy="51" rx="21" ry="25" fill="var(--paper)"/><g fill="none" stroke="currentColor" stroke-linecap="round"><path d="M40 44Q45 36 52 43M67 43Q75 35 80 44" stroke-width="2.5"/>' +
-      '<path d="M59 46L56 57L62 58M46 65Q60 76 75 64M45 70Q48 87 60 94Q74 80 74 68M44 79L58 108L76 80" stroke-width="2"/></g>' +
-      '<g fill="currentColor">' + props + '</g><circle cx="48" cy="47" r="1.7" fill="currentColor"/><circle cx="72" cy="47" r="1.7" fill="currentColor"/></svg>';
+      level: 3, minLevel: 2, chapter: 2, time: 40, taunt: s[9], beaten: s[10], hit: 'その読みでよい。次の一文へ。', miss: '解説で根拠を確かめて、もう一度進もう。' });
   });
 
   // 各関門の文脈問題。選択肢ごとの説明はシャッフル時にも一緒に並べ替える。
@@ -3185,9 +3219,12 @@ window.LESSONS = [
   q('f9', 2, '比較', '青取之於藍、而青於藍', '後半の書き下しとして適切なのはどれか。',
     ['藍よりも青し', '藍に青めらる', '藍をして青からしむ', '藍のごとく青し'], '形容詞「青」の後の「於藍」は、藍と比べてより青いことを表す。',
     ['比較を受身と取り違えています。', '比較を使役と取り違えています。', '「於」はここでは比況ではなく、比較の基準です。']);
-  q('f9', 3, '比較', '青取之於藍、而青於藍', 'この文の対照として適切なのはどれか。',
-    ['藍から生じた青が、もとの藍を上回る', '藍から青を取ることはできない', '青も藍も全く同じ濃さである', '青が藍を作り出す'], '前半が由来、後半がその由来を上回る性質を述べる。',
-    ['本文には「取れない」という否定はありません。', '「青於藍」は同程度ではなく、藍より青いという比較です。', '「取之於藍」の起点は藍です。']);
+  q('f9', 4, '否定', '不積跬歩、無以致千里', '「無以致千里」の意味として適切なのはどれか。',
+    ['千里に到達する手だてがない', '千里に到達しないわけにはいかない', '千里に到達する必要はない', '千里に到達しない者はいない'], '小さな歩みを積み重ねなければ、千里の遠くへは行けない。「無以」は〜する手だてがない。跬歩（きほ）は一歩一歩の小さな歩み。',
+    ['義務を表す二重否定ではありません。', '必要がないのではなく、到達する方法がないと述べています。', '「無〜不」の全肯定ではありません。']);
+  q('f9', 3, '比較', '青取之於藍、而青於藍', '青（青色の染料）と藍（原料の植物）の関係を、本文はどう述べているか。',
+    ['藍から取り出した染料が、原料の藍より青い', '藍から取り出した染料は、原料の藍ほど青くない', '藍から取り出した染料は、原料の藍と同じ青さだ', '藍は染料から作られ、その染料より青い'], '「青」は青色の染料、「藍」はその原料となる植物。原料から作った染料が、原料よりも青くなるという意味。『勧学』では、学びによってもとの自分を超えられることをたとえている。',
+    ['後半の「青於藍」は、藍より青いという比較です。比較の向きが逆です。', '「青於藍」は同程度ではなく、藍より青いという比較です。', '「取之於藍」の起点は藍です。']);
   q('f10', 1, '受身', '労力者治於人', '「於人」が示すのは誰か。',
     ['治める側の人', '治められる側の人', '比較される人', '訪問先の人'], '「人に治めらる」の「人」は、治める動作を行う側。',
     ['動作を受ける側は「労力者」です。', '「治」はここでは動作で、性質の比較ではありません。', '移動先を示す文ではありません。']);
@@ -3251,6 +3288,94 @@ window.LESSONS = [
   q('f16', 3, '反語', '燕雀安知鴻鵠之志哉', '文意に合う訳はどれか。',
     ['小さな鳥に、どうして大きな鳥の志が分かろうか', '大きな鳥は、小さな鳥の志をよく知っている', '小さな鳥にも、大きな鳥の志は必ず分かる', '大きな鳥に志を教えさせよう'], '反語の否定と、「燕雀」が知る側だという関係をともに押さえる。',
     ['知る側と知られる側が逆です。', '反語の否定を肯定に変えてしまっています。', '本文に使役・勧誘はありません。']);
+})();
+
+</script>
+<script>
+/* 突破後に読める人物・故事の手引き。訳と解説は本アプリの学習用。
+ * 既存の foesCleared だけで解放するので、更新前の突破記録にも対応する。 */
+(function () {
+  'use strict';
+  var entries = {
+    f1: ['狭い井戸と、広い海', '『荘子』「秋水」で、海の神が黄河の神に語るたとえ。井戸の蛙は、住む場所に縛られて海の広さを理解できない。限られた経験だけで世界を決めつけないよう促す。', '井戸の蛙とは、海について語り合うことができない。', '「不可以」は不可能。「語於海」は海について語ること。単に蛙を笑うのでなく、自分の見聞の狭さも問い直す言葉。'],
+    f2: ['燕雀と鴻鵠の志', '秦末、雇われて畑を耕していた陳渉（陳勝）が、大望を仲間に笑われて言った言葉。燕雀は小さな鳥、鴻鵠は大きな鳥を表す。『史記』「陳渉世家」に見える。', '小さな鳥に、どうして大きな鳥の志が分かろうか。', '「安〜哉」は反語。鳥の姿を借りて、志の大きさの違いを表現している。'],
+    f3: ['偶然を待ち続けた農夫', '『韓非子』「五蠹」の寓話。宋の農夫は、走ってきた兎が切り株にぶつかって死ぬのを見た。以来、農具を置いて兎を待ったが、二匹目は手に入らなかった。昔の方法を無条件に繰り返すことへの批判。', 'そこで農具を手放して、切り株を見張った。', '「因」はそこで、「釈」は置く・手放す、「耒」は農具。「守株」は偶然の成功や古い方法に固執すること。'],
+    f4: ['両立しない二つの口上', '『韓非子』「難一」。楚の商人は「何も通さない盾」と「何でも通す矛」を売った。その矛でその盾を突いたらどうなるかと問われ、答えられなくなる。', 'あなたの矛であなたの盾を突いたら、どうなりますか。', '「以」は道具・手段。「何如」は結果・状態を尋ねる。二つの主張が同時には成り立たない点が「矛盾」。'],
+    f5: ['狐の後ろにいた虎', '『戦国策』「楚策」の寓話。虎に捕まった狐は、自分が天帝から獣の長に任じられたと主張する。狐が虎を連れて歩くと獣は逃げたが、獣が恐れたのは後ろの虎だった。', '天帝は私を、すべての獣の長にならせた。', '「使我長百獣」は使役。「長」は長となるという動詞。これは狐の言い分であり、物語の事実として天帝に任命されたわけではない。'],
+    f6: ['夢を見たのは誰か', '『荘子』「斉物論」の「胡蝶の夢」。荘周は夢の中で蝶になり、目覚める。人が蝶になる夢を見たのか、それとも蝶が人になる夢を見ているのかと、自己や現実の境を問い直す。', '荘周が夢の中で蝶となったのか、分からない。', 'これは対になる二つの問いの前半。続いて「胡蝶の夢に周と為るか」が置かれる。「為」はなる、「与」は疑問のか。'],
+    f7: ['月から故郷へ — 李白', '唐の詩人・李白は「詩仙」と称される。「静夜思」は、旅先の夜に見た月の光から故郷への思いへと移る詩。', '頭を上げて明るい月を眺め、頭を垂れて故郷を思う。', '「挙頭」と「低頭」、「望明月」と「思故郷」が対になる。視線の上下と、目の前の月から心の中の故郷への移り変わりを読む。'],
+    f8: ['温故知新 — 孔子', '春秋時代の思想家・孔子の言行を伝える『論語』。「為政」のこの章では、以前に学んだことを確かめ直し、新しい理解を得ることの大切さが語られる。', '以前に学んだことを復習して、新しい理解を得る。それなら人の師となることができる。', '「温」は復習すること。「可以」は〜することができる。暗記だけでなく、学び直して理解を深める態度が大切。'],
+    f9: ['学びによって変わる — 荀子', '戦国時代の儒家・荀子は、学習や礼によって人が成長することを重視した。「勧学」は、藍から作る染料や水からできる氷を例に、学びによる変化を説く。', '青色の染料は藍という植物から取り出すが、もとの藍よりも青い。', 'ここで「青」は染料、「藍」は原料の植物。二つの「於」は、前が取り出す起点、後が比較の基準。後世には弟子が師を超えるたとえにもなった。'],
+    f10: ['動作の向きを読む — 孟子', '戦国時代の儒家・孟子の議論を伝える『孟子』。「滕文公上」の許行との議論では、仕事の分担を論じ、「労心者治人、労力者治於人」と対比する。', '身体を働かせる者は、他人によって治められる。', '「治人」は人を治めるという能動。「治於人」は人に治められるという受身。当時の統治と分業をめぐる主張として読む。'],
+    f11: ['主張の整合性を問う — 韓非子', '戦国時代の思想家・韓非は、法や制度による統治を論じた。『韓非子』には守株や矛盾など多くの寓話がある。「難一」の矛盾の話では、両立しない主張を問い詰める。', 'あなたの矛であなたの盾を突いたら、どうなりますか。', '「子」はあなた。「之」は所有を結ぶの。「以」は道具。誰が何を使うのかを、一語ずつつなげて読む。'],
+    f12: ['境界を問い直す — 荘子', '荘子は戦国時代の思想家。『荘子』には、蝶の夢など、ふだん当然とする区別を問い直す寓話が多い。荘周と蝶のどちらが夢の主体なのか、答えを急がず考えさせる。', '荘周が夢の中で蝶となったのか、分からない。', '原文のこの後には、蝶が夢で荘周になったのか、という対の問いが続く。文末の「与」は、ここでは「あたふ」ではなく「か」。'],
+    f13: ['戻らない時間 — 陶淵明', '晋から宋の時代の詩人・陶淵明は、官職を離れた田園生活を詠んだことでも知られる。「雑詩」のこの一句は、過ぎて戻らない時間を意識し、今を大切にするよう促す。', '歳月は人を待ってはくれない。', '主語は歳月、目的語は人。「不待」は待たないという打消で、待ってはいけないという禁止ではない。'],
+    f14: ['もう一層上へ — 王之渙', '唐の詩人・王之渙の「登鸛鵲楼」。山と黄河の大きな景色から、さらに遠くを見るため楼を上る行動へとつながる。', 'はるか遠くまで見渡そうと、さらにもう一階、楼を上る。', '「欲」は願望、「更」はさらに。「窮」は尽くす・極める。遠くを見たいという目的と、そのための行動を結びつける。'],
+    f15: ['荒れた都と変わらぬ山河 — 杜甫', '唐の詩人・杜甫は「詩聖」と称される。「春望」は安史の乱で荒れた長安で詠まれた。国都の荒廃、家族との別離、便りを待つ心が重なっている。', '国都は破壊されたが山河は残り、春の都には草木が深く茂っている。', '「国破」と「山河在」を対照させる。春の草木も単なる明るい風景ではなく、人の暮らしが失われた都の荒廃を伝える。'],
+    f16: ['人物の言葉を記す — 司馬遷', '前漢の歴史家・司馬遷は『史記』を著した。帝王だけでなく、多様な人物の生き方を伝える。ここで引用する言葉は司馬遷自身の発言ではなく、「陳渉世家」に記された陳渉の言葉。', '小さな鳥に、どうして大きな鳥の志が分かろうか。', '著者・作品・作中の発言者を区別しよう。「安〜哉」の反語と、「鴻鵠の志」という「之」の働きを合わせて読む。']
+  };
+  window.FOES.forEach(function (f) {
+    var e = entries[f.id];
+    f.lore = {title:e[0], origin:e[1], translation:e[2], note:e[3]};
+  });
+  ['f7','f14','f15'].forEach(function (id, i) {
+    var titles = ['静夜思','登鸛鵲楼','春望'];
+    var p = window.KANSHI.find(function (p) { return p.title === titles[i]; });
+    if (p) {
+      var lore = window.FOES.find(function (f) { return f.id === id; }).lore;
+      lore.original = p.lines.join('／'); lore.reading = p.yomi.join('。') + '。'; lore.translation = p.trans;
+    }
+  });
+
+  /* 後世の肖像を参照した創作。帽子だけでなく、体格・顔の向き・姿勢・持ち物を変える。
+   * 資料URLと観察点は docs/content-review.md に記録。画像の転載はしていない。 */
+  function portrait(body, lines, scene) {
+    return '<svg class="ink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">' +
+      '<circle cx="60" cy="61" r="53" fill="currentColor" opacity=".05"/>' +
+      '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" opacity=".22">' + scene + '</g>' +
+      '<g fill="currentColor" filter="url(#sumi-b)">' + body + '</g>' +
+      '<g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + lines + '</g></svg>';
+  }
+  // 荀子：細面の三分身、低い黒頭巾、静かに巻物を開く学者。
+  window.FOE_ART.f9 = portrait(
+    '<path d="M25 110L29 80Q34 65 52 63L77 67Q90 76 94 112Z" opacity=".7"/><path d="M39 38L35 18Q54 8 70 17L81 32L72 42Z"/><path d="M39 34Q43 23 59 27Q76 28 76 46L72 58L61 66L48 60L40 47Z" fill="var(--paper)"/><path d="M46 59Q56 65 71 57Q69 78 58 89L54 70Z" opacity=".7"/><path d="M20 78L57 73L67 95L30 101Z" fill="var(--paper)"/>',
+    '<path d="M42 36Q48 31 53 36M61 35L70 37M45 40L50 40M63 40L68 41M56 39L54 50L61 51M48 56L55 55L64 58M39 68L52 94L79 70M33 80L38 96M40 79L45 95M47 78L52 94M54 77L60 93M20 78L57 73L67 95L30 101Z"/>',
+    '<path d="M9 99L17 51M18 77Q3 68 6 58M17 63Q27 48 29 53M94 101L109 64M99 87L112 86" stroke-width="2"/>');
+  // 孟子：正面、幅広い肩と長いひげ、胸前に組んだ両袖。
+  window.FOE_ART.f10 = portrait(
+    '<path d="M12 111L19 82Q27 66 42 62L78 62Q100 71 106 111Z" opacity=".8"/><path d="M37 35L33 19L46 19L46 10L73 10L73 19L87 19L82 35Z"/><path d="M37 32Q60 24 82 33L79 55Q70 70 60 73Q44 66 40 53Z" fill="var(--paper)"/><path d="M41 53Q49 63 59 59Q70 63 80 51Q79 81 61 96Q43 83 41 53Z"/><path d="M24 85L57 91L82 79L95 98L68 111L27 103Z" fill="var(--paper)" opacity=".85"/>',
+    '<path d="M43 39L53 37M65 37L77 40M46 44L51 43M67 43L73 44M58 41L56 52L63 52M50 58L59 55L70 58M21 83L57 92L82 79L96 99L68 111M29 72L34 82M91 72L87 79"/><path d="M49 67L56 85M60 65L61 91M72 63L67 84" stroke="var(--paper)" opacity=".6"/>',
+    '<path d="M8 35H28M10 45H27M92 35H111M93 45H109M12 58H25M96 58H110"/>');
+  // 韓非：細い輪郭の横顔、高い冠、制度を象徴する竹簡。
+  window.FOE_ART.f11 = portrait(
+    '<path d="M35 113L36 77L55 62L74 62L86 79L98 113Z" opacity=".9"/><path d="M45 37L43 14L55 9L73 13L78 39Z"/><path d="M50 32L73 34L75 44L86 49L76 53L75 65L63 72L54 62L47 48Z" fill="var(--paper)"/><path d="M64 61L76 59L74 82L68 91L64 69Z"/><path d="M20 69L40 64L49 104L29 110Z" fill="var(--paper)"/>',
+    '<path d="M52 33L74 35M61 42L74 43M67 46L72 46M74 45L85 49L77 53M69 57L77 57M51 65L65 87L78 69M20 69L40 64L49 104L29 110ZM26 69L35 107M32 67L41 105M38 66L47 103M50 16L52 29M63 14L65 29"/>',
+    '<path d="M91 18V66M82 29H110M85 29L79 49L93 49L85 29M105 29L98 49H114L105 29"/>');
+  // 荘子：横に流れるゆったりした衣、髷と笑顔、蝶と杖。
+  window.FOE_ART.f12 = portrait(
+    '<path d="M12 108Q17 79 45 71L65 69Q90 84 109 109Z" opacity=".6"/><path d="M38 36Q31 18 50 15L53 6L64 8L65 20Q82 27 75 42Z"/><path d="M39 34Q48 25 62 31L75 42L70 59L58 67L44 57Z" fill="var(--paper)"/><path d="M50 61Q65 68 73 56Q67 83 50 81L55 69Z" opacity=".6"/>',
+    '<path d="M42 40Q48 36 53 41M61 43Q67 40 70 45M55 43L52 51L58 53M46 56Q56 64 67 55M28 76Q40 85 47 109M67 75L58 93L79 110M12 108Q33 98 54 103M90 110L103 57Q111 45 104 44Q98 44 99 50" stroke-width="2"/><path d="M53 18L70 21"/>',
+    '<path d="M22 36Q4 20 7 43Q15 55 22 42Q30 24 39 35Q38 48 23 42M23 39L27 31" stroke-width="2"/>');
+  // 陶淵明：笠を持つ農衣の姿。菊と田園。
+  window.FOE_ART.f13 = portrait(
+    '<path d="M24 114L29 72L47 63L66 63L80 78L89 112Z" opacity=".6"/><path d="M40 34L39 21Q59 8 75 27L70 39Z"/><ellipse cx="55" cy="47" rx="17" ry="22" fill="var(--paper)"/><path d="M40 60Q54 66 67 59L59 82Z" opacity=".65"/><path d="M68 90L95 66L114 93Z" opacity=".85"/>',
+    '<path d="M42 42L50 40M60 40L66 42M53 43L51 51L56 52M44 57Q53 61 61 56M33 70L48 96L69 69M27 96L54 102L72 89M73 89L108 92M84 82L98 89"/><path d="M13 107L15 77M15 86L8 89M15 94L22 90"/><circle cx="15" cy="71" r="7"/><path d="M15 61V81M5 71H25M8 64L22 78M8 78L22 64"/>',
+    '<path d="M2 107L24 101M86 36L115 19M84 45L118 25M90 55L120 35"/>');
+  // 王之渙：立ち姿、遠くを望む横顔、楼と山の稜線。
+  window.FOE_ART.f14 = portrait(
+    '<path d="M39 115L38 67L54 56L69 61L82 110Z" opacity=".7"/><path d="M48 26Q45 12 56 11L65 16L78 14L76 34Z"/><path d="M51 28L75 28L75 39L83 45L73 49L68 59L58 58L51 45Z" fill="var(--paper)"/><path d="M61 54L73 51L66 71Z"/><path d="M66 69L89 61L94 71L73 91Z" opacity=".8"/>',
+    '<path d="M63 36L73 37M67 40L72 40M72 46L78 46M60 50L69 52M46 66L61 83L74 68M46 84L47 109M61 83L67 109M85 64L90 54L97 54L96 68"/>',
+    '<path d="M4 96V57H31V105M1 58L16 46L36 58M8 67H27M8 80H27M8 93H27M87 103L99 89L119 103M86 20L95 14L116 29" stroke-width="2"/>');
+  // 杜甫：やせた頬、低い帽子、白い短髪とひげ、巻物を抱える。
+  window.FOE_ART.f15 = portrait(
+    '<path d="M25 112L34 76L47 64L70 65L92 112Z" opacity=".75"/><path d="M36 31L40 18L70 12L81 32L70 37Z"/><path d="M39 31L73 29L75 48L68 66L53 73L41 56Z" fill="var(--paper)"/><path d="M44 56L56 63L69 57L60 89L49 75Z" opacity=".45"/><path d="M65 79L92 84L85 110L61 100Z" fill="var(--paper)"/>',
+    '<path d="M42 39L50 37M60 37L69 39M44 44L49 43M61 44L67 44M54 41L51 53L58 54M44 56L52 58M61 58L69 55M41 49L46 52M64 50L70 47M37 73L52 100L70 69M65 79L92 84L85 110L61 100ZM70 85L86 88M68 91L84 94M67 97L83 100"/>',
+    '<path d="M6 99L14 58L22 98M95 52L105 41L116 52M97 54V77M109 52V73M90 92L99 79L115 92"/>');
+  // 司馬遷：冠と短いひげ、机で筆を走らせる史官。
+  window.FOE_ART.f16 = portrait(
+    '<path d="M21 88Q23 62 46 58L68 59Q86 64 92 89Z" opacity=".8"/><path d="M38 30L40 13L51 13L51 6L66 6L66 13L76 16L77 33Z"/><path d="M41 29L71 30L73 45L65 58L52 60L42 47Z" fill="var(--paper)"/><path d="M48 51L61 54L68 50L59 70Z"/><path d="M14 91H109V99H14ZM21 99H28V116H21ZM96 99H103V116H96Z" opacity=".9"/><path d="M32 81L74 84L67 94L25 90Z" fill="var(--paper)"/>',
+    '<path d="M46 37L53 36M61 36L67 38M55 39L54 47L59 47M48 51L55 50L64 52M34 64L49 79L40 86M76 67L67 75L64 88M69 82L85 52" stroke-width="2"/><path d="M32 81L74 84L67 94L25 90ZM37 83L31 89M44 84L38 90M51 85L45 91M58 86L52 92"/>',
+    '<path d="M7 69V26H28V67M12 32H23M12 39H23M12 46H23M97 25V71M102 25V71M107 25V71M94 28H110M94 67H110"/>');
 })();
 
 </script>
@@ -3588,11 +3713,13 @@ window.LESSONS = [
     var out = [];
     src.forEach(function (k) {
       var sameCat = all.filter(function (x) { return x.cat === k.cat && x.id !== k.id; });
-      var basis = sameCat.length >= 3 ? sameCat : all.filter(function (x) { return x.id !== k.id; });
+      var families = [['否定', '禁止', '二重否定', '部分否定'], ['疑問', '反語'], ['仮定', '否定'], ['重要語']];
+      var family = families.find(function (f) { return f.indexOf(k.cat) !== -1; }) || [k.cat];
+      var basis = sameCat.concat(all.filter(function (x) { return x.cat !== k.cat && family.indexOf(x.cat) !== -1; }));
+      var hand = (window.KUHO_CHOICES || {})[k.id] || {};
 
       // 読み問題では漢字だけを提示する。訓点つきの form には送り仮名が入っていて答えが読めてしまう。
-      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read)) ||
-        makeChoices(k.read, fieldPool(all, 'read', k.read));
+      var c1 = hand.read ? makeChoices(k.read, hand.read, 4, true) : makeChoices(k.read, fieldPool(basis, 'read', k.read));
       if (c1) out.push({
         key: k.id + ':read', cat: k.cat, level: k.level,
         stem: k.bare, q: 'この句形の読みとして正しいものはどれか。',
@@ -3600,8 +3727,7 @@ window.LESSONS = [
         exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.note ? '　' + k.note : '')
       });
 
-      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean)) ||
-        makeChoices(k.mean, fieldPool(all, 'mean', k.mean));
+      var c2 = hand.mean ? makeChoices(k.mean, hand.mean, 4, true) : makeChoices(k.mean, fieldPool(basis, 'mean', k.mean));
       if (c2) out.push({
         key: k.id + ':mean', cat: k.cat, level: k.level,
         stem: k.bare, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
@@ -3770,14 +3896,19 @@ window.LESSONS = [
       if (p.regular) {
         var ans = p.rhyme.join('・');
         var wrongs = [];
-        all.forEach(function (x) { if (x.id !== p.id) wrongs.push(x.rhyme.join('・')); });
-        // 同じ詩の中の非押韻字からもダミーを作る
-        var nonRhyme = [];
-        p.lines.forEach(function (ln, i) {
-          if (p.rhymeLines.indexOf(i + 1) === -1) nonRhyme.push(ln.charAt(ln.length - 1));
-        });
-        if (nonRhyme.length >= p.rhyme.length) wrongs.push(nonRhyme.slice(0, p.rhyme.length).join('・'));
-        var cr = makeChoices(ans, wrongs);
+        // 同じ詩の句末から誤答を作る。本文にない字だけで消去できないようにする。
+        var endings = p.lines.map(function (ln) { return ln.charAt(ln.length - 1); });
+        function combinations(at, chosen) {
+          if (chosen.length === p.rhyme.length) {
+            var candidate = chosen.join('・');
+            if (candidate !== ans) wrongs.push(candidate);
+            return;
+          }
+          for (var ci = at; ci < endings.length; ci++) combinations(ci + 1, chosen.concat(endings[ci]));
+        }
+        combinations(0, []);
+        // 句末が重複する詩では makeChoices が同じ選択肢を除く。
+        var cr = makeChoices(ans, wrongs, 4, true);
         if (cr) out.push({
           key: p.id + ':rhyme', cat: '漢詩', level: 2,
           stem: body, q: 'この詩で押韻している字の組み合わせはどれか。',
@@ -3910,6 +4041,50 @@ window.LESSONS = [
     return out;
   }
 
+  function passageKey(q) {
+    var norm = function (s) { return String(s || '').replace(/\^(一レ|上レ|甲レ|[一二三四上中下甲乙丙レ])/g, '').replace(/[\s、。，．／「」『』！？!?]/g, ''); };
+    var text = norm(q.stem);
+    var poem = (window.KANSHI || []).find(function (p) {
+      return p.lines.some(function (line) { return text.indexOf(norm(line)) !== -1; });
+    });
+    if (poem) return 'poem:' + poem.id;
+    // 同じ本文の読み・意味を続けて問わない。句形の読みと意味も同じ組。
+    return text || q.key;
+  }
+
+  function battlePool(foe) {
+    foe = (window.FOES || []).find(function (current) { return current.id === foe.id; }) || foe;
+    var thematic = build('mogi').filter(function (q) {
+      if (q.stage) return q.stage === foe.id;
+      return !foe.cats || foe.cats.indexOf(q.cat) !== -1;
+    });
+    var advanced = thematic.filter(function (q) { return q.stage || q.level >= (foe.minLevel || 1); });
+    // 上級問題が少ない分野は同じ分野の基礎を交える。担当分野は必ず維持する。
+    return advanced.length >= foe.ki + 6 ? advanced : thematic;
+  }
+
+  /** 初見の本文を優先。一つの本文の解説が次問の答えにならないように配る。 */
+  function battleDeck(foe, n, previous) {
+    var pool = battlePool(foe), remaining = pool.slice(), out = [], history = (previous || []).map(passageKey);
+    var seen = {};
+    history.forEach(function (key) { seen[key] = true; });
+    while (out.length < n && remaining.length) {
+      var fresh = remaining.filter(function (q) { return !seen[passageKey(q)]; });
+      var candidates = fresh.length ? fresh : remaining.filter(function (q) { return history.slice(-2).indexOf(passageKey(q)) === -1; });
+      // 題材が一つしか残らない場合も、同じ本文の連投はしない。
+      if (!candidates.length) candidates = remaining.filter(function (q) { return history[history.length - 1] !== passageKey(q); });
+      if (!candidates.length) break;
+      var contextual = candidates.filter(function (q) { return q.stage === foe.id; });
+      if (out.length % 4 === 0 && contextual.length) candidates = contextual;
+      var hard = candidates.filter(function (q) { return q.level >= foe.level; });
+      if (hard.length && out.length % 3 !== 2) candidates = hard;
+      var q = pick(candidates, 1)[0], key = passageKey(q);
+      out.push(q); history.push(key); seen[key] = true;
+      remaining = remaining.filter(function (x) { return x.key !== q.key; });
+    }
+    return out;
+  }
+
   function reviewItems(due) {
     var keys = due ? window.Store.dueKeys() : window.Store.weakKeys();
     return universe().filter(function (q) { return keys.indexOf(q.key) !== -1; });
@@ -3941,7 +4116,8 @@ window.LESSONS = [
   window.QuizGen = {
     build: build, pick: pick, weakPool: weakPool,
     shuffle: shuffle, makeChoices: makeChoices, universe: universe,
-    reviewItems: reviewItems, exam: exam, EXAM: EXAM
+    reviewItems: reviewItems, exam: exam, EXAM: EXAM,
+    battlePool: battlePool, battleDeck: battleDeck, passageKey: passageKey
   };
 })();
 
@@ -4084,8 +4260,13 @@ window.LESSONS = [
     return tokenHTML(Array.isArray(s) ? s : window.Learning.tokens(String(s || '')));
   }
   function tokenHTML(tokens) {
+    function text(s) {
+      return String(s).split(/([A-Za-z0-9]+)/).map(function (part) {
+        return /^[A-Za-z0-9]+$/.test(part) ? '<span class="latin-upright">' + esc(part) + '</span>' : esc(part);
+      }).join('');
+    }
     return tokens.map(function (t) {
-      return (t.mark ? '<span class="kc" data-kanji="' + esc(t.c) + '">' + esc(t.c) + '<i class="mark">' + esc(t.mark) + '</i></span>' : esc(t.c)) + esc(t.okuri || '');
+      return (t.mark ? '<span class="kc" data-kanji="' + esc(t.c) + '">' + text(t.c) + '<i class="mark">' + esc(t.mark) + '</i></span>' : text(t.c)) + text(t.okuri || '');
     }).join('');
   }
 
@@ -4251,6 +4432,7 @@ window.LESSONS = [
   function checkpoint() {
     if (!G) return;
     var copy = Object.assign({}, G);
+    copy.questionRevision = 2;
     delete copy.master;
     window.Store.state.session = JSON.parse(JSON.stringify(copy));
     window.Store.save();
@@ -4261,6 +4443,26 @@ window.LESSONS = [
     stopTick(); G = JSON.parse(JSON.stringify(saved));
     window.Store.mark();
     if (G.kind === 'battle') G.master = window.QuizGen.build('mogi');
+    if (G.phase === 'choice' && G.questionRevision !== 2) {
+      // 更新前に保存した出題を、未回答分から更新する。採点済みの履歴・得点は保持。
+      if (G.kind === 'battle') {
+        var last = G.locked ? G.qs[G.i] : null;
+        var foe = window.FOES.find(function (f) { return f.id === G.foe.id; });
+        var next = window.QuizGen.battleDeck(foe, Math.max(24, G.ki + G.hearts), last ? [last] : []);
+        G.qs = last ? [last].concat(next) : next; G.i = 0;
+        if (!last) G.left = foe.time || BATTLE_TIME;
+      } else {
+        var catalog = window.QuizGen.build('mogi');
+        G.qs = G.qs.map(function (q, i) {
+          if (i < G.i || i === G.i && G.locked) return q;
+          var latest = catalog.find(function (item) { return item.key === q.key; });
+          return latest ? Object.assign({}, latest, { examField: q.examField }) : q;
+        });
+        if (!G.locked && G.mode.perQ) G.left = G.mode.perQ;
+      }
+      G.questionRevision = 2;
+      checkpoint();
+    }
     if (G.phase === 'foe-intro') return screenFoeIntro();
     if (G.phase === 'foe-clear') return screenFoeCleared(true);
     if (G.phase === 'choice') {
@@ -4285,14 +4487,31 @@ window.LESSONS = [
     render('<div class="sec-h"><h2>道場破り・関門一覧</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
       [0, 8].map(function (start) {
         return '<h3>' + (start ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</h3>' +
-          '<p class="muted">' + (start ? '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
+          '<p class="muted">' + (start ? '文脈を読む25問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
           '<div class="journey-grid">' + window.FOES.slice(start, start + 8).map(function (f, j) {
             var i = start + j, open = i === 0 || window.FOES.slice(0, i).every(function (p) { return cleared.indexOf(p.id) !== -1; });
             var done = cleared.indexOf(f.id) !== -1;
-            return '<button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
-              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
+            return '<div class="journey-entry"><button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
+              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b><small>敵HP ' + f.ki + '</small></span></button>' +
+              (done ? '<button class="btn ghost lore-link" data-act="lore" data-id="' + f.id + '">由来・原文・訳を読む</button>' : '<small class="lore-locked">突破で由来と原文が開きます</small>') + '</div>';
           }).join('') + '</div>';
       }).join(''));
+  }
+
+  function loreHTML(f) {
+    f = window.FOES.find(function (current) { return current.id === f.id; }) || f;
+    var l = f.lore;
+    if (!l) return '';
+    return '<article class="foe-lore"><h3>' + esc(l.title) + '</h3><h4>由来・人物</h4><p>' + esc(l.origin) + '</p>' +
+      '<h4>原文' + (l.original ? '' : '（抜粋）') + '</h4>' + stemHTML(l.original || f.quote.replace(/、/g, '／')) +
+      '<p class="q-src">' + esc(f.src) + '</p><h4>書き下し</h4><p>' + esc(l.reading || f.qyomi) + '</p>' +
+      '<h4>現代語訳</h4><p>' + esc(l.translation) + '</p><h4>読みどころ</h4><p>' + esc(l.note) + '</p></article>';
+  }
+  function screenLore(id) {
+    var f = window.FOES.find(function (f) { return f.id === id; });
+    if (!f || window.Store.state.foesCleared.indexOf(id) === -1) return screenJourney();
+    render('<div class="sec-h"><h2>' + esc(f.name) + 'の巻</h2><div class="rule"></div><button class="btn ghost" data-act="journey">関門一覧へ</button></div>' +
+      '<div class="card lore-card">' + foeArt(f, 'big') + loreHTML(f) + '</div>');
   }
 
   /* ============================ ホーム ============================ */
@@ -4923,7 +5142,7 @@ window.LESSONS = [
             '<b>' + esc(f.name) + '</b>' +
             kiPips(G.ki, G.kiMax) +
           '</span>' +
-          '<span class="ki-label">気 ' + G.ki + '/' + G.kiMax + '</span>' +
+          '<span class="ki-label">敵HP ' + G.ki + '/' + G.kiMax + '</span>' +
           '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
         '</div>' +
         '<div class="bhud-row life-row">' +
@@ -5050,7 +5269,7 @@ window.LESSONS = [
           pips.classList.toggle('low', G.ki <= 2);
           pips.setAttribute('aria-label', '相手の気 残り' + G.ki + ' / ' + G.kiMax);
         }
-        if (label) label.textContent = '気 ' + G.ki + '/' + G.kiMax;
+        if (label) label.textContent = '敵HP ' + G.ki + '/' + G.kiMax;
       } else if (life) {
         var dots = life.querySelectorAll('i:not(.gone)');
         if (dots.length) dots[dots.length - 1].className = 'gone';
@@ -5095,7 +5314,7 @@ window.LESSONS = [
       if (G.hearts <= 0) return screenBattleEnd(false);
       if (G.ki <= 0) return screenFoeCleared();
       G.i++;
-      if (G.i >= G.qs.length) { G.qs = window.QuizGen.pick(foePool(G.foe), 20); G.i = 0; }
+      if (G.i >= G.qs.length) { G.qs = window.QuizGen.battleDeck(G.foe, 24, G.qs); G.i = 0; }
       return renderChoice();
     }
     if (G.mode.hearts && G.hp <= 0) return finishChoice();
@@ -5114,14 +5333,9 @@ window.LESSONS = [
   /* ============================ ゲーム：道場破り ============================ */
   var BATTLE_TIME = 25;
 
-  /** その関門の担当分野から問題を集める。足りなければ全分野から。 */
+  /** 関門の担当分野だけを使う。別分野へのフォールバックはしない。 */
   function foePool(foe) {
-    var base = G.master.filter(function (q) { return !q.stage && (!foe.chapter || q.level >= 2); });
-    if (!foe.cats) return base;
-    var set = {};
-    foe.cats.forEach(function (c) { set[c] = 1; });
-    var p = base.filter(function (q) { return set[q.cat]; });
-    return p.length >= foe.ki ? p : base;
+    return window.QuizGen.battlePool(foe);
   }
 
   function startBattle(mode, selected) {
@@ -5175,7 +5389,7 @@ window.LESSONS = [
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
         '<div class="foe-facts">' +
           '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
-          '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
+          '<b class="shu">敵HP ' + f.ki + ' · 正解で1ずつ減る</b>' +
           '<b>体力 ' + G.maxHearts + '</b>' +
           '<b>一問 ' + (f.time || BATTLE_TIME) + ' 秒</b>' +
         '</div>' +
@@ -5191,8 +5405,7 @@ window.LESSONS = [
     var f = window.FOES[G.foeIdx];
     G.foe = f; G.ki = f.ki; G.kiMax = f.ki;
     G.hearts = G.maxHearts;
-    var fresh = window.QuizGen.shuffle(G.master.filter(function (q) { return q.stage === f.id; }));
-    G.qs = fresh.concat(window.QuizGen.pick(foePool(f), 20 - fresh.length));
+    G.qs = window.QuizGen.battleDeck(f, Math.max(24, f.ki + G.maxHearts));
     G.i = 0;
     renderChoice();
   }
@@ -5215,6 +5428,7 @@ window.LESSONS = [
         foeArt(f, 'big beaten', '破') +
         '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
         '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
+        '<details class="lore-unlocked"><summary>解放：' + esc(f.name) + 'の由来・原文・訳を読む</summary>' + loreHTML(f) + '</details>' +
         '<div class="r-grid">' +
           '<div class="stat"><b>' + G.score + '</b><span>得点</span></div>' +
           '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
@@ -5578,6 +5792,7 @@ window.LESSONS = [
         window.Store.state.timedPractice = !window.Store.state.timedPractice;
         window.Store.save(); screenHome(); break;
       case 'journey': checkpoint(); screenJourney(); break;
+      case 'lore': checkpoint(); stopTick(); G = null; screenLore(t.getAttribute('data-id')); break;
       case 'stage': window.Store.mark(); startBattle(modeById('battle'), Number(t.getAttribute('data-i'))); break;
       case 'learn':
         checkpoint(); stopTick(); G = null;
