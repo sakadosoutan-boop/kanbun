@@ -66,11 +66,13 @@
     var out = [];
     src.forEach(function (k) {
       var sameCat = all.filter(function (x) { return x.cat === k.cat && x.id !== k.id; });
-      var basis = sameCat.length >= 3 ? sameCat : all.filter(function (x) { return x.id !== k.id; });
+      var families = [['否定', '禁止', '二重否定', '部分否定'], ['疑問', '反語'], ['仮定', '否定'], ['重要語']];
+      var family = families.find(function (f) { return f.indexOf(k.cat) !== -1; }) || [k.cat];
+      var basis = sameCat.concat(all.filter(function (x) { return x.cat !== k.cat && family.indexOf(x.cat) !== -1; }));
+      var hand = (window.KUHO_CHOICES || {})[k.id] || {};
 
       // 読み問題では漢字だけを提示する。訓点つきの form には送り仮名が入っていて答えが読めてしまう。
-      var c1 = makeChoices(k.read, fieldPool(basis, 'read', k.read)) ||
-        makeChoices(k.read, fieldPool(all, 'read', k.read));
+      var c1 = hand.read ? makeChoices(k.read, hand.read, 4, true) : makeChoices(k.read, fieldPool(basis, 'read', k.read));
       if (c1) out.push({
         key: k.id + ':read', cat: k.cat, level: k.level,
         stem: k.bare, q: 'この句形の読みとして正しいものはどれか。',
@@ -78,8 +80,7 @@
         exp: '【' + k.form + '】' + k.read + '＝' + k.mean + (k.note ? '　' + k.note : '')
       });
 
-      var c2 = makeChoices(k.mean, fieldPool(basis, 'mean', k.mean)) ||
-        makeChoices(k.mean, fieldPool(all, 'mean', k.mean));
+      var c2 = hand.mean ? makeChoices(k.mean, hand.mean, 4, true) : makeChoices(k.mean, fieldPool(basis, 'mean', k.mean));
       if (c2) out.push({
         key: k.id + ':mean', cat: k.cat, level: k.level,
         stem: k.bare, q: '「' + k.read + '」と読むこの句形の意味として最も適当なものはどれか。',
@@ -248,14 +249,19 @@
       if (p.regular) {
         var ans = p.rhyme.join('・');
         var wrongs = [];
-        all.forEach(function (x) { if (x.id !== p.id) wrongs.push(x.rhyme.join('・')); });
-        // 同じ詩の中の非押韻字からもダミーを作る
-        var nonRhyme = [];
-        p.lines.forEach(function (ln, i) {
-          if (p.rhymeLines.indexOf(i + 1) === -1) nonRhyme.push(ln.charAt(ln.length - 1));
-        });
-        if (nonRhyme.length >= p.rhyme.length) wrongs.push(nonRhyme.slice(0, p.rhyme.length).join('・'));
-        var cr = makeChoices(ans, wrongs);
+        // 同じ詩の句末から誤答を作る。本文にない字だけで消去できないようにする。
+        var endings = p.lines.map(function (ln) { return ln.charAt(ln.length - 1); });
+        function combinations(at, chosen) {
+          if (chosen.length === p.rhyme.length) {
+            var candidate = chosen.join('・');
+            if (candidate !== ans) wrongs.push(candidate);
+            return;
+          }
+          for (var ci = at; ci < endings.length; ci++) combinations(ci + 1, chosen.concat(endings[ci]));
+        }
+        combinations(0, []);
+        // 句末が重複する詩では makeChoices が同じ選択肢を除く。
+        var cr = makeChoices(ans, wrongs, 4, true);
         if (cr) out.push({
           key: p.id + ':rhyme', cat: '漢詩', level: 2,
           stem: body, q: 'この詩で押韻している字の組み合わせはどれか。',
@@ -388,6 +394,50 @@
     return out;
   }
 
+  function passageKey(q) {
+    var norm = function (s) { return String(s || '').replace(/\^(一レ|上レ|甲レ|[一二三四上中下甲乙丙レ])/g, '').replace(/[\s、。，．／「」『』！？!?]/g, ''); };
+    var text = norm(q.stem);
+    var poem = (window.KANSHI || []).find(function (p) {
+      return p.lines.some(function (line) { return text.indexOf(norm(line)) !== -1; });
+    });
+    if (poem) return 'poem:' + poem.id;
+    // 同じ本文の読み・意味を続けて問わない。句形の読みと意味も同じ組。
+    return text || q.key;
+  }
+
+  function battlePool(foe) {
+    foe = (window.FOES || []).find(function (current) { return current.id === foe.id; }) || foe;
+    var thematic = build('mogi').filter(function (q) {
+      if (q.stage) return q.stage === foe.id;
+      return !foe.cats || foe.cats.indexOf(q.cat) !== -1;
+    });
+    var advanced = thematic.filter(function (q) { return q.stage || q.level >= (foe.minLevel || 1); });
+    // 上級問題が少ない分野は同じ分野の基礎を交える。担当分野は必ず維持する。
+    return advanced.length >= foe.ki + 6 ? advanced : thematic;
+  }
+
+  /** 初見の本文を優先。一つの本文の解説が次問の答えにならないように配る。 */
+  function battleDeck(foe, n, previous) {
+    var pool = battlePool(foe), remaining = pool.slice(), out = [], history = (previous || []).map(passageKey);
+    var seen = {};
+    history.forEach(function (key) { seen[key] = true; });
+    while (out.length < n && remaining.length) {
+      var fresh = remaining.filter(function (q) { return !seen[passageKey(q)]; });
+      var candidates = fresh.length ? fresh : remaining.filter(function (q) { return history.slice(-2).indexOf(passageKey(q)) === -1; });
+      // 題材が一つしか残らない場合も、同じ本文の連投はしない。
+      if (!candidates.length) candidates = remaining.filter(function (q) { return history[history.length - 1] !== passageKey(q); });
+      if (!candidates.length) break;
+      var contextual = candidates.filter(function (q) { return q.stage === foe.id; });
+      if (out.length % 4 === 0 && contextual.length) candidates = contextual;
+      var hard = candidates.filter(function (q) { return q.level >= foe.level; });
+      if (hard.length && out.length % 3 !== 2) candidates = hard;
+      var q = pick(candidates, 1)[0], key = passageKey(q);
+      out.push(q); history.push(key); seen[key] = true;
+      remaining = remaining.filter(function (x) { return x.key !== q.key; });
+    }
+    return out;
+  }
+
   function reviewItems(due) {
     var keys = due ? window.Store.dueKeys() : window.Store.weakKeys();
     return universe().filter(function (q) { return keys.indexOf(q.key) !== -1; });
@@ -419,6 +469,7 @@
   window.QuizGen = {
     build: build, pick: pick, weakPool: weakPool,
     shuffle: shuffle, makeChoices: makeChoices, universe: universe,
-    reviewItems: reviewItems, exam: exam, EXAM: EXAM
+    reviewItems: reviewItems, exam: exam, EXAM: EXAM,
+    battlePool: battlePool, battleDeck: battleDeck, passageKey: passageKey
   };
 })();

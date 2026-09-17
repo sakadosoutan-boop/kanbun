@@ -79,8 +79,13 @@
     return tokenHTML(Array.isArray(s) ? s : window.Learning.tokens(String(s || '')));
   }
   function tokenHTML(tokens) {
+    function text(s) {
+      return String(s).split(/([A-Za-z0-9]+)/).map(function (part) {
+        return /^[A-Za-z0-9]+$/.test(part) ? '<span class="latin-upright">' + esc(part) + '</span>' : esc(part);
+      }).join('');
+    }
     return tokens.map(function (t) {
-      return (t.mark ? '<span class="kc" data-kanji="' + esc(t.c) + '">' + esc(t.c) + '<i class="mark">' + esc(t.mark) + '</i></span>' : esc(t.c)) + esc(t.okuri || '');
+      return (t.mark ? '<span class="kc" data-kanji="' + esc(t.c) + '">' + text(t.c) + '<i class="mark">' + esc(t.mark) + '</i></span>' : text(t.c)) + text(t.okuri || '');
     }).join('');
   }
 
@@ -246,6 +251,7 @@
   function checkpoint() {
     if (!G) return;
     var copy = Object.assign({}, G);
+    copy.questionRevision = 2;
     delete copy.master;
     window.Store.state.session = JSON.parse(JSON.stringify(copy));
     window.Store.save();
@@ -256,6 +262,26 @@
     stopTick(); G = JSON.parse(JSON.stringify(saved));
     window.Store.mark();
     if (G.kind === 'battle') G.master = window.QuizGen.build('mogi');
+    if (G.phase === 'choice' && G.questionRevision !== 2) {
+      // 更新前に保存した出題を、未回答分から更新する。採点済みの履歴・得点は保持。
+      if (G.kind === 'battle') {
+        var last = G.locked ? G.qs[G.i] : null;
+        var foe = window.FOES.find(function (f) { return f.id === G.foe.id; });
+        var next = window.QuizGen.battleDeck(foe, Math.max(24, G.ki + G.hearts), last ? [last] : []);
+        G.qs = last ? [last].concat(next) : next; G.i = 0;
+        if (!last) G.left = foe.time || BATTLE_TIME;
+      } else {
+        var catalog = window.QuizGen.build('mogi');
+        G.qs = G.qs.map(function (q, i) {
+          if (i < G.i || i === G.i && G.locked) return q;
+          var latest = catalog.find(function (item) { return item.key === q.key; });
+          return latest ? Object.assign({}, latest, { examField: q.examField }) : q;
+        });
+        if (!G.locked && G.mode.perQ) G.left = G.mode.perQ;
+      }
+      G.questionRevision = 2;
+      checkpoint();
+    }
     if (G.phase === 'foe-intro') return screenFoeIntro();
     if (G.phase === 'foe-clear') return screenFoeCleared(true);
     if (G.phase === 'choice') {
@@ -280,14 +306,31 @@
     render('<div class="sec-h"><h2>道場破り・関門一覧</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
       [0, 8].map(function (start) {
         return '<h3>' + (start ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</h3>' +
-          '<p class="muted">' + (start ? '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
+          '<p class="muted">' + (start ? '文脈を読む25問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
           '<div class="journey-grid">' + window.FOES.slice(start, start + 8).map(function (f, j) {
             var i = start + j, open = i === 0 || window.FOES.slice(0, i).every(function (p) { return cleared.indexOf(p.id) !== -1; });
             var done = cleared.indexOf(f.id) !== -1;
-            return '<button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
-              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
+            return '<div class="journey-entry"><button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
+              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b><small>敵HP ' + f.ki + '</small></span></button>' +
+              (done ? '<button class="btn ghost lore-link" data-act="lore" data-id="' + f.id + '">由来・原文・訳を読む</button>' : '<small class="lore-locked">突破で由来と原文が開きます</small>') + '</div>';
           }).join('') + '</div>';
       }).join(''));
+  }
+
+  function loreHTML(f) {
+    f = window.FOES.find(function (current) { return current.id === f.id; }) || f;
+    var l = f.lore;
+    if (!l) return '';
+    return '<article class="foe-lore"><h3>' + esc(l.title) + '</h3><h4>由来・人物</h4><p>' + esc(l.origin) + '</p>' +
+      '<h4>原文' + (l.original ? '' : '（抜粋）') + '</h4>' + stemHTML(l.original || f.quote.replace(/、/g, '／')) +
+      '<p class="q-src">' + esc(f.src) + '</p><h4>書き下し</h4><p>' + esc(l.reading || f.qyomi) + '</p>' +
+      '<h4>現代語訳</h4><p>' + esc(l.translation) + '</p><h4>読みどころ</h4><p>' + esc(l.note) + '</p></article>';
+  }
+  function screenLore(id) {
+    var f = window.FOES.find(function (f) { return f.id === id; });
+    if (!f || window.Store.state.foesCleared.indexOf(id) === -1) return screenJourney();
+    render('<div class="sec-h"><h2>' + esc(f.name) + 'の巻</h2><div class="rule"></div><button class="btn ghost" data-act="journey">関門一覧へ</button></div>' +
+      '<div class="card lore-card">' + foeArt(f, 'big') + loreHTML(f) + '</div>');
   }
 
   /* ============================ ホーム ============================ */
@@ -918,7 +961,7 @@
             '<b>' + esc(f.name) + '</b>' +
             kiPips(G.ki, G.kiMax) +
           '</span>' +
-          '<span class="ki-label">気 ' + G.ki + '/' + G.kiMax + '</span>' +
+          '<span class="ki-label">敵HP ' + G.ki + '/' + G.kiMax + '</span>' +
           '<button class="icon-btn" data-act="quit" title="中断">✕</button>' +
         '</div>' +
         '<div class="bhud-row life-row">' +
@@ -1045,7 +1088,7 @@
           pips.classList.toggle('low', G.ki <= 2);
           pips.setAttribute('aria-label', '相手の気 残り' + G.ki + ' / ' + G.kiMax);
         }
-        if (label) label.textContent = '気 ' + G.ki + '/' + G.kiMax;
+        if (label) label.textContent = '敵HP ' + G.ki + '/' + G.kiMax;
       } else if (life) {
         var dots = life.querySelectorAll('i:not(.gone)');
         if (dots.length) dots[dots.length - 1].className = 'gone';
@@ -1090,7 +1133,7 @@
       if (G.hearts <= 0) return screenBattleEnd(false);
       if (G.ki <= 0) return screenFoeCleared();
       G.i++;
-      if (G.i >= G.qs.length) { G.qs = window.QuizGen.pick(foePool(G.foe), 20); G.i = 0; }
+      if (G.i >= G.qs.length) { G.qs = window.QuizGen.battleDeck(G.foe, 24, G.qs); G.i = 0; }
       return renderChoice();
     }
     if (G.mode.hearts && G.hp <= 0) return finishChoice();
@@ -1109,14 +1152,9 @@
   /* ============================ ゲーム：道場破り ============================ */
   var BATTLE_TIME = 25;
 
-  /** その関門の担当分野から問題を集める。足りなければ全分野から。 */
+  /** 関門の担当分野だけを使う。別分野へのフォールバックはしない。 */
   function foePool(foe) {
-    var base = G.master.filter(function (q) { return !q.stage && (!foe.chapter || q.level >= 2); });
-    if (!foe.cats) return base;
-    var set = {};
-    foe.cats.forEach(function (c) { set[c] = 1; });
-    var p = base.filter(function (q) { return set[q.cat]; });
-    return p.length >= foe.ki ? p : base;
+    return window.QuizGen.battlePool(foe);
   }
 
   function startBattle(mode, selected) {
@@ -1170,7 +1208,7 @@
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
         '<div class="foe-facts">' +
           '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
-          '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
+          '<b class="shu">敵HP ' + f.ki + ' · 正解で1ずつ減る</b>' +
           '<b>体力 ' + G.maxHearts + '</b>' +
           '<b>一問 ' + (f.time || BATTLE_TIME) + ' 秒</b>' +
         '</div>' +
@@ -1186,8 +1224,7 @@
     var f = window.FOES[G.foeIdx];
     G.foe = f; G.ki = f.ki; G.kiMax = f.ki;
     G.hearts = G.maxHearts;
-    var fresh = window.QuizGen.shuffle(G.master.filter(function (q) { return q.stage === f.id; }));
-    G.qs = fresh.concat(window.QuizGen.pick(foePool(f), 20 - fresh.length));
+    G.qs = window.QuizGen.battleDeck(f, Math.max(24, f.ki + G.maxHearts));
     G.i = 0;
     renderChoice();
   }
@@ -1210,6 +1247,7 @@
         foeArt(f, 'big beaten', '破') +
         '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
         '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
+        '<details class="lore-unlocked"><summary>解放：' + esc(f.name) + 'の由来・原文・訳を読む</summary>' + loreHTML(f) + '</details>' +
         '<div class="r-grid">' +
           '<div class="stat"><b>' + G.score + '</b><span>得点</span></div>' +
           '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
@@ -1573,6 +1611,7 @@
         window.Store.state.timedPractice = !window.Store.state.timedPractice;
         window.Store.save(); screenHome(); break;
       case 'journey': checkpoint(); screenJourney(); break;
+      case 'lore': checkpoint(); stopTick(); G = null; screenLore(t.getAttribute('data-id')); break;
       case 'stage': window.Store.mark(); startBattle(modeById('battle'), Number(t.getAttribute('data-i'))); break;
       case 'learn':
         checkpoint(); stopTick(); G = null;
