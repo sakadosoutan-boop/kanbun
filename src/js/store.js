@@ -55,6 +55,8 @@
     { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
     { id: 'a10', ico: '伝', t: '免許皆伝',   d: '第一巻の八関門を突破', test: function (s) { return ['f1','f2','f3','f4','f5','f6','f7','f8'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a14', ico: '極', t: '古典探究', d: '第二巻の八関門を突破', test: function (s) { return ['f9','f10','f11','f12','f13','f14','f15','f16'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
+    { id: 'a15', ico: '鴻', t: '鴻門脱出', d: '楚漢の章で鴻門の会を生き延びた', test: function (s) { return (s.plays.koumon || 0) >= 1; } },
+    { id: 'a16', ico: '傑', t: '人傑の宴', d: '楚漢の章を終章まで読み終えた', test: function (s) { return (s.plays.koumon2 || 0) >= 1; } },
     { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } },
     { id: 'a12', ico: '墨', t: '千字文',     d: '漢文を通算1000字読んだ',          test: function (s) { return (s.chars || 0) >= 1000; } },
     { id: 'a13', ico: '万', t: '万巻の書',   d: '漢文を通算10000字読んだ',         test: function (s) { return (s.chars || 0) >= 10000; } }
@@ -169,6 +171,19 @@
     save();
   }
 
+  /** 解答を伴わずに読んだ漢文の字数（楚漢の章の原文の段など）を足す。 */
+  function addChars(n) {
+    if (!n) return;
+    touchDay();
+    state.chars += n;
+    var d = today();
+    var rec = state.days[d] || [0, 0, 0];
+    if (rec.length < 3) rec[2] = 0;
+    rec[2] += n;
+    state.days[d] = rec;
+    save();
+  }
+
   /** 直近 n 日ぶんの学習量。カレンダー表示に使う。 */
   function recentDays(n) {
     var out = [], base = new Date();
@@ -253,7 +268,7 @@
 
   window.Store = {
     load: load, save: save, touchDay: touchDay,
-    rankOf: rankOf, record: record, weakness: weakness, weakKeys: weakKeys, dueKeys: dueKeys, currentStreak: currentStreak,
+    rankOf: rankOf, record: record, addChars: addChars, weakness: weakness, weakKeys: weakKeys, dueKeys: dueKeys, currentStreak: currentStreak,
     mark: mark, recentDays: recentDays, isMastered: isMastered, activeDays: activeDays,
     finishSession: finishSession, reset: reset, checkAchievements: checkAchievements,
     RANKS: RANKS, ACHIEVEMENTS: ACHIEVEMENTS,
