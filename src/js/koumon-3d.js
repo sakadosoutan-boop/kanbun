@@ -125,433 +125,11 @@
     return TEX.dot;
   }
 
-  /* ============================ 人物 ============================ */
-  /* head: 彫刻の頭部の値（koumon-figkit の buildHead に渡す）
-     robe: 衣の色, trim: 襟の色, armor: 甲冑の色, cap: 冠の種類, h: 身の丈(m) */
-  var SKIN = { skin: 0xc49a74, skinRed: 0xb87c62 };
-  function headP(o) { var p = { catchlight: true, scalp: 'hair', hairC: 0x17130f, iris: [40, 28, 20], brow: 0x221c18, lipU: .0040, lipL: .0050, lipUvol: .0013, lipLvol: .0017 }; for (var k in SKIN) p[k] = SKIN[k]; for (k in o) p[k] = o[k]; return p; }
-  var CAST = {
-    hai:  { h: 1.74, robe: 0x7e2a20, trim: 0x1a1210, belt: 0x161010, cap: 'bamboo', head: headP({ seed: 201, age: 50, thin: .35, smile: .15, beard: 'long', beardLen: .08, wrinkles: .6, nose: 1.04, eyeOpenU: .0046 }) },
-    ko:   { h: 1.74, robe: 0x141016, trim: 0x8a2a1c, belt: 0xa8842a, cap: 'mian', head: headP({ seed: 201, age: 56, thin: .4, smile: .25, beard: 'long', beardLen: .1, wrinkles: .8, nose: 1.04 }) },
-    ryo:  { h: 1.68, robe: 0x5f6e78, trim: 0xe6dcc6, belt: 0x2a2a30, cap: 'cap', head: headP({ seed: 202, age: 30, thin: .05, smile: .05, beard: 'none', wrinkles: .1, jaw: .95, nose: .98, browDrop: .002, eyeOpenU: .005 }) },
-    kai:  { h: 1.82, robe: 0x3a1c18, trim: 0x7a2018, armor: 0x3a342c, cord: '#4a1a10', cap: 'helm', build: 1.12, shield: 1, sword: 1, head: headP({ seed: 203, age: 36, thin: 0, smile: 0, beard: 'long', beardLen: .07, hairC: 0x110e0c, wrinkles: .4, jaw: 1.1, browK: 1.2, nose: 1.08, browDrop: .012 }) },
-    u:    { h: 1.86, robe: 0x141218, trim: 0xa8842a, armor: 0x24222a, cord: '#3a2a14', cap: 'warrior', build: 1.12, sword: 1, head: headP({ seed: 204, age: 26, thin: .05, smile: 0, beard: 'none', wrinkles: .15, jaw: 1.08, browK: 1.15, nose: 1.03, browDrop: .008, eyeOpenU: .0052 }) },
-    zo:   { h: 1.64, robe: 0x4e4232, trim: 0xd8ccb0, belt: 0x241c14, cap: 'cap', jue: 1, head: headP({ seed: 205, age: 72, thin: .85, smile: 0, hairC: 0xd9d4cb, beard: 'long', beardLen: .17, wrinkles: 1.35, spots: 9, browDrop: .016, nose: 1.06, iris: [62, 44, 32], hood: 1.2 }) },
-    haku: { h: 1.72, robe: 0x2c3650, trim: 0xcfc4a8, belt: 0x1a1a22, cap: 'cap', sword: 1, head: headP({ seed: 206, age: 46, thin: .4, smile: .1, beard: 'long', beardLen: .11, wrinkles: .7, nose: 1.02 }) },
-    sou:  { h: 1.76, robe: 0x2a1a14, trim: 0x8a6a2a, armor: 0x302824, cord: '#5a3a1a', cap: 'helm', sword: 1, head: headP({ seed: 207, age: 22, thin: 0, smile: 0, beard: 'none', wrinkles: 0, jaw: 1.02 }) },
-    chin: { h: 1.72, robe: 0x34504e, trim: 0xd8ccb0, belt: 0x1a2222, cap: 'cap', head: headP({ seed: 208, age: 30, thin: .1, smile: .2, beard: 'none', wrinkles: .1 }) },
-    msg:  { h: 1.66, robe: 0x5a4632, trim: 0x2a2018, belt: 0x2a2018, cap: 'band', head: headP({ seed: 209, age: 34, thin: .2, beard: 'none', wrinkles: .3 }) },
-    ei:   { h: 1.76, robe: 0x2a1a14, trim: 0x5a3a1a, armor: 0x2e2a26, cord: '#4a2a18', cap: 'helm', halberd: 1, head: headP({ seed: 210, age: 28, thin: .1, beard: 'none', wrinkles: .2 }) },
-    gu:   { h: 1.6, robe: 0x8a2030, trim: 0xf0e4cc, belt: 0x3a1a20, cap: 'lady', lady: 1, head: headP({ seed: 211, age: 20, thin: 0, smile: .25, beard: 'none', wrinkles: 0, jaw: .9, nose: .9, browK: .85, lipU: .0044, lipL: .0058, lipUvol: .0018, lipLvol: .0024, lip: 0xb04848, lipColL: 0xb85050, skin: 0xd2ac8c, eyeOpenU: .0052 }) },
-    tei:  { h: 1.64, robe: 0x5a5448, trim: 0x2a2620, belt: 0x2a2620, cap: 'band', head: headP({ seed: 213, age: 64, thin: .7, smile: .15, hairC: 0xbab4a8, beard: 'long', beardLen: .12, wrinkles: 1.2, spots: 6 }) },
-    rba:  { h: 1.76, robe: 0x5a1a14, trim: 0x8a2a1c, armor: 0x3a3028, cord: '#4a1a10', cap: 'helm', sword: 1, head: headP({ seed: 214, age: 34, thin: .2, beard: 'long', beardLen: .06, wrinkles: .4 }) },
-    ou:   { h: 1.7, robe: 0x2e4232, trim: 0xd8ccb0, belt: 0x1a221a, cap: 'cap', head: headP({ seed: 212, age: 50, thin: .4, beard: 'long', beardLen: .1, wrinkles: .8 }) }
-  };
-
-  var Q = 'high', HEADS = {};
-  /** 頭部の彫刻（重い）。同じ値なら使い回す */
-  function headMesh(id) {
-    var c = CAST[id];
-    var key = id === 'ko' ? 'hai' : id;
-    var K = window.KM_FIGKIT;
-    if (!K) return null;
-    var R = K.Res();
-    var hq = Q === 'high' ? 'medium' : 'low';
-    var hd = K.buildHead(R, c.head, hq);
-    void key;
-    return hd.group;
-  }
-
-  /** 旋盤形（輪郭を回して作る）を楕円に押しつぶし、裾に襞を入れる */
-  function latheRobe(profile, segs, zs, folds, foldAmp, seed) {
-    var pts = profile.map(function (p) { return new THREE.Vector2(p[0], p[1]); });
-    var g = new THREE.LatheGeometry(pts, segs);
-    var pos = g.attributes.position, R = rng(seed || 1);
-    var ph = R() * 6;
-    var y0 = profile[0][1], y1 = profile[profile.length - 1][1];
-    for (var i = 0; i < pos.count; i++) {
-      var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-      var a = Math.atan2(x, z), r = Math.sqrt(x * x + z * z);
-      var u = (y - y0) / (y1 - y0 || 1); // 0=始点 1=終点
-      var f = folds ? Math.sin(a * folds + ph + Math.sin(a * 3 + ph) * .8) * foldAmp * u * u : 0;
-      r += f;
-      pos.setXYZ(i, Math.sin(a) * r, y, Math.cos(a) * r * zs);
-    }
-    g.computeVertexNormals();
-    return g;
-  }
-
-  /** 坐した衣：裾の前側を膝の形に張り出させ、上から押しつぶす */
-  function seatRobe(r0, r1, depth, knee, seed) {
-    var g = latheRobe([[r0, 0], [r0 * 1.12, -.08], [r1 * .9, -depth * .7], [r1, -depth], [r1 * .85, -depth - .004]], 40, .9, 11, .012, seed);
-    var pos = g.attributes.position;
-    for (var i = 0; i < pos.count; i++) {
-      var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-      var u = Math.min(1, Math.max(0, -y / depth));
-      if (z > 0) z += knee * Math.pow(u, .8) * (z / (Math.abs(x) + z + .001));
-      x *= 1 + .12 * u;
-      pos.setXYZ(i, x, y, z);
-    }
-    g.computeVertexNormals();
-    return g;
-  }
-
-  /** 袖：肘から手首へ広がり、下側が垂れる */
-  function sleeveGeo(len, r0, r1, droop, lady) {
-    var g = new THREE.CylinderGeometry(r1, r0, len, 18, 6, true);
-    g.translate(0, -len / 2, 0);
-    var pos = g.attributes.position;
-    for (var i = 0; i < pos.count; i++) {
-      var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-      var u = -y / len;
-      // 腕の内側（-z を体の前と見なす前提ではなく、袖の「下」= +x 側に垂らす）
-      var down = Math.max(0, x) / (r1 + .001);
-      x += droop * u * u * down * (lady ? 1.6 : 1);
-      pos.setXYZ(i, x, y, z);
-    }
-    g.computeVertexNormals();
-    return g;
-  }
-
-  function hatMesh(kind, c) {
-    var g = new THREE.Group();
-    var lac = std(0x0e0c0c, .35, .1), bron = std(0x6a5430, .45, .6), brown = std(0x6a4a2a, .7);
-    if (kind === 'bamboo') {
-      // 劉氏冠：竹の皮で作った高い冠
-      var bd = new THREE.BoxGeometry(.075, .19, .03, 1, 6, 1);
-      var p = bd.attributes.position; for (var i = 0; i < p.count; i++) { var y = p.getY(i) + .1; p.setZ(i, p.getZ(i) + y * y * .9); p.setY(i, y); }
-      bd.computeVertexNormals();
-      var m1 = mesh(bd, std(0x3a2414, .6)); m1.position.set(0, .125, -.01); m1.rotation.x = -.2; g.add(m1);
-      var rim2 = mesh(new THREE.BoxGeometry(.08, .012, .034), lac); rim2.position.set(0, .3, .02); rim2.rotation.x = -.2; g.add(rim2);
-      var band = mesh(new THREE.CylinderGeometry(.045, .048, .03, 16), lac); band.position.set(0, .118, -.012); g.add(band);
-    } else if (kind === 'cap') {
-      var ring = mesh(new THREE.CylinderGeometry(.044, .05, .035, 18), lac); ring.position.set(0, .12, -.02); g.add(ring);
-      var plate = mesh(new THREE.BoxGeometry(.075, .006, .14), lac); plate.position.set(0, .16, -.01); plate.rotation.x = -.45; g.add(plate);
-      var ear = mesh(new THREE.BoxGeometry(.01, .06, .05), lac); ear.position.set(.04, .145, -.03); g.add(ear); var ear2 = ear.clone(); ear2.position.x = -.04; g.add(ear2);
-    } else if (kind === 'warrior') {
-      var cap = mesh(new THREE.SphereGeometry(.102, 24, 12, 0, PI * 2, 0, PI * .5), std(0x141216, .55, 0)); cap.scale.set(1.02, .95, 1.1); cap.position.set(0, .052, -.016); g.add(cap);
-      var rim = mesh(new THREE.TorusGeometry(.1, .007, 8, 32), std(0xa8842a, .35, .8)); rim.rotation.x = PI / 2 + .12; rim.position.set(0, .058, -.018); rim.scale.set(1.02, 1.1, 1); g.add(rim);
-      // 鶡冠の雉の尾羽二本
-      [-1, 1].forEach(function (s) {
-        var curve = new THREE.CatmullRomCurve3([new V3(s * .03, .12, -.03), new V3(s * .07, .3, -.1), new V3(s * .1, .46, -.26), new V3(s * .12, .52, -.46)]);
-        var tg = new THREE.TubeGeometry(curve, 32, .011, 8);
-        var tp = tg.attributes.position, nseg = 33;
-        for (var j = 0; j < tp.count; j++) { var ring = Math.floor(j / 9) / (nseg - 1); var cen = curve.getPoint(Math.min(1, ring)); var k = 1 - ring * .85; tp.setXYZ(j, cen.x + (tp.getX(j) - cen.x) * k * (1.6 - ring), cen.y + (tp.getY(j) - cen.y) * k * .5, cen.z + (tp.getZ(j) - cen.z) * k); }
-        tg.computeVertexNormals();
-        var t = mesh(tg, std(0x2e2010, .75)); g.add(t);
-      });
-    } else if (kind === 'helm') {
-      var hm = mesh(new THREE.SphereGeometry(.105, 24, 14, 0, PI * 2, 0, PI * .55), bron); hm.scale.set(1, .95, 1.1); hm.position.set(0, .03, -.012); g.add(hm);
-      var nk = mesh(new THREE.CylinderGeometry(.11, .125, .07, 24, 1, true, PI * .55, PI * 1.9), std(0x4a3a24, .6, .3, { side: THREE.DoubleSide })); nk.position.set(0, -.01, -.012); g.add(nk);
-      var crest = mesh(new THREE.CylinderGeometry(.006, .01, .08, 8), bron); crest.position.set(0, .14, -.01); g.add(crest);
-      var tuft = mesh(new THREE.SphereGeometry(.025, 10, 8), std(0x8a1a14, .8)); tuft.position.set(0, .19, -.01); tuft.scale.set(1, 1.6, 1); g.add(tuft);
-    } else if (kind === 'band') {
-      var bnd = mesh(new THREE.TorusGeometry(.088, .012, 8, 28), std(0x3a2a1a, .9)); bnd.rotation.x = PI / 2 - .2; bnd.position.set(0, .07, -.01); g.add(bnd);
-      var knot = mesh(new THREE.SphereGeometry(.035, 12, 10), std(0x17130f, .7)); knot.position.set(0, .13, -.035); g.add(knot);
-    } else if (kind === 'mian') {
-      var board = mesh(new THREE.BoxGeometry(.2, .012, .32), std(0x0e0c0c, .35, .1)); board.position.set(0, .2, .0); board.rotation.x = .08; g.add(board);
-      var bas = mesh(new THREE.CylinderGeometry(.045, .05, .08, 16), lac); bas.position.set(0, .15, -.01); g.add(bas);
-      var beadM = std(0xd8c070, .3, .4);
-      [-1, 1].forEach(function (s) {
-        for (var k = 0; k < 6; k++) {
-          var str = mesh(new THREE.CylinderGeometry(.0015, .0015, .1, 4), lac, false); str.position.set(-.08 + k * .032, .145, s * .16); g.add(str);
-          var bd2 = mesh(new THREE.SphereGeometry(.007, 6, 6), beadM, false); bd2.position.set(-.08 + k * .032, .1, s * .16); g.add(bd2);
-        }
-      });
-    } else if (kind === 'lady') {
-      var hairM = std(0x120e0c, .5);
-      var bun = mesh(new THREE.SphereGeometry(.06, 16, 12), hairM); bun.scale.set(1.2, .8, 1); bun.position.set(0, .135, -.05); g.add(bun);
-      var bun2 = mesh(new THREE.SphereGeometry(.04, 14, 10), hairM); bun2.position.set(0, .17, -.08); g.add(bun2);
-      var pin = mesh(new THREE.CylinderGeometry(.003, .003, .2, 6), std(0xd8b050, .3, .8)); pin.rotation.z = PI / 2 - .3; pin.position.set(0, .16, -.06); g.add(pin);
-      var flower = mesh(new THREE.SphereGeometry(.014, 8, 8), std(0xd84860, .5)); flower.position.set(.1, .19, -.06); g.add(flower);
-      var back = mesh(new THREE.CylinderGeometry(.05, .03, .5, 12), hairM); back.position.set(0, -.15, -.11); back.rotation.x = .12; back.scale.set(1.3, 1, .6); g.add(back);
-      var crown = mesh(new THREE.SphereGeometry(.098, 22, 12, 0, PI * 2, 0, PI * .55), hairM); crown.scale.set(1.02, .92, 1.08); crown.position.set(0, .028, -.015); g.add(crown);
-    }
-    if (kind !== 'lady' && kind !== 'warrior' && kind !== 'helm') {
-      // 髻（もとどり）
-      var tk = mesh(new THREE.SphereGeometry(.035, 12, 10), std(0x17130f, .7)); tk.position.set(0, .13, -.035); g.add(tk);
-    }
-    return g;
-  }
-
-  function swordMesh(drawn) {
-    var g = new THREE.Group();
-    var bladeM = std(0xd8dce4, .25, .9), hiltM = std(0x2a1e14, .6), guardM = std(0xa88a3a, .35, .8);
-    var blade = mesh(new THREE.BoxGeometry(.035, .78, .006), bladeM); blade.position.y = -.47; g.add(blade);
-    var tip = mesh(new THREE.ConeGeometry(.0175, .07, 4), bladeM); tip.rotation.z = PI; tip.position.y = -.89; tip.scale.z = .2; g.add(tip);
-    var gu = mesh(new THREE.BoxGeometry(.09, .02, .03), guardM); gu.position.y = -.07; g.add(gu);
-    var hi = mesh(new THREE.CylinderGeometry(.015, .015, .14, 8), hiltM); hi.position.y = 0; g.add(hi);
-    var pm = mesh(new THREE.SphereGeometry(.022, 10, 8), guardM); pm.position.y = .08; g.add(pm);
-    if (!drawn) { var sc = mesh(new THREE.CylinderGeometry(.026, .02, .8, 8), std(0x1a1210, .5)); sc.position.y = -.47; g.add(sc); blade.visible = false; tip.visible = false; }
-    g.userData.blade = blade;
-    return g;
-  }
-
-  /** 人物を組む。返す Group の userData.rig に関節、userData.setPose で姿勢を変える */
-  function makeFigure(id) {
-    var c = CAST[id];
-    if (!c) return null;
-    var s = c.h / 1.72, b = c.build || 1, armored = !!c.armor, lady = !!c.lady;
-    var root = new THREE.Group(); root.name = 'fig-' + id;
-    var body = new THREE.Group(); root.add(body); // 姿勢全体（倒れるときに回す）
-    var robeM = std(0xffffff, .88, 0, { map: clothTex(c.robe, 3 + id.length, null) });
-    var trimM = std(c.trim, .8);
-    var beltM = std(c.belt || 0x161010, .6);
-    var armM = armored ? std(0xffffff, .5, .45, { map: lamellarTex(c.armor, c.cord) }) : null;
-    var skinM = std(c.head.skin || 0xc49a74, .62);
-
-    var pelvis = new THREE.Group(); pelvis.position.y = .95 * s; body.add(pelvis);
-    var spine = new THREE.Group(); pelvis.add(spine);
-    var chest = new THREE.Group(); chest.position.y = .3 * s; spine.add(chest);
-    var neck = new THREE.Group(); neck.position.set(0, .2 * s, .0); chest.add(neck);
-    var headPiv = new THREE.Group(); neck.add(headPiv);
-
-    // 胴（衣）
-    var torsoProfile = [[.15, -.3], [.165, -.18], [.18, 0], [.205 * b, .12], [.19 * b, .17], [.11, .205], [.06, .225]];
-    var torso = mesh(latheRobe(torsoProfile.map(function (p) { return [p[0] * s, p[1] * s]; }), 32, .68, 0, 0, 2), armored ? armM : robeM);
-    chest.add(torso);
-    if (armored) {
-      var under = mesh(latheRobe([[.15 * s, -.32 * s], [.16 * s, -.1 * s], [.17 * s, .1 * s]], 24, .66, 0, 0, 2), robeM); chest.add(under);
-      [-1, 1].forEach(function (sd) {
-        var pa = mesh(new THREE.SphereGeometry(.1 * s * b, 16, 10, 0, PI * 2, 0, PI * .5), armM);
-        pa.scale.set(1.1, .75, 1); pa.position.set(sd * .2 * s * b, .13 * s, 0); pa.rotation.z = -sd * .5; chest.add(pa);
-      });
-    }
-    // 襟（右衽：着物の前を右から左へ重ねる）と帯
-    var collarCurve = new THREE.CatmullRomCurve3([new V3(.055 * s, .21 * s, .03 * s), new V3(.02 * s, .14 * s, .12 * s), new V3(-.06 * s, .03 * s, .13 * s), new V3(-.12 * s, -.12 * s, .1 * s)]);
-    var collar = mesh(new THREE.TubeGeometry(collarCurve, 20, .018 * s, 6), trimM); collar.visible = !armored; chest.add(collar);
-    var collar2 = mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new V3(-.055 * s, .21 * s, .03 * s), new V3(-.02 * s, .15 * s, .1 * s), new V3(.02 * s, .1 * s, .12 * s)]), 12, .015 * s, 6), trimM); collar2.visible = !armored; chest.add(collar2);
-    var belt = mesh(new THREE.CylinderGeometry(.165 * s * b, .165 * s * b, .07 * s, 28, 1, true), beltM); belt.scale.z = .7; belt.position.y = -.27 * s; chest.add(belt);
-    var sash = mesh(new THREE.BoxGeometry(.05 * s, .4 * s, .01), beltM); sash.position.set(.06 * s, -.48 * s, .115 * s); chest.add(sash);
-
-    // 裾：立ち・坐り・跽きの三種を用意して切り替える
-    var hemLen = .95 * s;
-    var skirtStand = armored
-      ? mesh(latheRobe([[.17 * s, .02], [.22 * s * b, -.18 * s], [.25 * s * b, -.48 * s]], 32, .78, 9, .012, 5), armM)
-      : mesh(latheRobe([[.16 * s, .02], [.2 * s * (lady ? 1.05 : 1), -.16 * s], [.27 * s * (lady ? 1.3 : 1), -.6 * s], [.31 * s * (lady ? 1.45 : 1), -hemLen + .02]], 40, .8, 13, .02, 7), robeM);
-    skirtStand.material.side = THREE.DoubleSide;
-    pelvis.add(skirtStand);
-    var skirtSit = mesh(seatRobe(.17 * s, .36 * s, .4 * s, .36 * s, 9), robeM); skirtSit.material.side = THREE.DoubleSide; skirtSit.visible = false; pelvis.add(skirtSit);
-    var skirtKneel = mesh(seatRobe(.17 * s, .3 * s, .62 * s, .26 * s, 13), robeM); skirtKneel.material.side = THREE.DoubleSide; skirtKneel.visible = false; pelvis.add(skirtKneel);
-
-    // 脚（武人は膝下が見える）
-    var legs = {};
-    ['L', 'R'].forEach(function (k) {
-      var sd = k === 'L' ? 1 : -1;
-      var hip = new THREE.Group(); hip.position.set(sd * .1 * s, -.05 * s, 0); pelvis.add(hip);
-      var thigh = mesh(new THREE.CylinderGeometry(.075 * s, .06 * s, .44 * s, 12), armored ? std(0x2a2420, .8) : robeM); thigh.position.y = -.22 * s; hip.add(thigh);
-      var knee = new THREE.Group(); knee.position.y = -.44 * s; hip.add(knee);
-      var shin = mesh(new THREE.CylinderGeometry(.058 * s, .045 * s, .42 * s, 12), armored ? std(0x3a2e24, .8) : robeM); shin.position.y = -.21 * s; knee.add(shin);
-      var boot = mesh(new THREE.BoxGeometry(.09 * s, .07 * s, .24 * s), std(0x161210, .55)); boot.position.set(0, -.43 * s, .05 * s); knee.add(boot);
-      legs[k] = { hip: hip, knee: knee, show: armored };
-      hip.visible = armored;
-    });
-
-    // 腕
-    var arms = {};
-    ['L', 'R'].forEach(function (k) {
-      var sd = k === 'L' ? 1 : -1;
-      var sh = new THREE.Group(); sh.position.set(sd * .19 * s * b, .14 * s, 0); chest.add(sh);
-      var ua = mesh(new THREE.CylinderGeometry(.06 * s * b, .05 * s, .29 * s, 12), armored ? armM : robeM); ua.position.y = -.145 * s; sh.add(ua);
-      var el = new THREE.Group(); el.position.y = -.29 * s; sh.add(el);
-      var sl = mesh(armored ? new THREE.CylinderGeometry(.06 * s, .045 * s, .25 * s, 12, 1, true) : sleeveGeo(.27 * s, .055 * s, (lady ? .14 : .1) * s, (lady ? .2 : .12) * s, lady), armored ? std(0x2a2420, .8) : robeM);
-      if (armored) sl.position.y = -.125 * s;
-      sl.material.side = THREE.DoubleSide;
-      sl.rotation.y = sd > 0 ? 0 : PI; // 袖の垂れを体の外側の下へ
-      el.add(sl);
-      var cuff = mesh(new THREE.TorusGeometry((armored ? .045 : (lady ? .14 : .1)) * s, .008 * s, 6, 20), trimM, false); cuff.rotation.x = PI / 2; cuff.position.y = -.26 * s; if (!armored) cuff.visible = false; el.add(cuff);
-      var wr = new THREE.Group(); wr.position.y = -.25 * s; el.add(wr);
-      arms[k] = { sh: sh, el: el, wr: wr };
-    });
-
-    // 手（彫刻。無いときは簡易な形）
-    function attachHand(k, pose) {
-      var A = arms[k];
-      if (A.hand) { A.wr.remove(A.hand); }
-      var K = window.KM_FIGKIT, hm = null;
-      try { if (K) hm = K.handMesh(K.Res(), pose || 'relax', k === 'L' ? 'L' : 'R', c.head, Q === 'high' ? 'medium' : 'low'); } catch (e) { hm = null; }
-      if (!hm) { hm = mesh(new THREE.BoxGeometry(.07, .17, .03), skinM); hm.position.y = .06; }
-      hm.scale.setScalar(s);
-      var g = new THREE.Group(); g.add(hm);
-      g.rotation.z = PI; // 指先を腕の先（-Y）へ
-      g.rotation.y = k === 'L' ? -PI / 2 : PI / 2; // 手の甲を外へ
-      A.wr.add(g); A.hand = g; A.handPose = pose;
-    }
-
-    // 頭
-    var head = headMesh(id);
-    var HEAD_PIV = [0, -.032, -.018];
-    if (head) { head.position.set(-HEAD_PIV[0], -HEAD_PIV[1] + .1 * s, -HEAD_PIV[2]); head.scale.setScalar(s); headPiv.add(head); }
-    else { var hb = mesh(new THREE.SphereGeometry(.1 * s, 20, 16), skinM); hb.position.y = .13 * s; headPiv.add(hb); }
-    var hat = hatMesh(c.cap, c); hat.position.copy(head ? head.position : new V3(0, .13 * s, 0)); hat.scale.setScalar(s); headPiv.add(hat);
-    var headTop = new THREE.Object3D(); headTop.position.set(0, .34 * s, 0); headPiv.add(headTop);
-
-    // 持ち物
-    var props = {};
-    if (c.sword) { props.sheath = swordMesh(false); props.sheath.position.set(-.17 * s, -.28 * s, .04); props.sheath.rotation.set(.25, 0, -.32); chest.add(props.sheath); props.sword = swordMesh(true); props.sword.visible = false; }
-    if (c.shield) {
-      var shg = new THREE.Group();
-      var sm = mesh(new THREE.CylinderGeometry(.24, .24, .03, 24), std(0x5a2018, .6)); sm.rotation.x = PI / 2; sm.scale.set(.75, 1, 1.25); shg.add(sm);
-      var boss = mesh(new THREE.SphereGeometry(.06, 12, 8, 0, PI * 2, 0, PI / 2), std(0xa88a3a, .35, .8)); boss.rotation.x = PI / 2; boss.position.z = .015; shg.add(boss);
-      var paint = mesh(new THREE.TorusGeometry(.16, .01, 6, 24), std(0xd8b050, .4, .3), false); paint.position.z = .017; paint.scale.set(.75, 1.25, 1); shg.add(paint);
-      props.shield = shg;
-    }
-    if (c.halberd) {
-      var hg = new THREE.Group();
-      var shaft = mesh(new THREE.CylinderGeometry(.014, .014, 2.6, 8), std(0x3a2a1a, .7)); shaft.position.y = .6; hg.add(shaft);
-      var blade = mesh(new THREE.BoxGeometry(.03, .26, .008), std(0xb8bcc4, .3, .9)); blade.position.y = 1.98; hg.add(blade);
-      var hook = mesh(new THREE.BoxGeometry(.2, .04, .008), std(0xb8bcc4, .3, .9)); hook.position.set(.09, 1.78, 0); hook.rotation.z = -.25; hg.add(hook);
-      props.halberd = hg;
-    }
-    if (c.jue) {
-      var jm = mesh(new THREE.TorusGeometry(.04, .011, 10, 28, PI * 1.8), std(0x8fd4b0, .25, .1, { emissive: col(0x1e5a40), emissiveIntensity: .6 }), false);
-      props.jue = jm;
-      var jHang = jm.clone(); jHang.scale.setScalar(.8); jHang.position.set(.1 * s, -.33 * s, .12 * s); jHang.rotation.x = PI / 2; chest.add(jHang); props.jueHang = jHang;
-    }
-    props.cup = new THREE.Group();
-    var cupB = mesh(new THREE.CylinderGeometry(.06, .05, .13, 16, 1, true), std(0x3a1c10, .4, .1, { side: THREE.DoubleSide })); props.cup.add(cupB);
-    var cupBot = mesh(new THREE.CircleGeometry(.05, 16), std(0x3a1c10, .4)); cupBot.rotation.x = -PI / 2; cupBot.position.y = -.065; props.cup.add(cupBot);
-    props.cup.visible = false;
-
-    var rig = { root: root, body: body, pelvis: pelvis, spine: spine, chest: chest, neck: neck, headPiv: headPiv, arms: arms, legs: legs, skirt: { stand: skirtStand, sit: skirtSit, kneel: skirtKneel }, headTop: headTop, props: props, s: s, armored: armored };
-
-    function setArm(k, p, r, e, tw) {
-      var A = arms[k], sd = k === 'L' ? 1 : -1;
-      A.sh.rotation.set(-p, 0, sd * r);
-      A.el.rotation.set(-e, tw || 0, 0);
-    }
-    function holdIn(k, obj, rot, pos) {
-      // 手に物を持たせる（手首の下に付ける）
-      var A = arms[k];
-      if (obj.parent) obj.parent.remove(obj);
-      A.wr.add(obj);
-      obj.position.set(pos ? pos[0] : 0, pos ? pos[1] : -.09 * s, pos ? pos[2] : .02);
-      obj.rotation.set(rot[0], rot[1], rot[2]);
-      obj.visible = true;
-    }
-
-    var state = { pose: 'stand', t0: 0 };
-    function setPose(pose) {
-      state.pose = pose;
-      root.visible = pose !== 'gone';
-      body.rotation.set(0, 0, 0); body.position.set(0, 0, 0);
-      spine.rotation.set(0, 0, 0); neck.rotation.set(0, 0, 0); headPiv.rotation.set(0, 0, 0);
-      var seated = pose === 'sit' || pose === 'raise';
-      var kneel = pose === 'kneel';
-      skirtStand.visible = !seated && !kneel;
-      skirtSit.visible = seated;
-      skirtKneel.visible = kneel;
-      pelvis.position.y = seated ? .4 * s : kneel ? .62 * s : .95 * s;
-      ['L', 'R'].forEach(function (k) {
-        legs[k].hip.visible = armored && !seated && !kneel;
-        legs[k].hip.rotation.set(0, 0, 0); legs[k].knee.rotation.set(0, 0, 0);
-      });
-      if (props.sword) { props.sword.visible = false; if (props.sword.parent) props.sword.parent.remove(props.sword); if (props.sheath) props.sheath.visible = true; }
-      if (props.shield && props.shield.parent) props.shield.parent.remove(props.shield);
-      if (props.halberd && props.halberd.parent) props.halberd.parent.remove(props.halberd);
-      if (props.jue && props.jue.parent) props.jue.parent.remove(props.jue);
-      if (props.jueHang) props.jueHang.visible = true;
-      if (props.cup.parent) props.cup.parent.remove(props.cup);
-      var hp = { L: 'relax', R: 'relax' };
-      // 腕の基本：だらりと下げ、少し前へ
-      setArm('L', .12, .1, .15); setArm('R', .12, .1, .15);
-      if (seated) { setArm('L', .22, .1, .7); setArm('R', .22, .1, .7); hp = { L: 'lap', R: 'lap' }; }
-      if (kneel) { setArm('L', .2, .1, .6); setArm('R', .2, .1, .6); hp = { L: 'lap', R: 'lap' }; }
-      if (pose === 'raise') { setArm('R', 2.5, .25, .4); hp.R = 'hold'; if (props.jue) { holdIn('R', props.jue, [0, 0, 0], [0, -.13 * s, .03]); props.jueHang.visible = false; } }
-      if (pose === 'dance' || pose === 'strike' || pose === 'eat') {
-        if (props.sword) { holdIn('R', props.sword, [PI, 0, 0], [0, -.08 * s, .0]); if (props.sheath) props.sheath.visible = false; }
-        hp.R = 'grasp';
-      }
-      if (pose === 'strike') { setArm('R', .9, .1, .2); spine.rotation.x = .25; }
-      if (pose === 'eat') { setArm('R', .8, .1, 1.2); setArm('L', .7, -.1, 1.0); spine.rotation.x = .3; if (props.shield) { if (props.shield.parent) props.shield.parent.remove(props.shield); root.add(props.shield); props.shield.position.set(0, .03, .45); props.shield.rotation.set(-PI / 2, 0, 0); } }
-      if (pose === 'drink') { setArm('R', 2.4, .5, 2.0); hp.R = 'hold'; holdIn('R', props.cup, [0, 0, .3], [0, -.1 * s, .05]); headPiv.rotation.x = -.45; neck.rotation.x = -.2; }
-      if (pose === 'glare') { setArm('L', .2, .35, .3); setArm('R', .2, .35, .3); hp = { L: 'grasp', R: 'grasp' }; legs.L.hip.rotation.z = .12; legs.R.hip.rotation.z = -.12; }
-      if (pose === 'charge') { spine.rotation.x = .3; setArm('L', 1.3, .2, .3); hp.L = 'grasp'; legs.L.hip.rotation.x = -.5; legs.L.knee.rotation.x = .5; legs.R.hip.rotation.x = .4; }
-      if ((pose === 'glare' || pose === 'charge' || pose === 'stand' || pose === 'run') && props.shield && pose !== 'eat') holdIn('L', props.shield, [0, PI / 2, 0], [-.05, -.12 * s, .1]);
-      if (props.halberd && pose !== 'down') { holdIn('R', props.halberd, [0, 0, 0], [0, -.6, .02]); setArm('R', .45, .05, .9); hp.R = 'grasp'; }
-      if (pose === 'down') { body.rotation.x = -PI / 2; body.position.set(0, .12, .9 * s); setArm('L', 2.8, .4, .2); setArm('R', .3, .6, .4); }
-      if (pose === 'run') hp = { L: 'grasp', R: 'grasp' };
-      ['L', 'R'].forEach(function (k) { if (arms[k].handPose !== hp[k]) attachHand(k, hp[k]); });
-    }
-
-    function update(dt, t) {
-      var p = state.pose, br = Math.sin(t * 1.3 + id.length) * .012;
-      chest.scale.set(1, 1 + br * .4, 1 + br);
-      neck.rotation.y = Math.sin(t * .37 + id.length * 2) * .08;
-      if (p === 'dance') {
-        var ph = t * 2.2;
-        setArm('R', 1.6 + Math.sin(ph) * 1.1, .3 + Math.cos(ph) * .4, .3 + Math.sin(ph * .5) * .3, 0);
-        setArm('L', .6 + Math.cos(ph) * .5, .7, .9);
-        spine.rotation.y = Math.sin(ph) * .5; spine.rotation.x = .1 + Math.cos(ph * 2) * .06;
-        body.position.y = Math.abs(Math.sin(ph)) * .03;
-      } else if (p === 'run') {
-        var r = t * 9;
-        if (legs.L.hip.visible) {
-          legs.L.hip.rotation.x = Math.sin(r) * .8; legs.L.knee.rotation.x = Math.max(0, -Math.sin(r + .8)) * 1.2;
-          legs.R.hip.rotation.x = -Math.sin(r) * .8; legs.R.knee.rotation.x = Math.max(0, Math.sin(r + .8)) * 1.2;
-        }
-        setArm('R', -Math.sin(r) * .7 + .2, .15, .9); setArm('L', Math.sin(r) * .7 + .2, .15, .9);
-        body.position.y = Math.abs(Math.sin(r)) * .05; spine.rotation.x = .18;
-      } else if (p === 'glare') {
-        headPiv.rotation.x = -.05 + Math.sin(t * 7) * .005;
-      }
-    }
-
-    setPose('stand');
-    root.userData = { rig: rig, setPose: setPose, update: update, headTop: headTop, id: id, state: state };
-    return root;
-  }
-
-  /* ---------- 馬 ---------- */
-  function makeHorse(colr) {
-    var g = new THREE.Group();
-    var M = std(colr || 0x1a1412, .5, .05), D = std(0x0a0806, .8);
-    // 胴：一つの楕円体を前後で太さを変えて馬らしい胴にする
-    var bg = new THREE.SphereGeometry(.5, 32, 20); var bp = bg.attributes.position;
-    for (var i = 0; i < bp.count; i++) {
-      var x = bp.getX(i), y = bp.getY(i), z = bp.getZ(i);
-      var u = z / .5; // -1 尻 … 1 胸
-      var k = 1 - .12 * Math.cos(u * PI) ; // 腰が少し細い
-      bp.setXYZ(i, x * .58 * k, y * .62 * k + (y < 0 ? 0 : .04 * (1 - u * u)), z * 1.25);
-    }
-    bg.computeVertexNormals();
-    var body = mesh(bg, M); body.position.y = 1.28; g.add(body);
-    // 首と頭
-    var neckG = new THREE.Group(); neckG.position.set(0, 1.42, .5); g.add(neckG);
-    var ng = new THREE.CylinderGeometry(.13, .24, .78, 16, 4); ng.translate(0, .39, 0);
-    var nk = mesh(ng, M); nk.rotation.x = .62; neckG.add(nk);
-    var head = new THREE.Group(); head.position.set(0, .66, .45); head.rotation.x = 1.15; neckG.add(head);
-    var hg = new THREE.SphereGeometry(.13, 20, 14); var hp = hg.attributes.position;
-    for (i = 0; i < hp.count; i++) { var hy = hp.getY(i); var t = (hy + .13) / .26; hp.setXYZ(i, hp.getX(i) * (.85 - t * .25), hy * 2.3, hp.getZ(i) * (1 - t * .15)); }
-    hg.computeVertexNormals();
-    var hm = mesh(hg, M); hm.position.y = .16; head.add(hm);
-    [-1, 1].forEach(function (sd) { var ear = mesh(new THREE.ConeGeometry(.035, .13, 8), M); ear.position.set(sd * .07, -.08, -.08); ear.rotation.x = -1.2; head.add(ear); });
-    var mane = mesh(new THREE.BoxGeometry(.05, .72, .14, 1, 6, 1), D); mane.position.set(0, .42, -.08); mane.rotation.x = .62; neckG.add(mane);
-    var tg = new THREE.CylinderGeometry(.07, .02, .8, 10, 4); tg.translate(0, -.4, 0);
-    var tail = mesh(tg, D); tail.position.set(0, 1.42, -.6); tail.rotation.x = -.35; g.add(tail);
-    var legs = [];
-    [[.18, .42, 0], [-.18, .42, PI], [.18, -.45, PI * .5], [-.18, -.45, PI * 1.5]].forEach(function (p) {
-      var hip = new THREE.Group(); hip.position.set(p[0], 1.12, p[1]); g.add(hip);
-      var up = mesh(new THREE.CylinderGeometry(.09, .055, .5, 12), M); up.position.y = -.25; hip.add(up);
-      var kn = new THREE.Group(); kn.position.y = -.5; hip.add(kn);
-      var lo = mesh(new THREE.CylinderGeometry(.045, .04, .52, 10), M); lo.position.y = -.26; kn.add(lo);
-      var fet = mesh(new THREE.SphereGeometry(.05, 10, 8), M); fet.position.y = -.5; kn.add(fet);
-      var hoof = mesh(new THREE.CylinderGeometry(.05, .06, .07, 10), D); hoof.position.y = -.56; kn.add(hoof);
-      legs.push({ hip: hip, kn: kn, ph: p[2] });
-    });
-    var saddle = mesh(new THREE.CylinderGeometry(.3, .3, .1, 18, 1, false, -PI / 2, PI), std(0x6a2018, .7)); saddle.rotation.z = PI / 2; saddle.position.set(0, 1.64, .05); saddle.scale.set(1, 1, .9); g.add(saddle);
-    g.userData.update = function (dt, t, running) {
-      legs.forEach(function (l) {
-        var a = running ? Math.sin(t * 9 + l.ph) : 0;
-        l.hip.rotation.x = a * .55; l.kn.rotation.x = running ? Math.max(0, Math.sin(t * 9 + l.ph + 1.2)) * 1.0 : 0;
-      });
-      neckG.rotation.x = running ? Math.sin(t * 9) * .07 : Math.sin(t * .6) * .03;
-      tail.rotation.x = -.35 - (running ? .5 + Math.sin(t * 9) * .1 : Math.sin(t * .8) * .05);
-      g.position.y = running ? Math.abs(Math.sin(t * 9)) * .06 : 0;
-    };
-    g.userData.saddleY = 1.66;
-    return g;
-  }
+  /* ============================ 人物（koumon-cast3d.js） ============================ */
+  var CM = window.KM_CAST3D;
+  var CAST = CM.CAST, Q = 'high';
+  function makeFigure(id) { return CM.makeFigure(id); }
+  function makeHorse(kind) { return CM.makeHorse(kind); }
 
   /* ============================ 舞台の部品 ============================ */
   function ground(size, colr, rough, seed, hills) {
@@ -707,6 +285,148 @@
     return m;
   }
 
+  /* ---------- 帳の中のしつらえ（色は sRGB で指定して線形に直す） ---------- */
+  function stdc(c, r, m, o) { var x = std(c, r, m, o); x.color.convertSRGBToLinear(); return x; }
+  /** 帷（とばり）の布：縦の織り目と、上の縁の文様帯 */
+  function drapeTex(base, seed, band) {
+    var key = 'drape|' + base + '|' + seed + '|' + band;
+    if (TEX[key]) return TEX[key];
+    TEX[key] = canvasTex(256, 512, function (g, w, h) {
+      var c = col(base);
+      g.fillStyle = '#' + c.getHexString(); g.fillRect(0, 0, w, h);
+      var R = rng(seed);
+      for (var x = 0; x < w; x += 2) { g.fillStyle = 'rgba(0,0,0,' + (.02 + R() * .035) + ')'; g.fillRect(x, 0, 1, h); }
+      for (var i = 0; i < 900; i++) { g.fillStyle = R() < .5 ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.06)'; g.fillRect(R() * w, R() * h, 1, 2 + R() * 6); }
+      var sh = g.createLinearGradient(0, 0, 0, h); sh.addColorStop(0, 'rgba(0,0,0,.25)'); sh.addColorStop(.25, 'rgba(0,0,0,0)'); sh.addColorStop(.85, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.35)');
+      g.fillStyle = sh; g.fillRect(0, 0, w, h);
+      if (band) {
+        // 菱形と雲の文様の帯（錦）
+        g.fillStyle = band; g.fillRect(0, h * .02, w, h * .1);
+        g.strokeStyle = 'rgba(230,190,110,.8)'; g.lineWidth = 2;
+        for (var k = 0; k < 8; k++) { var cx = (k + .5) * w / 8, cy = h * .07; g.beginPath(); g.moveTo(cx - 12, cy); g.lineTo(cx, cy - 14); g.lineTo(cx + 12, cy); g.lineTo(cx, cy + 14); g.closePath(); g.stroke(); }
+        g.fillStyle = 'rgba(230,190,110,.9)'; g.fillRect(0, h * .02, w, 3); g.fillRect(0, h * .12 - 3, w, 3);
+      }
+    });
+    TEX[key].wrapS = THREE.RepeatWrapping; TEX[key].wrapT = THREE.ClampToEdgeWrapping;
+    return TEX[key];
+  }
+  /** 帷の壁：上の竿から下がる布。縦のひだ、裾は床でたまる。上に垂れ幕（帷の帽）と、ところどころの束ね紐 */
+  function drapeWall(w, h, colr, seed, o) {
+    o = o || {};
+    var g = new THREE.Group(), R = rng(seed || 3);
+    var geo = new THREE.PlaneGeometry(w, h, Math.round(w * 16), 12), p = geo.attributes.position;
+    var ph = R() * 6;
+    for (var i = 0; i < p.count; i++) {
+      var x = p.getX(i), y = p.getY(i), u = (h / 2 - y) / h;
+      var fold = Math.sin(x * 9 + ph + Math.sin(x * 2.1 + ph) * 1.4) * .07 + Math.sin(x * 23 + ph * 2) * .018;
+      p.setZ(i, fold * (.55 + u * .6) + (u > .96 ? (u - .96) * 2.2 : 0));
+    }
+    geo.computeVertexNormals();
+    var tex = drapeTex(colr, seed || 3, o.band || null); tex = tex.clone(); tex.needsUpdate = true; tex.repeat.set(w / 2.2, 1);
+    var cloth = mesh(geo, std(0xffffff, .92, 0, { map: tex, side: THREE.DoubleSide }), false, true); g.add(cloth);
+    // 竿
+    var rod = mesh(new THREE.CylinderGeometry(.035, .035, w + .3, 8), stdc(0x2a1810, .5, .1)); rod.rotation.z = PI / 2; rod.position.set(0, h / 2 + .02, .05); g.add(rod);
+    // 帷の帽（スワッグ）：竿に沿って弧を描いて垂れる短い幕
+    var vg = new THREE.PlaneGeometry(w, .5, Math.round(w * 12), 4), vp = vg.attributes.position, sw = o.swag || 1.2;
+    for (i = 0; i < vp.count; i++) { var vx = vp.getX(i), vy = vp.getY(i), ph2 = ((vx / sw) % 1 + 1) % 1, dip = Math.sin(ph2 * PI) * .16; vp.setY(i, vy < 0 ? vy - dip : vy); vp.setZ(i, .1 + Math.sin(ph2 * PI) * .05 * (vy < 0 ? 1 : 0)); }
+    vg.computeVertexNormals();
+    var vt = drapeTex(o.valance || 0x6a1810, (seed || 3) + 50, o.band || '#3a0c08').clone(); vt.needsUpdate = true; vt.repeat.set(w / 2.2, .55); vt.offset.y = .42;
+    var val = mesh(vg, std(0xffffff, .85, 0, { map: vt, side: THREE.DoubleSide }), false, true); val.position.y = h / 2 - .2; g.add(val);
+    // 束ね紐で寄せたところ（深いひだ）
+    (o.ties || []).forEach(function (tx) {
+      var tie = mesh(new THREE.TorusGeometry(.12, .02, 6, 16), stdc(0xb08a3a, .4, .5)); tie.position.set(tx, -h * .08, .14); tie.scale.set(1, .4, 1); g.add(tie);
+      var tas = mesh(new THREE.ConeGeometry(.04, .3, 8, 1, true), stdc(0xa8281a, .8, 0, { side: THREE.DoubleSide })); tas.position.set(tx + .08, -h * .08 - .2, .16); g.add(tas);
+    });
+    return g;
+  }
+  /** 屏風：黒漆に朱の雲気文、縁は黒、金具は青銅 */
+  function screenMesh(w, h, panels, seed) {
+    var g = new THREE.Group(), pw = w / panels;
+    var frameM = stdc(0x120a08, .3, .05), bron = stdc(0x8a6a32, .35, .8);
+    for (var i = 0; i < panels; i++) {
+      var pg = new THREE.Group(), a = (i % 2 ? -1 : 1) * .2;
+      var tex = CM.lacquerCloudTex(seed + i);
+      var face = mesh(new THREE.BoxGeometry(pw - .06, h - .16, .03), [frameM, frameM, frameM, frameM, stdc(0x8a7a76, .3, 0, { map: tex }), stdc(0x8a7a76, .3, 0, { map: tex })]);
+      face.position.y = h / 2 + .04; pg.add(face);
+      [-1, 1].forEach(function (sx) { var post = mesh(new THREE.BoxGeometry(.05, h + .04, .05), frameM); post.position.set(sx * (pw / 2 - .025), h / 2 + .02, 0); pg.add(post); });
+      [.06, h - .02].forEach(function (y) { var rail = mesh(new THREE.BoxGeometry(pw, .05, .05), frameM); rail.position.y = y; pg.add(rail); });
+      var foot = mesh(new THREE.BoxGeometry(.08, .06, .3), bron); foot.position.set(0, .03, 0); pg.add(foot);
+      pg.position.x = -w / 2 + pw * (i + .5); pg.rotation.y = a; pg.position.z = (i % 2) * .08;
+      g.add(pg);
+    }
+    return g;
+  }
+  /** 席（敷物）：い草の目と、錦の縁 */
+  function seatMat(w, d, edge) {
+    var key = 'seat|' + edge;
+    if (!TEX[key]) TEX[key] = canvasTex(128, 128, function (g, W, H) {
+      g.fillStyle = '#b89a62'; g.fillRect(0, 0, W, H);
+      for (var y = 0; y < H; y += 3) { g.fillStyle = y % 6 ? 'rgba(80,50,20,.18)' : 'rgba(255,240,200,.12)'; g.fillRect(0, y, W, 1); }
+      var b = 16; g.fillStyle = edge || '#5a1410';
+      g.fillRect(0, 0, W, b); g.fillRect(0, H - b, W, b); g.fillRect(0, 0, b, H); g.fillRect(W - b, 0, b, H);
+      g.fillStyle = 'rgba(220,180,100,.85)';
+      for (var k = 0; k < W; k += 16) { g.fillRect(k + 5, 6, 6, 4); g.fillRect(k + 5, H - 10, 6, 4); g.fillRect(6, k + 5, 4, 6); g.fillRect(W - 10, k + 5, 4, 6); }
+    });
+    var m = mesh(new THREE.BoxGeometry(w, .025, d), stdc(0xffffff, .9, 0, { map: TEX[key] }), false, true); m.position.y = .0125;
+    return m;
+  }
+  /** 耳杯（両側に耳のある楕円の杯）：外は黒漆、内は朱 */
+  function earCup() {
+    var g = new THREE.Group();
+    var cg = new THREE.SphereGeometry(.05, 18, 10, 0, PI * 2, PI / 2, PI / 2); cg.scale(1.35, .55, .9);
+    g.add(mesh(cg, stdc(0x120a08, .28, .05, { side: THREE.FrontSide })));
+    var ig = new THREE.SphereGeometry(.047, 18, 10, 0, PI * 2, PI / 2, PI / 2); ig.scale(1.35, .52, .9);
+    g.add(mesh(ig, stdc(0xa02818, .3, 0, { side: THREE.BackSide })));
+    [-1, 1].forEach(function (sd) { var ear = mesh(new THREE.BoxGeometry(.045, .006, .02), stdc(0x120a08, .3)); ear.position.set(0, -.002, sd * .052); g.add(ear); });
+    g.position.y = .028;
+    return g;
+  }
+  /** 案（低い漆の食卓）：黒漆、天板の内に朱の雲気文。耳杯・盤・箸 */
+  function lacTable(w, food) {
+    var g = new THREE.Group(), blk = stdc(0x140a08, .3, .05);
+    var top = mesh(new THREE.BoxGeometry(w, .035, .46), [blk, blk, stdc(0xffffff, .3, 0, { map: CM.lacquerCloudTex(31) }), blk, blk, blk]); top.position.y = .26; g.add(top);
+    var rim = mesh(new THREE.BoxGeometry(w + .02, .02, .48), blk); rim.position.y = .285; rim.scale.set(1, 1, 1); g.add(rim);
+    var inner = mesh(new THREE.BoxGeometry(w - .04, .021, .44), stdc(0xffffff, .3, 0, { map: CM.lacquerCloudTex(31) })); inner.position.y = .287; g.add(inner);
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (sd) {
+      var leg = new THREE.CylinderGeometry(.018, .028, .25, 8); leg.translate(0, .125, 0);
+      var l = mesh(leg, blk); l.position.set(sd[0] * (w / 2 - .06), 0, sd[1] * .17); l.rotation.z = -sd[0] * .12; g.add(l);
+      var hoof = mesh(new THREE.SphereGeometry(.03, 8, 6), stdc(0x8a6a32, .35, .8)); hoof.scale.y = .6; hoof.position.set(sd[0] * (w / 2 - .03), .015, sd[1] * .17); g.add(hoof);
+    });
+    if (food !== false) {
+      var c1 = earCup(); c1.position.set(-w * .25, .297, .06); c1.rotation.y = .3; g.add(c1);
+      var c2 = earCup(); c2.position.set(-w * .08, .297, -.1); c2.rotation.y = -.2; g.add(c2);
+      var plate = mesh(new THREE.CylinderGeometry(.13, .1, .025, 22), stdc(0x140a08, .3)); plate.position.set(w * .2, .31, 0); g.add(plate);
+      var pin = mesh(new THREE.CylinderGeometry(.115, .115, .004, 22), stdc(0xa02818, .3)); pin.position.set(w * .2, .324, 0); g.add(pin);
+      var meat = mesh(new THREE.SphereGeometry(.06, 10, 8), stdc(0x7a3a24, .5)); meat.scale.set(1.3, .45, 1); meat.position.set(w * .2, .34, 0); g.add(meat);
+      [-1, 1].forEach(function (k) { var st = mesh(new THREE.CylinderGeometry(.003, .003, .24, 4), stdc(0x2a1a10, .6)); st.rotation.z = PI / 2; st.rotation.y = .1; st.position.set(w * .02, .302, .17 + k * .012); g.add(st); });
+    }
+    return g;
+  }
+  /** 青銅の樽（酒を入れる器）と勺 */
+  function bronzeZun() {
+    var g = new THREE.Group(), br = stdc(0x6a5a3a, .42, .85), pat = stdc(0x4a6a58, .6, .4);
+    var body = mesh(new THREE.CylinderGeometry(.2, .2, .3, 28, 1), br); body.position.y = .24; g.add(body);
+    [.12, .34].forEach(function (y) { var band = mesh(new THREE.TorusGeometry(.203, .012, 6, 32), pat); band.rotation.x = PI / 2; band.position.y = y; g.add(band); });
+    var lid = mesh(new THREE.SphereGeometry(.205, 24, 8, 0, PI * 2, 0, PI * .3), br); lid.position.y = .32; g.add(lid);
+    for (var i = 0; i < 3; i++) { var a = i / 3 * PI * 2, leg = mesh(new THREE.SphereGeometry(.05, 10, 8), br); leg.scale.set(.8, 1.2, .8); leg.position.set(Math.sin(a) * .15, .06, Math.cos(a) * .15); g.add(leg); }
+    [-1, 1].forEach(function (sd) { var ring = mesh(new THREE.TorusGeometry(.03, .008, 6, 14), br); ring.position.set(sd * .21, .3, 0); ring.rotation.y = PI / 2; g.add(ring); });
+    var lad = mesh(new THREE.CylinderGeometry(.006, .006, .45, 6), br); lad.position.set(.1, .45, 0); lad.rotation.z = -.5; g.add(lad);
+    return g;
+  }
+  /** 戟や戈を立てる架（兵器架） */
+  function weaponRack() {
+    var g = new THREE.Group(), wd = stdc(0x2a1a10, .7), steel = stdc(0xb8bcc4, .3, .85), red = stdc(0x9a1a12, .85);
+    [-.55, .55].forEach(function (x) { var post = mesh(new THREE.BoxGeometry(.07, 1.3, .07), wd); post.position.set(x, .65, 0); g.add(post); });
+    [.35, 1.15].forEach(function (y) { var bar = mesh(new THREE.BoxGeometry(1.25, .05, .08), wd); bar.position.set(0, y, 0); g.add(bar); });
+    for (var i = 0; i < 4; i++) {
+      var x = -.42 + i * .28, sh = mesh(new THREE.CylinderGeometry(.014, .014, 2.5, 6), stdc(0x3a2414, .6)); sh.position.set(x, 1.25, .04); sh.rotation.z = (i - 1.5) * .02; g.add(sh);
+      var tip = mesh(new THREE.ConeGeometry(.022, .22, 4), steel); tip.position.set(x, 2.6, .04); tip.scale.z = .25; g.add(tip);
+      if (i % 2 === 0) { var ge = mesh(new THREE.BoxGeometry(.2, .03, .006), steel); ge.position.set(x + .09, 2.4, .04); ge.rotation.z = .25; g.add(ge); }
+      var tas = mesh(new THREE.ConeGeometry(.03, .09, 8, 1, true), red); tas.position.set(x, 2.32, .04); g.add(tas);
+    }
+    return g;
+  }
+
   /* ============================ 舞台 ============================ */
   /* pos: 人物の立ち位置 [x, z, 向き(rad, 0=+Z), 姿勢]
      wide: 引きのカメラ [位置], [注視点]
@@ -749,14 +469,22 @@
       pos: { hai: [-1.05, 0, 1.1, 'sit'], ryo: [1.1, 0, -1.1, 'sit'], haku: [-.35, -.55, .7], u: [-.7, 0, .9, 'sit'], gu: [.8, -.2, -1.0] },
       wide: [[0, 1.6, 4.4], [0, .95, -.4]], light: 'lamp', indoor: true,
       build: function (sc, S) {
-        var cl = S.lightId === 'snowin' ? 0x3a2a24 : 0x6a4a30;
         var fl = mesh(new THREE.PlaneGeometry(12, 12), std(0x2a1c14, .95)); fl.rotation.x = -PI / 2; sc.add(fl);
         sc.add(mat(4.2, 2.6, '#6a5232'));
-        var back = curtainWall(10, 4, cl, 9, 1); back.position.set(0, 2, -2.6); sc.add(back);
-        var left = curtainWall(8, 4, cl, 7, 2); left.rotation.y = PI / 2; left.position.set(-3.6, 2, 0); sc.add(left);
-        var right = curtainWall(8, 4, cl, 7, 3); right.rotation.y = -PI / 2; right.position.set(3.6, 2, 0); sc.add(right);
+        var snow = S.lightId === 'snowin', wc = snow ? 0x4a3a34 : 0x7a5a3a, vc = snow ? 0x2a1a1a : 0x5a140e;
+        var back = drapeWall(10, 4, wc, 1, { band: '#140a08', valance: vc, ties: [-3.2, 3.2] }); back.position.set(0, 2, -2.6); sc.add(back);
+        var left = drapeWall(8, 4, wc, 2, { band: '#140a08', valance: vc, ties: [-2] }); left.rotation.y = PI / 2; left.position.set(-3.6, 2, 0); sc.add(left);
+        var right = drapeWall(8, 4, wc, 3, { band: '#140a08', valance: vc, ties: [2] }); right.rotation.y = -PI / 2; right.position.set(3.6, 2, 0); sc.add(right);
         var roof = mesh(new THREE.ConeGeometry(6, 2.2, 12, 1, true), std(0x1a120c, .95, 0, { side: THREE.DoubleSide }), false, false); roof.position.y = 5; sc.add(roof);
-        var tb = lowTable(1.2); tb.position.set(0, 0, 0); sc.add(tb);
+        var scr = screenMesh(2.6, 1.6, 4, 60); scr.position.set(0, 0, -2.25); sc.add(scr);
+        [[-1.05, 0], [1.1, 0], [-.7, 0]].forEach(function (p, i) { if (i === 2) return; var m = seatMat(.9, .9, '#3a1410'); m.position.x = p[0]; sc.add(m); });
+        var tb = lacTable(1.2, false); tb.position.set(0, 0, 0); sc.add(tb);
+        // 机の上の竹簡（巻いたものと、広げたもの）
+        var slipM = stdc(0xc8a870, .7);
+        for (var k = 0; k < 3; k++) { var roll = mesh(new THREE.CylinderGeometry(.045, .045, .24, 14), slipM); roll.rotation.z = PI / 2; roll.position.set(-.38 + k * .02, .33, -.12 + k * .1); sc.add(roll); }
+        var open = new THREE.Group(); for (k = 0; k < 14; k++) { var sl = mesh(new THREE.BoxGeometry(.016, .004, .24), slipM); sl.position.set(.1 + k * .019, .3, .02); open.add(sl); } sc.add(open);
+        var c1 = earCup(); c1.position.set(-.1, .297, .15); sc.add(c1);
+        var rk = weaponRack(); rk.rotation.y = PI / 2; rk.position.set(-3.1, 0, -1.2); sc.add(rk);
         var lp = lampStand(.95); lp.position.set(.2, 0, -.5); sc.add(lp); S.anim.push(lp);
         [-2.6, 2.6].forEach(function (x) { var p = mesh(new THREE.CylinderGeometry(.06, .07, 4, 8), std(0x2a1a10, .8)); p.position.set(x, 2, -2.4); sc.add(p); });
       }
@@ -785,16 +513,25 @@
         var day = S.lightId === 'day';
         var fl = mesh(new THREE.PlaneGeometry(16, 16), std(0x2a1c14, .95)); fl.rotation.x = -PI / 2; sc.add(fl);
         sc.add(mat(5.4, 5.4, '#7a5e36'));
-        var wallC = day ? 0x9a7a4e : 0x5a3a24;
-        var back = curtainWall(12, 4.6, wallC, 10, 4); back.position.set(0, 2.3, -3.6); sc.add(back);
-        var left = curtainWall(10, 4.6, wallC, 8, 5); left.rotation.y = PI / 2; left.position.set(-3.8, 2.3, 0); sc.add(left);
-        var rightA = curtainWall(4, 4.6, wallC, 3, 6); rightA.rotation.y = -PI / 2; rightA.position.set(3.8, 2.3, -2.4); sc.add(rightA);
-        var rightB = curtainWall(4, 4.6, wallC, 3, 7); rightB.rotation.y = -PI / 2; rightB.position.set(3.8, 2.3, 2.6); sc.add(rightB);
-        var door = curtainWall(1.6, 4.6, 0x7a2018, 2, 8); door.rotation.y = -PI / 2 + .5; door.position.set(3.5, 2.3, .6); sc.add(door);
+        // 帷：生成りの幕に朱の帽、錦の縁。東（右）に入口
+        var wallC = day ? 0xb8a07a : 0x5a4030, valC = 0x7a1a10, band = '#1a0c0a';
+        var back = drapeWall(12, 4.6, wallC, 10, { band: band, valance: valC, ties: [-4.6, 4.6] }); back.position.set(0, 2.3, -3.6); sc.add(back);
+        var left = drapeWall(10, 4.6, wallC, 5, { band: band, valance: valC, ties: [-3.6, 3.6] }); left.rotation.y = PI / 2; left.position.set(-3.8, 2.3, 0); sc.add(left);
+        var rightA = drapeWall(4, 4.6, wallC, 6, { band: band, valance: valC, ties: [1.7] }); rightA.rotation.y = -PI / 2; rightA.position.set(3.8, 2.3, -2.4); sc.add(rightA);
+        var rightB = drapeWall(4, 4.6, wallC, 7, { band: band, valance: valC, ties: [-1.7] }); rightB.rotation.y = -PI / 2; rightB.position.set(3.8, 2.3, 2.6); sc.add(rightB);
+        var door = drapeWall(1.6, 4.6, 0x7a2018, 8, { valance: valC }); door.rotation.y = -PI / 2 + .5; door.position.set(3.5, 2.3, .6); sc.add(door);
         var roof = mesh(new THREE.ConeGeometry(8.5, 2.6, 16, 1, true), std(day ? 0xc8aa78 : 0x1a120c, .95, 0, { side: THREE.DoubleSide, emissive: col(day ? 0x3a2a14 : 0), emissiveIntensity: .5 }), false, false); roof.position.y = 5.9; sc.add(roof);
-        [[-1.7, -.2], [-1.7, -1.25], [0, -1.75], [0, 1.65], [1.75, .2]].forEach(function (p, i) { var t = lowTable(.9); t.position.set(p[0], 0, p[1]); t.rotation.y = i < 2 ? PI / 2 : i === 4 ? -PI / 2 : 0; sc.add(t); });
+        // 屏風：項王・項伯の背（西）と、亜父の背（北）
+        var scrW = screenMesh(3.0, 1.75, 6, 40); scrW.rotation.y = PI / 2; scrW.position.set(-3.25, 0, -.7); sc.add(scrW);
+        var scrN = screenMesh(2.2, 1.6, 4, 50); scrN.position.set(0, 0, -3.15); sc.add(scrN);
+        // 席と案
+        [[-2.3, -.2], [-2.3, -1.25], [0, -2.4], [0, 2.3], [2.3, .2]].forEach(function (p, i) { var m = seatMat(.95, .95, i < 2 ? '#5a1410' : '#2a1a3a'); m.position.x = p[0]; m.position.z = p[1]; sc.add(m); });
+        [[-1.7, -.2], [-1.7, -1.25], [0, -1.75], [0, 1.65], [1.75, .2]].forEach(function (p, i) { var t = lacTable(.9); t.position.set(p[0], 0, p[1]); t.rotation.y = i < 2 ? PI / 2 : i === 4 ? -PI / 2 : i === 2 ? 0 : PI; sc.add(t); });
+        var zun = bronzeZun(); zun.position.set(1.15, 0, -1.3); sc.add(zun);
+        var rack = weaponRack(); rack.rotation.y = -PI / 2; rack.position.set(3.3, 0, -1.6); sc.add(rack);
         [[-3.1, -3], [3.1, -3], [-3.1, 2.9], [3.1, 2.9]].forEach(function (p) { var l = lampStand(1.25); l.position.set(p[0], 0, p[1]); sc.add(l); S.anim.push(l); });
-        [[-3.6, -3.4], [3.6, -3.4], [0, -3.5]].forEach(function (p) { var pl = mesh(new THREE.CylinderGeometry(.08, .09, 5, 8), std(0x2a1a10, .8)); pl.position.set(p[0], 2.5, p[1]); sc.add(pl); });
+        [[-3.6, -3.4], [3.6, -3.4], [0, -3.5]].forEach(function (p) { var pl = mesh(new THREE.CylinderGeometry(.08, .09, 5, 10), stdc(0x2a120c, .45, .05)); pl.position.set(p[0], 2.5, p[1]); sc.add(pl);
+          [.3, 4.2].forEach(function (y) { var fit = mesh(new THREE.CylinderGeometry(.1, .1, .12, 10), stdc(0x7a5a2a, .35, .8)); fit.position.set(p[0], y, p[1]); sc.add(fit); }); });
         if (day) { var sky = new THREE.PointLight(col(0xfff0d0), .5, 14, 1.5); sky.position.set(0, 5, 0); sc.add(sky); }
       }
     },
@@ -854,12 +591,19 @@
       wide: [[0, 2.6, 7.4], [0, 1.4, -2]], light: 'palace', indoor: true,
       build: function (sc, S) {
         var fl = mesh(new THREE.PlaneGeometry(30, 30), std(0x2a1a12, .35, .1)); fl.rotation.x = -PI / 2; sc.add(fl);
-        var back = curtainWall(16, 7, 0x6a1a14, 10, 9); back.position.set(0, 3.5, -5.5); sc.add(back);
+        var back = drapeWall(16, 7, 0x6a1a14, 9, { band: '#1a0806', valance: 0x2a0806, swag: 1.6, ties: [-5.5, 5.5] }); back.position.set(0, 3.5, -5.5); sc.add(back);
         var pM = std(0x5a140c, .5, .05);
         [-3.5, 3.5].forEach(function (x) { for (var z = -4; z <= 5; z += 3) { var p = mesh(new THREE.CylinderGeometry(.28, .3, 7, 16), pM); p.position.set(x, 3.5, z); sc.add(p); } });
         var dM = std(0x1a0c08, .4, .1);
         [[4.4, .3, -3.6, 3.2], [3.6, .3, -3.4, 2.6]].forEach(function (d, i) { var s = mesh(new THREE.BoxGeometry(d[0], d[1], d[3]), dM); s.position.set(0, d[1] / 2 + i * .3, d[2] - i * .1); sc.add(s); });
-        var throne = mesh(new THREE.BoxGeometry(1.6, 1.2, .2), std(0x2a140c, .35, .2)); throne.position.set(0, 1.2, -4.2); sc.add(throne);
+        // 御座：段の上に黒漆の榻、背に朱の雲気文の屏風。左右に青銅の鼎
+        var scr = screenMesh(3.2, 2.1, 5, 70); scr.position.set(0, .6, -4.35); sc.add(scr);
+        var ta = mesh(new THREE.BoxGeometry(1.7, .16, 1.0), stdc(0x140a08, .3, .05)); ta.position.set(0, .68, -3.4); sc.add(ta);
+        var tm = seatMat(1.2, .8, '#7a1a10'); tm.position.set(0, .76, -3.3); sc.add(tm);
+        var tb = lacTable(1.0); tb.position.set(0, .6, -2.55); tb.rotation.y = PI; sc.add(tb);
+        [-1.6, 1.6].forEach(function (x) { var z = bronzeZun(); z.scale.setScalar(1.6); z.position.set(x, .6, -3.6); sc.add(z); });
+        // 臣下の列の間の敷物（緋の毛氈）
+        var run = mesh(new THREE.PlaneGeometry(2.2, 8), stdc(0x6a1410, .9)); run.rotation.x = -PI / 2; run.position.set(0, .006, 1.2); sc.add(run);
         [[-2.2, -2], [2.2, -2], [-2.2, 3], [2.2, 3]].forEach(function (p) { var l = lampStand(1.6); l.position.set(p[0], 0, p[1]); sc.add(l); S.anim.push(l); });
         S.platform = .6;
       }
@@ -886,6 +630,7 @@
     S.cv = canvas; S.ov = overlay;
     S.reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     Q = pickQuality();
+    CM.setQuality(Q);
     try {
       S.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: Q !== 'low', powerPreference: 'high-performance' });
     } catch (e) { S.renderer = null; return false; }
@@ -1059,7 +804,7 @@
       sc.add(f);
       S.cast[id] = f;
       if (p[3] === 'ride') {
-        var h = S.horse || (S.horse = makeHorse(0x1a1412));
+        var h = S.horse || (S.horse = makeHorse('zhui'));
         h.position.set(p[0], 0, p[1]); h.rotation.y = p[2]; sc.add(h);
         f.position.set(p[0], h.userData.saddleY - .4 * (CAST[id].h / 1.72), p[1]);
         f.userData.rideOn = h;
@@ -1086,7 +831,7 @@
       });
     }
     if (st.horse) {
-      var hz = S.horse || (S.horse = makeHorse(0x1a1412));
+      var hz = S.horse || (S.horse = makeHorse('zhui'));
       hz.position.set(st.horse[0], 0, st.horse[1]); hz.rotation.y = st.horse[2]; sc.add(hz);
     }
     // 粒子
@@ -1214,6 +959,17 @@
     S.from = { pos: S.cam.pos.clone(), tgt: S.cam.tgt.clone() };
     S.to = { pos: pos, tgt: tgt, id: f ? target : null };
     S.tStart = S.t; S.tDur = S.reduced ? .001 : 1.7; S.drift = 0;
+  }
+
+  /** 話し手：その人物は身ぶりをし、ほかの者はそちらへ顔を向ける。id が無ければ解く */
+  function speaker(id) {
+    S.speakerId = id && S.cast[id] ? id : null;
+    var sp = S.speakerId ? S.cast[S.speakerId] : null, hw = sp ? headWorld(sp) : null;
+    Object.keys(S.cast).forEach(function (k) {
+      var ud = S.cast[k].userData;
+      if (ud.talk) ud.talk(k === S.speakerId);
+      if (ud.lookAt) ud.lookAt(sp && k !== S.speakerId ? hw : null);
+    });
   }
 
   function effect(name) {
@@ -1345,7 +1101,7 @@
   function renderOnce() { draw(.016); }
 
   window.KoumonStage3D = {
-    supported: supported, mount: mount, resize: resize, setScene: setScene, setPose: setPose, focus: focus, effect: effect,
+    supported: supported, mount: mount, resize: resize, setScene: setScene, setPose: setPose, focus: focus, effect: effect, speaker: speaker,
     start: start, stop: stop, renderOnce: renderOnce, showBubble: showBubble, hideBubble: hideBubble, clearLabels: clearLabels,
     prewarm: prewarm, STAGES: STAGES, LIGHTS: LIGHTS, CAST: CAST, S: S, makeFigure: makeFigure, is3D: true,
     quality: function () { return Q; }

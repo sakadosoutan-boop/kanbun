@@ -17,7 +17,7 @@
   var NODES = {}, ORDER = [];
   var meta = null, st = null;
   var $root = null, el = {};
-  var mode = '', typing = null, cur = null, onExit = null, timerId = null, cardTimer = null;
+  var mode = '', typing = null, cur = null, onExit = null, timerId = null, cardTimer = null, standalone = false;
 
   /* ============================ 記録 ============================ */
   function blankMeta() {
@@ -270,10 +270,12 @@
     K = window.KOUMON;
     if (!K || !window.KoumonStage) return;
     onExit = opts && opts.onExit;
+    standalone = !!(opts && opts.standalone);
     buildIndex();
     loadMeta();
     if (!$root) build();
     $root.hidden = false;
+    $root.classList.toggle('km-standalone', standalone);
     ST.resize();
     document.documentElement.classList.add('km-open');
     updateSoundChip();
@@ -469,6 +471,7 @@
     mode = 'say';
     if (n.pose) Object.keys(n.pose).forEach(function (k) { ST.setPose(k, n.pose[k]); });
     if (n.at) ST.focus(n.at);
+    if (ST.speaker) ST.speaker(n.w && n.w !== 'you' ? n.w : null);
     if (typeof n.fx === 'string') ST.effect(n.fx);
     if (n.sfx) sfx(n.sfx);
     if (n.b && n.w && n.w !== 'you') ST.showBubble(n.w, { anger: '！！', hush: '……', think: '（……）' }[n.b] || '……', n.b);
@@ -506,6 +509,7 @@
   function doGen(n) {
     mode = 'gen';
     ST.hideBubble();
+    if (ST.speaker) ST.speaker(null);
     var g = K.genbun[n.g];
     var first = !meta.gen[n.g];
     if (first) {
@@ -1007,7 +1011,10 @@
         if (meta.sound) { ac(); if (st && ST.S.stageId) ambience(/tent|feast|nangong/.test(ST.S.stageId) ? 'in' : 'out'); sfx('chime'); }
         else stopAmbience();
         break;
-      case 'quit': close(); break;
+      case 'quit':
+        if (standalone) { closeModal(); if (st) persist(); titleScreen(); }
+        else close();
+        break;
       case 'retry': retry(); break;
       case 'part2': closeModal(); startNew('c8'); break;
       case 'ai': aiScreen(); break;
