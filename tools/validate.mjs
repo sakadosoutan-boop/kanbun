@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art', 'journey', 'koumon'];
+const DATA = ['kuho', 'mondai', 'misyomi', 'kaeriten', 'okiji', 'narabekae', 'kanshi', 'koji', 'kanji', 'lessons', 'foes', 'foe-art', 'journey'];
 const CODE = ['store', 'quizgen'];
 
 const sandbox = { window: {}, localStorage: null, console };
@@ -227,104 +227,9 @@ for (const id of POOLS) {
   });
 }
 
-/* ---------- 楚漢の章（物語） ---------- */
-{
-  const K = W.KOUMON;
-  const nodes = new Map(), order = [];
-  sec(`楚漢の章 (${K.chapters.length} 章・原文 ${Object.keys(K.genbun).length} 段・結末 ${Object.keys(K.endings).length})`);
-  const TYPES = new Set(['scene', 'say', 'gen', 'ask', 'if', 'set', 'game', 'go', 'end']);
-  const STAGES = new Set(['bashang', 'koumon', 'tent', 'gate', 'feast', 'road', 'gaixia', 'ukou', 'nangong']);
-  const LIGHTS = new Set(['dusk', 'night', 'moon', 'dawn', 'day', 'lamp', 'snow', 'snowin', 'palace']);
-  const POSES = new Set(['stand', 'sit', 'kneel', 'raise', 'dance', 'strike', 'drink', 'eat', 'glare', 'charge', 'run', 'down', 'gone']);
-  const kuhoIds = new Set(W.KUHO.map((k) => k.id));
-  K.chapters.forEach((c) => {
-    const arr = K.script[c.id];
-    if (!arr || !arr.length) return err(`章 ${c.id} に台本がない`);
-    arr.forEach((n, i) => {
-      const t = n.t || (n.go && !n.x ? 'go' : 'say');
-      const id = n.id || c.id + '-' + i;
-      if (nodes.has(id)) err(`楚漢: ノード id 重複 ${id}`);
-      nodes.set(id, { n, t, ch: c.id, i, last: i === arr.length - 1, chap: c });
-      order.push(id);
-      if (!TYPES.has(t)) err(`楚漢 ${id}: 種類 ${t} が不明`);
-    });
-    if (!nodes.has(c.start)) err(`章 ${c.id}: 開始ノード ${c.start} がない`);
-  });
-  const ref = (id, from) => { if (id && !nodes.has(id)) err(`楚漢 ${from}: 飛び先 ${id} がない`); };
-  const reached = new Set();
-  const usedGen = new Set(), usedEnd = new Set();
-  for (const [id, x] of nodes) {
-    const n = x.n;
-    if (x.t === 'say' && !n.x) err(`楚漢 ${id}: 本文が空`);
-    if (n.w && !K.chars[n.w]) err(`楚漢 ${id}: 話し手 ${n.w} が人物表にない`);
-    if (n.at && n.at !== 'wide' && !K.chars[n.at]) err(`楚漢 ${id}: 寄り先 ${n.at} が人物表にない`);
-    if (n.pose) Object.entries(n.pose).forEach(([k, v]) => { if (!POSES.has(v)) err(`楚漢 ${id}: 姿勢 ${k}:${v} が不明`); });
-    if (x.t === 'scene') {
-      if (!STAGES.has(n.stage)) err(`楚漢 ${id}: 舞台 ${n.stage} が不明`);
-      if (!LIGHTS.has(n.light)) err(`楚漢 ${id}: 光 ${n.light} が不明`);
-      (n.cast || []).forEach((c) => { if (!K.chars[c]) err(`楚漢 ${id}: 登場人物 ${c} が人物表にない`); });
-    }
-    if (x.t === 'gen') { if (!K.genbun[n.g]) err(`楚漢 ${id}: 原文 ${n.g} がない`); if (usedGen.has(n.g)) warn(`楚漢 ${id}: 原文 ${n.g} を二度読む`); usedGen.add(n.g); }
-    if (x.t === 'end') { if (!K.endings[n.e]) err(`楚漢 ${id}: 結末 ${n.e} がない`); usedEnd.add(n.e); }
-    if (x.t === 'game' && !K.games[n.g]) err(`楚漢 ${id}: 遊び ${n.g} がない`);
-    if (x.t === 'if') { ref(n.go, id); ref(n.el, id); if (!n.go || !n.el) err(`楚漢 ${id}: 分岐先が片方ない`); }
-    if (x.t === 'go') ref(n.go, id);
-    ref(n.next, id); ref(n.el, id);
-    if (x.t === 'ask') {
-      if (!n.q || !Array.isArray(n.o) || n.o.length < 2) err(`楚漢 ${id}: 設問か選択肢が足りない`);
-      (n.o || []).forEach((o, j) => { if (!o.x) err(`楚漢 ${id}: 選択肢${j} が空`); ref(o.go, id + '/' + j); });
-      if (n.k === 'read') {
-        const oks = n.o.filter((o) => o.ok).length;
-        if (oks !== 1) err(`楚漢 ${id}: 読解問題の正解が ${oks} 個`);
-        if (!n.exp) err(`楚漢 ${id}: 読解問題に解説がない`);
-        if (!n.hint) warn(`楚漢 ${id}: 策（ヒント）がない`);
-        if (new Set(n.o.map((o) => o.x)).size !== n.o.length) err(`楚漢 ${id}: 選択肢が重複`);
-      } else if (n.k !== 'judge') err(`楚漢 ${id}: 種類 k が read/judge でない`);
-      if (n.kuho && !kuhoIds.has(n.kuho)) err(`楚漢 ${id}: 句法図鑑 ${n.kuho} がない`);
-      if (n.stem) {
-        const marks = (n.stem.match(/\^(一レ|上レ|レ|一|二|三|四|上|中|下)/g) || []).map((m) => m.slice(1));
-        const cnt = (k) => marks.filter((m) => m === k || m === k + 'レ').length;
-        if (cnt('二') && !cnt('一')) err(`楚漢 ${id}: 二点があるのに一点がない`);
-        if (cnt('三') && !cnt('二')) err(`楚漢 ${id}: 三点があるのに二点がない`);
-      }
-    }
-  }
-  // 到達できるか（はじめから）
-  const next = (id) => {
-    const x = nodes.get(id), n = x.n, out = [];
-    if (x.t === 'end') return out;
-    if (x.t === 'go') return [n.go];
-    if (x.t === 'if') return [n.go, n.el];
-    if (x.t === 'ask') n.o.forEach((o) => out.push(o.go || null));
-    if (x.t === 'game' && n.el) out.push(n.el);
-    let d = n.next;
-    if (!d) { if (!x.last) d = order[order.indexOf(id) + 1]; else if (x.chap.next) d = K.chapters.find((c) => c.id === x.chap.next).start; }
-    return out.map((o) => o || d).concat(x.t === 'ask' ? [] : [d]).filter(Boolean);
-  };
-  const stack = ['c0', 'c8'];
-  while (stack.length) { const id = stack.pop(); if (reached.has(id) || !nodes.has(id)) continue; reached.add(id); next(id).forEach((d) => stack.push(d)); }
-  for (const id of nodes.keys()) if (!reached.has(id)) err(`楚漢 ${id}: どこからも到達できない`);
-  Object.keys(K.endings).forEach((e) => { if (!usedEnd.has(e) && e !== 'B8') err(`楚漢: 結末 ${e} に至る場面がない`); });
-  Object.keys(K.genbun).forEach((g) => {
-    const G = K.genbun[g];
-    if (!usedGen.has(g)) err(`楚漢: 原文 ${g} が物語で読まれない`);
-    ['title', 'hakubun', 'yomi', 'yaku', 'note'].forEach((f) => { if (!G[f]) err(`楚漢 原文 ${g}: ${f} が空`); });
-    if (/[^㐀-鿿、。「」『』／・]/.test(G.hakubun)) err(`楚漢 原文 ${g}: 白文に漢字・句読点以外の文字`);
-    if (/以て/.test(G.yomi)) err(`楚漢 原文 ${g}: 教科書の表記「以つて」に合わせる`);
-  });
-  // 座次の答えは史記の本文（東嚮・南嚮・北嚮・西嚮）と一致させる
-  const seat = K.games.seat.seats;
-  const want = { W: ['u', 'haku'], N: ['zo'], S: ['hai'], E: ['ryo'] };
-  seat.forEach((s) => { if (JSON.stringify(s.ans) !== JSON.stringify(want[s.id])) err(`楚漢 座次 ${s.id}: 史記と違う`); });
-  if (!/項王/.test(K.aiPrompt) || !/五回/.test(K.aiPrompt)) err('楚漢: AI 指示文の要件（項王・五回まで）がない');
-  const doc = path.join(root, 'docs/hanzo-roleplay.md');
-  if (fs.existsSync(doc) && fs.readFileSync(doc, 'utf8').indexOf(K.aiPrompt.split('\n')[0]) === -1) err('楚漢: docs/hanzo-roleplay.md の指示文がアプリと食い違う');
-  console.log(`  ノード ${nodes.size}・読解問題 ${[...nodes.values()].filter((x) => x.t === 'ask' && x.n.k === 'read').length} 問`);
-}
-
 /* ---------- 全角記号などの混入チェック ---------- */
 sec('文字種チェック');
-const files = [...DATA.map((f) => 'src/data/' + f + '.js'), ...CODE.map((f) => 'src/js/' + f + '.js'), 'src/js/app.js', 'src/js/koumon.js', 'src/js/koumon-3d.js', 'src/js/koumon-stage.js'];
+const files = [...DATA.map((f) => 'src/data/' + f + '.js'), ...CODE.map((f) => 'src/js/' + f + '.js'), 'src/js/app.js'];
 const suspicious = /[가-힯Ѐ-ӿ]/;   // ハングル・キリル
 files.forEach((rel) => {
   const txt = fs.readFileSync(path.join(root, rel), 'utf8');

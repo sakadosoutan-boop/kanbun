@@ -1,7 +1,5 @@
-/* HTML の CSS / JS をすべてインライン化して単一ファイル版を出力する。
-   単一ファイルなのでオフラインでもそのまま開ける。 実行: node tools/build.mjs
-     index.html  → dist/index.html  ・ dist/artifact.html        （漢文道場）
-     soukan.html → dist/soukan.html ・ dist/soukan-artifact.html （楚漢の章・独立版） */
+/* index.html の CSS / JS をすべてインライン化して dist/index.html と dist/artifact.html を出力する。
+   単一ファイルなのでオフラインでもそのまま開ける。 実行: node tools/build.mjs */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +34,7 @@ function artifact(html) {
     (cls ? '<script>(function () { var c = ' + JSON.stringify(cls) + '; function a() { document.body.classList.add(c); } if (document.body) a(); else document.addEventListener(\'DOMContentLoaded\', a); })();</script>\n' : '') + body + '\n';
 }
 
-for (const [src, out, art] of [['index.html', 'dist/index.html', 'dist/artifact.html'], ['soukan.html', 'dist/soukan.html', 'dist/soukan-artifact.html']]) {
+for (const [src, out, art] of [['index.html', 'dist/index.html', 'dist/artifact.html']]) {
   const html = inline(src);
   write(out, html);
   write(art, artifact(html));

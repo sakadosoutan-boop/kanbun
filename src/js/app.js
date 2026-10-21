@@ -314,20 +314,15 @@
       '</button>';
   }
 
-  /** 楚漢の章（鴻門の会の物語）への入口 */
+  /** 楚漢の章（鴻門の会の物語）は別のリポジトリへ移した。ホームからはリンクで開く */
+  var KOUMON_URL = 'https://sakadosoutan-boop.github.io/-koumonnokai-/';
   function koumonHero() {
-    if (!window.Koumon || !window.KOUMON) return '';
-    var k = window.Koumon.summary() || {};
-    var sub = k.done ? '終章まで読了。結末 ' + k.endings + ' / ' + k.endAll + '・原文帳 ' + k.gen + ' / ' + k.genAll + ' 段'
-      : k.saveAt ? '続きから：' + k.saveAt
-      : k.cleared ? '鴻門を生き延びた。第二部「垓下」が開いています'
-      : '史記・項羽本紀。沛公となって、四十万の待つ宴へ。';
-    return '<button class="koumon-hero" data-act="koumon">' +
+    return '<a class="koumon-hero" href="' + KOUMON_URL + '" target="_blank" rel="noopener">' +
       '<span class="kh-tag">物語</span>' +
       '<span class="kh-t">楚漢の章<small>鴻門を生き延びよ</small></span>' +
-      '<span class="kh-d">鴻門の会・四面楚歌・高祖の三傑を、場面の絵とともに。句法を読み違えれば命はない。</span>' +
-      '<span class="kh-n">' + esc(sub) + '</span>' +
-      '</button>';
+      '<span class="kh-d">史記・鴻門の会。沛公となって、四十万の待つ宴へ。句法を読み違えれば命はない。</span>' +
+      '<span class="kh-go">別のページで開く ↗</span>' +
+      '</a>';
   }
 
   function screenHome() {
@@ -383,8 +378,8 @@
       homeLearningHTML() +
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
       battleHero(s) +
-      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button></div>' +
       koumonHero() +
+      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button></div>' +
       groupHTML +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
@@ -1590,10 +1585,6 @@
         window.Store.state.timedPractice = !window.Store.state.timedPractice;
         window.Store.save(); screenHome(); break;
       case 'journey': checkpoint(); screenJourney(); break;
-      case 'koumon':
-        checkpoint(); stopTick(); G = null;
-        window.Koumon.open({ onExit: function () { screenHome(); } });
-        break;
       case 'stage': window.Store.mark(); startBattle(modeById('battle'), Number(t.getAttribute('data-i'))); break;
       case 'learn':
         checkpoint(); stopTick(); G = null;
