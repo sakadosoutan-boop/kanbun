@@ -274,18 +274,46 @@
       '<button class="btn ghost" data-act="related" data-key="' + esc(q.key || '') + '" data-cat="' + esc(q.cat) + '">類題3問へ切替</button></div>';
   }
 
+  /* 道場破りのコース。本編（第一巻・第二巻）は順に開き、特別編（楚漢の章）は本編と関係なく、特別編の中で順に開く */
+  function courseOf(sp) {
+    var out = [];
+    window.FOES.forEach(function (f, i) { if (!!f.special === !!sp) out.push(i); });
+    return out;
+  }
+  function foeOpen(i) {
+    var f = window.FOES[i], c = courseOf(f.special), cleared = window.Store.state.foesCleared || [];
+    return c.slice(0, c.indexOf(i)).every(function (j) { return cleared.indexOf(window.FOES[j].id) !== -1; });
+  }
+  /** そのコースで次に挑む関門（全突破なら先頭に戻る） */
+  function nextOpenFoe(sp) {
+    var c = courseOf(sp), cleared = window.Store.state.foesCleared || [];
+    for (var k = 0; k < c.length; k++) if (cleared.indexOf(window.FOES[c[k]].id) === -1) return c[k];
+    return c[0];
+  }
+  function courseDone(sp) {
+    var cleared = window.Store.state.foesCleared || [];
+    return courseOf(sp).every(function (j) { return cleared.indexOf(window.FOES[j].id) !== -1; });
+  }
+  /** 関門の番号（コースの中で何番目か）と、見出し */
+  function gateNo(i) { var f = window.FOES[i]; return courseOf(f.special).indexOf(i) + 1; }
+  function gateLabel(i) { return (window.FOES[i].special ? '特別編 第' : '第') + gateNo(i) + '関門'; }
+  function chapterName(f) { return f.special ? '特別編 · 楚漢の章（史記）' : f.chapter === 2 ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門'; }
+
   function screenJourney() {
     stopTick(); G = null;
     var cleared = window.Store.state.foesCleared;
+    var groups = [
+      { list: courseOf(false).slice(0, 8), t: '第一巻 · 八つの関門', d: '基本の型を八つの関門で確かめます。' },
+      { list: courseOf(false).slice(8), t: '第二巻 · 諸子と詩人の試練', d: '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' },
+      { list: courseOf(true), t: '特別編 · 楚漢の章（史記）', d: '鴻門の会・垓下・烏江の人物が、その場面の本文から出題します。第一巻・第二巻を突破していなくても挑めます。一問45秒。' }
+    ];
     render('<div class="sec-h"><h2>道場破り・関門一覧</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
-      [0, 8].map(function (start) {
-        return '<h3>' + (start ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</h3>' +
-          '<p class="muted">' + (start ? '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
-          '<div class="journey-grid">' + window.FOES.slice(start, start + 8).map(function (f, j) {
-            var i = start + j, open = i === 0 || window.FOES.slice(0, i).every(function (p) { return cleared.indexOf(p.id) !== -1; });
-            var done = cleared.indexOf(f.id) !== -1;
+      groups.map(function (g) {
+        return '<h3>' + g.t + '</h3><p class="muted">' + g.d + '</p>' +
+          '<div class="journey-grid">' + g.list.map(function (i) {
+            var f = window.FOES[i], open = foeOpen(i), done = cleared.indexOf(f.id) !== -1;
             return '<button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
-              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
+              foeArt(f, 'mini') + '<span><small>' + gateLabel(i) + ' · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
           }).join('') + '</div>';
       }).join(''));
   }
@@ -294,11 +322,9 @@
 
   /** 道場破りだけは、次に立ちはだかる相手の顔を見せて別格に扱う */
   function battleHero(s) {
-    var cleared = s.foesCleared || [];
-    var idx = 0;
-    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
-    var all = idx >= window.FOES.length;
-    var f = window.FOES[all ? window.FOES.length - 1 : idx];
+    var main = courseOf(false), cleared = (s.foesCleared || []).filter(function (id) { return main.some(function (j) { return window.FOES[j].id === id; }); });
+    var all = courseDone(false), idx = all ? main[main.length - 1] : nextOpenFoe(false);
+    var f = window.FOES[idx];
     return '<button class="mode battle-hero" data-act="play" data-id="battle" style="--accent:var(--shu)">' +
       '<span class="m-tag">対戦</span>' +
       foeArt(f, 'hero-foe' + (all ? ' beaten' : ''), all ? '破' : '') +
@@ -308,8 +334,8 @@
           ? '十六の関門を突破。関門一覧から好きな相手に再挑戦できます。'
           : '次に待つのは<b>' + esc(f.name) + '</b>。' +
             esc(f.cats ? f.cats.join('・') : '全分野') + 'から、正解 ' + f.ki + ' 回で突破。') + '</span>' +
-        gateRoad(all ? window.FOES.length - 1 : idx, true) +
-        '<span class="bh-n">突破 ' + cleared.length + ' / ' + window.FOES.length + ' 関門</span>' +
+        gateRoad(idx, true) +
+        '<span class="bh-n">突破 ' + cleared.length + ' / ' + main.length + ' 関門</span>' +
       '</span>' +
       '</button>';
   }
@@ -379,7 +405,8 @@
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
       battleHero(s) +
       koumonHero() +
-      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button></div>' +
+      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button>' +
+        '<button class="btn ghost" data-act="special">特別編・楚漢の章（史記）</button></div>' +
       groupHTML +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
@@ -702,7 +729,7 @@
 
     var foeHTML = window.FOES.map(function (f, i) {
       var got = (s.foesCleared || []).indexOf(f.id) !== -1;
-      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="第' + (i + 1) + '関門　' +
+      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="' + gateLabel(i) + '　' +
           esc(got ? f.name : '未踏') + '">' +
         foeArt(f, got ? 'mini' : 'mini unknown', got ? '破' : '') +
         '<small>' + esc(got ? f.name : '？？？') + '</small></div>';
@@ -1132,12 +1159,9 @@
   }
 
   function startBattle(mode, selected) {
-    var cleared = window.Store.state.foesCleared || [];
-    var idx = 0;
-    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
-    if (idx >= window.FOES.length) idx = 0;      // 全突破後はもう一巡できる
+    var idx = nextOpenFoe(false);                 // 全突破後は先頭からもう一巡できる
     if (selected !== undefined) {
-      if (!window.FOES[selected] || !window.FOES.slice(0, selected).every(function (f) { return cleared.indexOf(f.id) !== -1; })) return screenJourney();
+      if (!window.FOES[selected] || !foeOpen(selected)) return screenJourney();
       idx = selected;
     }
     G = {
@@ -1152,16 +1176,17 @@
   /** 第一関門から第八関門までの道のり。inline は入れ子のボタン内に置く用 */
   function gateRoad(cur, inline) {
     var cleared = window.Store.state.foesCleared || [];
+    var c = courseOf(window.FOES[cur].special), k = c.indexOf(cur);
+    var list = window.FOES[cur].special ? c : c.slice(k >= 8 ? 8 : 0, k >= 8 ? 16 : 8);
     var s = '';
-    var start = cur >= 8 ? 8 : 0;
-    for (var i = start; i < Math.min(start + 8, window.FOES.length); i++) {
-      if (i > start) s += '<span></span>';
+    list.forEach(function (i, n) {
+      if (n) s += '<span></span>';
       var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
       s += '<i class="' + st + '"></i>';
-    }
+    });
     var tag = inline ? 'span' : 'div';
-    return '<' + tag + ' class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
-      window.FOES.length + '">' + s + '</' + tag + '>';
+    return '<' + tag + ' class="gate-road" role="img" aria-label="' + gateLabel(cur) + ' / ' +
+      c.length + '">' + s + '</' + tag + '>';
   }
 
   function screenFoeIntro() {
@@ -1169,10 +1194,10 @@
     var f = window.FOES[G.foeIdx];
     var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
     render(
-      '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
+      '<div class="sec-h"><h2>' + gateLabel(G.foeIdx) + ' / ' + courseOf(f.special).length + '</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
       gateRoad(G.foeIdx) +
-      '<p class="chapter-label">' + (f.chapter === 2 ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</p>' +
+      '<p class="chapter-label">' + chapterName(f) + '</p>' +
       '<div class="card foe-card">' +
         foeArt(f, 'big') +
         '<div class="foe-name">' + esc(f.name) +
@@ -1181,7 +1206,7 @@
         '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
         '<div class="foe-facts">' +
-          '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
+          '<b>' + esc(f.special ? '史記の本文から' : f.cats ? f.cats.join('・') : '全分野') + '</b>' +
           '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
           '<b>体力 ' + G.maxHearts + '</b>' +
           '<b>一問 ' + (f.time || BATTLE_TIME) + ' 秒</b>' +
@@ -1215,19 +1240,19 @@
     if (!restoring) { G.gates++; G.score += 300; }
     window.Store.checkAchievements();
     checkpoint();
-    var last = G.foeIdx >= window.FOES.length - 1;
+    var course = courseOf(f.special), last = G.foeIdx === course[course.length - 1];
     render(
       '<div class="card result">' +
         gateRoad(G.foeIdx) +
         foeArt(f, 'big beaten', '破') +
-        '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
+        '<div class="gate-clear">' + gateLabel(G.foeIdx) + '　突破</div>' +
         '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
         '<div class="r-grid">' +
           '<div class="stat"><b>' + G.score + '</b><span>得点</span></div>' +
           '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
           '<div class="stat"><b>' + G.hearts + '</b><span>残り体力</span></div>' +
         '</div>' +
-        '<p class="muted mt">' + (last ? '第二巻まで踏破しました。' : G.foeIdx === 7 ? '第一巻を踏破。第二巻「諸子と詩人の試練」が開きました。' : '体力を回復して次へ進みます。') + '</p>' +
+        '<p class="muted mt">' + (last ? (f.special ? '特別編「楚漢の章」を踏破しました。' : '第二巻まで踏破しました。') : !f.special && gateNo(G.foeIdx) === 8 ? '第一巻を踏破。第二巻「諸子と詩人の試練」が開きました。' : '体力を回復して次へ進みます。') + '</p>' +
         '<div class="btn-row mt" style="justify-content:center">' +
           (last
             ? '<button class="btn shu" data-act="bend">結果を見る</button>'
@@ -1241,16 +1266,18 @@
   }
 
   function nextFoe() {
-    G.foeIdx++;
-    if (G.foeIdx >= window.FOES.length) return screenBattleEnd(true);
+    var c = courseOf(window.FOES[G.foeIdx].special), k = c.indexOf(G.foeIdx);
+    if (k >= c.length - 1) return screenBattleEnd(true);
+    G.foeIdx = c[k + 1];
     screenFoeIntro();
   }
 
   function screenBattleEnd(win) {
     stopTick();
     var gates = G.gates, score = G.score, combo = G.maxCombo, wrong = G.wrong;
-    var reached = G.foeIdx + 1;
-    var allDone = (window.Store.state.foesCleared || []).length >= window.FOES.length;
+    var sp = !!window.FOES[G.foeIdx].special, reachedLabel = gateLabel(G.foeIdx);
+    var allDone = courseDone(sp), course = courseOf(sp);
+    var nCleared = course.filter(function (j) { return (window.Store.state.foesCleared || []).indexOf(window.FOES[j].id) !== -1; }).length;
     var m = G.mode;
     G = null;
 
@@ -1270,21 +1297,22 @@
 
     render(
       '<div class="card result mt">' +
-        '<div class="r-rank">' + (win || allDone ? '皆伝' : '第' + reached + '関門') + '</div>' +
+        '<div class="r-rank">' + (win || allDone ? (sp ? '踏破' : '皆伝') : reachedLabel) + '</div>' +
         '<div class="r-sub">' + (win || allDone
-          ? '第一巻・第二巻の十六関門をすべて突破しました。'
-          : 'この回で突破した関門：' + gates + '　／　到達：第' + reached + '関門') + '</div>' +
+          ? (sp ? '特別編「楚漢の章」の八関門をすべて突破しました。' : '第一巻・第二巻の十六関門をすべて突破しました。')
+          : 'この回で突破した関門：' + gates + '　／　到達：' + reachedLabel) + '</div>' +
         '<p class="r-msg">' + (win || allDone
           ? '次は間隔をあけて復習し、別の文章でも読める力を確かめましょう。'
           : gates > 0 ? '突破した関門は記録されています。次は続きから始まります。'
+                      : sp ? '原文と書き下し文を読み直して、句法の根拠を確かめてから、もう一度。'
                       : 'まずは基礎講座と再読文字ドリルで足場を作ってから、もう一度。') + '</p>' +
         '<div class="r-grid">' +
           '<div class="stat"><b>' + score + '</b><span>得点</span></div>' +
           '<div class="stat"><b>' + combo + '</b><span>最大連鎖</span></div>' +
-          '<div class="stat"><b>' + (window.Store.state.foesCleared || []).length + ' / ' + window.FOES.length + '</b><span>突破した関門</span></div>' +
+          '<div class="stat"><b>' + nCleared + ' / ' + course.length + '</b><span>突破した関門</span></div>' +
         '</div>' +
         '<div class="btn-row mt-l" style="justify-content:center">' +
-          '<button class="btn shu" data-act="play" data-id="battle">もう一度</button>' +
+          (sp ? '<button class="btn shu" data-act="special">もう一度</button>' : '<button class="btn shu" data-act="play" data-id="battle">もう一度</button>') +
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
@@ -1586,6 +1614,7 @@
         window.Store.save(); screenHome(); break;
       case 'journey': checkpoint(); screenJourney(); break;
       case 'stage': window.Store.mark(); startBattle(modeById('battle'), Number(t.getAttribute('data-i'))); break;
+      case 'special': window.Store.mark(); startBattle(modeById('battle'), nextOpenFoe(true)); break;
       case 'learn':
         checkpoint(); stopTick(); G = null;
         screenLesson(window.Learning.guide(t.getAttribute('data-cat'))[0]); break;

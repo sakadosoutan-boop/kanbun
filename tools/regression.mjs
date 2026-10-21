@@ -115,6 +115,27 @@ try {
     console.log('✔ 実力テストの採点・分野別結果・前回比較');
   }
   {
+    const p=await fresh(null);
+    await click(p,'special');
+    assert.equal(await p.evaluate(()=>__peek().foeIdx),16);
+    assert.ok((await p.locator('#app').textContent()).includes('特別編 第1関門'));
+    await p.screenshot({path:path.join(out,'special-intro.png'),fullPage:true});
+    await click(p,'foego');
+    assert.ok(await p.evaluate(()=>__peek().qs.slice(0,6).every(q=>q.stage==='f17')));
+    await p.screenshot({path:path.join(out,'special-question.png'),fullPage:true});
+    await answer(p,false); await click(p,'next');
+    for(let step=0;step<8;step++) { await answer(p); await click(p,'next'); if(await p.locator('.gate-clear').count()) break; }
+    assert.equal(await p.locator('.gate-clear').count(),1);
+    await click(p,'foenext');
+    assert.equal(await p.evaluate(()=>__peek().foeIdx),17);
+    await click(p,'go','[data-to="home"]'); await click(p,'journey');
+    assert.equal(await p.locator('[data-act="stage"][data-i="17"]').isEnabled(),true);
+    assert.equal(await p.locator('[data-act="stage"][data-i="18"]').isDisabled(),true);
+    assert.equal(await p.locator('[data-act="stage"][data-i="1"]').isDisabled(),true);
+    await noOverflow(p);
+    console.log('✔ 特別編「楚漢の章」は本編を突破していなくても挑め、特別編の中で順に開く');
+  }
+  {
     const seed={foesCleared:['f1','f2','f3','f4','f5','f6','f7','f8'],ach:['a10'],xp:8500};
     const p=await fresh(seed);
     await click(p,'journey'); await noOverflow(p);
@@ -151,7 +172,7 @@ try {
     assert.equal(state.session,null);
     await p.screenshot({path:path.join(out,'volume-two-cleared.png'),fullPage:true});
     await click(p,'go','[data-to="home"]'); await click(p,'journey');
-    assert.equal(await p.locator('[data-act="stage"]:not([disabled])').count(),16);
+    assert.equal(await p.locator('[data-act="stage"]:not([disabled])').count(),17); // 本編16＋特別編の最初の関門
     console.log('✔ 旧全クリ記録 → 第9関門 → 第二巻全8関門突破・途中再開・称号・再挑戦');
   }
   {
