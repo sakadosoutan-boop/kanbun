@@ -1072,6 +1072,30 @@ button:focus-visible { outline: 3px solid var(--ai); outline-offset: 3px; }
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
 
+/* ホームの入口 */
+.koumon-hero {
+  position: relative; display: grid; gap: 6px; width: 100%; text-align: left; margin-top: 14px; padding: 20px 20px 18px;
+  border-radius: var(--radius); border: 1px solid #b7913f; color: #f3ead2; cursor: pointer; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 82% 18%, rgba(255,230,180,.28), rgba(255,230,180,0) 22%),
+    radial-gradient(ellipse at 30% 110%, rgba(255,150,70,.35), rgba(255,150,70,0) 45%),
+    linear-gradient(180deg, #0c1022 0%, #1b1d36 55%, #2a1a1a 100%);
+  box-shadow: var(--shadow-lg); font-family: var(--mincho);
+}
+.koumon-hero::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38%; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+}
+.koumon-hero > * { position: relative; z-index: 1; }
+.koumon-hero:hover { filter: brightness(1.08); }
+.kh-tag { justify-self: start; font-size: 10px; letter-spacing: .25em; padding: 2px 10px; border-radius: 99px; background: #b7913f; color: #1b120a; }
+.kh-t { font-size: 26px; letter-spacing: .25em; }
+.kh-t small { display: block; font-size: 13px; letter-spacing: .35em; color: #e3c477; margin-top: 2px; }
+.kh-d { font-size: 13px; line-height: 1.7; color: #ddd0ae; font-family: var(--gothic); }
+.kh-n { font-size: 12px; color: #9fe0c0; font-family: var(--gothic); }
+.koumon-hero { text-decoration: none; }
+.kh-go { font-size: 12px; color: #e3c477; font-family: var(--gothic); }
+
 </style>
 <header class="topbar">
   <div class="topbar-in">
@@ -3255,6 +3279,277 @@ window.LESSONS = [
 
 </script>
 <script>
+/* 道場破り・特別編「楚漢の章」。
+ * 史記・項羽本紀（鴻門の会・垓下・烏江）の登場人物が関門に立ち、その人物の場面の本文から出題する。
+ * 第一巻・第二巻を突破していなくても挑める（特別編の中では順に開く）。
+ * 本文・書き下しは教科書の表記に合わせる（「以つて」「之を為すこと奈何」など）。相手の台詞は学習用の創作。 */
+(function () {
+  'use strict';
+  // [id, 一字, 名, かな, 引用, 引用の書き下し, 名乗り, 突破時の言葉, 帽子・冠のSVG, 持ち物のSVG]
+  var stages = [
+    ['f17', '讒', '曹無傷', 'そうむしょう', '沛公欲王関中', '沛公関中に王たらんと欲す。',
+      'わしの一言で、四十万の軍が動く。告げ口の文を、正しく読めるか。',
+      '……わしの名は、やがて宴の席で項王の口から漏れるのだったな。',
+      '<path d="M38 36L44 24H76L82 36Z"/>', '<path d="M84 70Q100 60 104 74Q96 80 86 78Z"/>'],
+    ['f18', '范', '范増', 'はんぞう', '此天子気也、急撃勿失', '此れ天子の気なり。急ぎ撃ちて失ふこと勿かれ。',
+      '七十の老骨、奇計を好む。わしの進言を、一字も読み落とすでないぞ。',
+      '……おぬしの読みは確かだ。豎子とは呼ぶまい。',
+      '<path d="M40 36L46 20H74L80 36Z"/><path d="M52 12H68V20H52Z"/>', '<circle cx="92" cy="80" r="11" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="58 12"/>'],
+    ['f19', '伯', '項伯', 'こうはく', '毋従倶死也', '従ひて倶に死すること毋かれ。',
+      '甥の項羽より、旧友の張良が大事でな。夜を駆けて来た。わしの言葉を取り違えるなよ。',
+      'よかろう。わしは剣を抜いて、沛公を翼のごとく蔽うてやる。',
+      '<path d="M36 37L42 22H78L84 37Z"/>', '<path d="M86 104L102 34" fill="none" stroke="currentColor" stroke-width="4"/><path d="M80 76H100" fill="none" stroke="currentColor" stroke-width="4"/>'],
+    ['f20', '良', '張良', 'ちょうりょう', '料大王士卒足以当項王乎', '大王の士卒を料るに、以つて項王に当たるに足るか。',
+      '策は帷帳の中で巡らすもの。わたしの問いに、沛公はどう答えたか。読んでみよ。',
+      'お見事。わたしは残って謝しましょう。あなたは間道を行かれよ。',
+      '<path d="M40 36Q42 18 60 16Q78 18 80 36Z"/>', '<path d="M14 88L38 67L59 93L36 112Z" fill="var(--paper)"/><path d="M20 86L37 75M25 92L43 80M31 99L48 87" fill="none" stroke="currentColor" stroke-width="2"/>'],
+    ['f21', '荘', '項荘', 'こうそう', '請以剣舞', '請ふ剣を以つて舞はん。',
+      '寿ぎの杯のあとに剣を抜く。舞か、刺客か——言葉の裏を読め。',
+      '……項伯どのの身が、いつも沛公の前にあった。撃てなかった。',
+      '<path d="M32 38Q60 2 88 38Z"/><path d="M58 4H62V14H58Z"/>', '<path d="M78 98L110 22" fill="none" stroke="currentColor" stroke-width="3"/><path d="M76 86L92 92" fill="none" stroke="currentColor" stroke-width="4"/>'],
+    ['f22', '噲', '樊噲', 'はんかい', '臣死且不避、卮酒安足辞', '臣死すら且つ避けず。卮酒安くんぞ辞するに足らん。',
+      '盾で衛士を突き倒して来た。目は裂け、髪は逆立つ。この口上、受け止められるか。',
+      '壮士だな、おぬしも。……さあ、大行は細謹を顧みずだ。行くぞ。',
+      '<path d="M30 38Q60 4 90 38Z"/><path d="M57 2H63V12H57Z"/>', '<path d="M80 62H110V100Q95 112 80 100Z"/><path d="M95 66V104" fill="none" stroke="var(--paper)" stroke-width="2"/>'],
+    ['f23', '沛', '沛公', 'はいこう', '臣与将軍戮力而攻秦', '臣将軍と力を戮はせて秦を攻む。',
+      '百余騎で鴻門へ来た。わたしの謝罪の言葉、そして逃げ道。読み解けたら通してやろう。',
+      '……間道二十里。後は張良に任せて、わたしは軍へ帰る。',
+      '<path d="M50 34L54 22H66L70 34Z"/><path d="M52 24L58 2L72 4L66 24Z"/>', '<path d="M84 70Q104 66 106 92Q96 100 86 94Z"/>'],
+    ['f24', '霸', '項王', 'こうおう', '力抜山兮気蓋世', '力は山を抜き気は世を蓋ふ。',
+      '力は山を抜き、気は世を蓋う。鴻門で沛公を逃したのは、わしの不明か、天か。最後の関門だ。',
+      '此れ天の我を亡ぼすにして、戦ひの罪に非ざるなり。……ゆけ。おぬしの勝ちだ。',
+      '<path d="M30 38Q60 2 90 38Z"/><path d="M56 2Q40 -6 30 6Q46 4 56 10Z"/><path d="M64 2Q80 -6 90 6Q74 4 64 10Z"/>', '<path d="M8 110L22 40" fill="none" stroke="currentColor" stroke-width="4"/><path d="M84 72L112 112H84Z" opacity=".8"/>']
+  ];
+  stages.forEach(function (s) {
+    window.FOES.push({ id: s[0], glyph: s[1], name: s[2], kana: s[3], src: '史記・項羽本紀', quote: s[4], qyomi: s[5], cats: null, ki: 4,
+      level: 3, chapter: 3, special: true, time: 45, taunt: s[6], beaten: s[7],
+      hit: 'その読み、本文どおりだ。', miss: '本文に戻って、根拠を確かめよ。' });
+    window.FOE_ART[s[0]] = '<svg class="ink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">' +
+      '<circle cx="60" cy="60" r="51" fill="currentColor" opacity=".06"/><path d="M6 108L26 70L44 92L70 58L114 110Z" fill="currentColor" opacity=".09"/>' +
+      '<g fill="currentColor" filter="url(#sumi-b)"><path d="M24 110Q24 77 45 68L75 68Q97 83 99 110Z" opacity=".8"/>' + s[8] + '</g>' +
+      '<ellipse cx="60" cy="51" rx="21" ry="25" fill="var(--paper)"/><g fill="none" stroke="currentColor" stroke-linecap="round"><path d="M40 44Q45 38 53 43M67 43Q75 38 80 44" stroke-width="2.8"/>' +
+      '<path d="M59 46L56 57L62 58M48 66Q60 72 72 66M47 70Q50 86 60 92Q71 84 73 70" stroke-width="2"/></g>' +
+      '<g fill="currentColor">' + s[9] + '</g><circle cx="48" cy="47" r="1.7" fill="currentColor"/><circle cx="72" cy="47" r="1.7" fill="currentColor"/></svg>';
+  });
+
+  // 本文から出す問題。answers の先頭が正解。reasons は誤答それぞれへの説明。
+  function q(stage, n, cat, stem, question, answers, exp, reasons) {
+    window.MONDAI.push({ id: 'j' + stage.slice(1) + '-' + n, stage: stage, cat: cat, level: 3,
+      stem: stem.replace(/、/g, '／'), src: '史記・項羽本紀', q: question, choices: answers, a: 0, exp: exp,
+      reasons: ['', reasons[0], reasons[1], reasons[2]] });
+  }
+
+  /* ---- 曹無傷：密告（沛公霸上に軍し…） ---- */
+  q('f17', 1, '再読文字', '沛公軍霸上、未得与項羽相見', '「未得与項羽相見」の書き下しとして適切なのはどれか。',
+    ['未だ項羽と相見ゆるを得ず', '未だ項羽と相見ゆるを得たり', '項羽と相見ゆるを未だ得ん', '未だ項羽を相見ゆるを得ず'],
+    '「未」は再読文字「未だ〜ず」。沛公はまだ項羽と会えずにいた。「与」は「〜と」。',
+    ['「未」の二度目の読み「ず」が抜け、意味が逆になっています。', '再読文字は一度目「いまだ」を先に、二度目「ず」を後に読みます。', '「与」は「〜と」で、会う相手を示します。']);
+  q('f17', 2, '使役', '沛公左司馬曹無傷使人言於項羽', '「使人言於項羽」の書き下しとして適切なのはどれか。',
+    ['人をして項羽に言はしむ', '人を使ひて項羽を言ふ', '人に項羽に言はる', '人の項羽に言ふを使ふ'],
+    '「使A〜」は使役「Aをして〜しむ」。曹無傷が人をやって項羽に言わせた。',
+    ['「使」はここでは使役の助字で、「言ふ」は「しむ」を伴って読みます。', '受身ではなく使役です。言わせたのは曹無傷です。', '「人」は使役の対象で、「人をして」と読みます。']);
+  q('f17', 3, '識別', '沛公欲王関中', 'この「王」の読みと働きとして適切なのはどれか。',
+    ['「王たり」と読み、王となる意の動詞', '「王の」と読み、関中を修飾する', '「王に」と読み、相手を示す', '「おう」と読み、沛公の称号を表す'],
+    '動詞の位置にある「王」は「王たり（王となる）」。「関中に王たらんと欲す」と読む。',
+    ['後ろの「関中」は場所で、「王の関中」という修飾ではありません。', '「欲」の後ろで述語として働いています。', '沛公はまだ王ではありません。王になろうとしているのです。']);
+  q('f17', 4, '使役', '使子嬰為相', '意味として適切なのはどれか。',
+    ['子嬰を宰相にする', '子嬰によって宰相にされる', '子嬰が宰相を使う', '子嬰のために宰相になる'],
+    '「子嬰をして相たらしむ」。降伏した秦王の子嬰を宰相にするという密告の内容。',
+    ['使役を受身と取り違えています。', '使役の対象と動作が逆になっています。', '「為」はここでは「なる（たり）」で、「ために」ではありません。']);
+  q('f17', 5, '重要語', '珍宝尽有之', '「之」が指すものはどれか。',
+    ['珍宝', '子嬰', '関中の民', '項羽の軍'],
+    '「珍宝尽く之を有す」。前に出した「珍宝」を「之」で受け直し、すべて自分のものにしたと言う。',
+    ['子嬰は宰相にする相手として前の句に出ています。', '民のことは述べていません。', '項羽の軍を持っているという意味にはなりません。']);
+  q('f17', 6, '訓読', '旦日饗士卒、為撃破沛公軍', '項羽の言葉の意味として適切なのはどれか。',
+    ['明朝、兵士にごちそうし、その勢いで沛公の軍を撃ち破ろう', '昨日兵士をもてなしたので、沛公の軍は破れた', '明朝、兵士に沛公の軍をもてなさせよう', '沛公の軍のために兵士を集めよう'],
+    '「旦日」は明朝。「士卒を饗し、為に沛公の軍を撃破せん」。怒った項羽が攻撃を決めた。',
+    ['「旦日」は明日の朝で、過去ではありません。', '「饗」するのは項羽の側の兵士たちです。', '「為に」は「そのために・それによって」で、沛公を助ける意味ではありません。']);
+
+  /* ---- 范増：進言 ---- */
+  q('f18', 1, '否定', '今入関、財物無所取、婦女無所幸', '「財物無所取」の意味として適切なのはどれか。',
+    ['財物を奪い取ることがない', '財物を取る場所がない', '財物をすべて取り尽くした', '財物を取らないでほしい'],
+    '「所〜」は「〜すること（もの）」。「財物取る所無し」で、財物を取ることがない。',
+    ['「所」は場所ではなく、「〜すること」を表します。', '「無」は打消です。取り尽くしたのではありません。', '願望や禁止の表現はありません。']);
+  q('f18', 2, '否定', '此其志不在小', '意味として適切なのはどれか。',
+    ['彼の志は小さなところにはない', '彼には志が少しもない', '小さなことを志してはならない', '彼の志は小さいに違いない'],
+    '「此れ其の志小に在らず」。財物や女性に目もくれないのは、天下という大きな望みがあるからだと説く。',
+    ['否定されているのは志の有無ではなく、志のありかです。', '「不」は打消で、禁止ではありません。', '「小に在らず」は小さくないという意味です。']);
+  q('f18', 3, '使役', '吾令人望其気、皆為龍虎、成五采', '「吾令人望其気」の書き下しとして適切なのはどれか。',
+    ['吾人をして其の気を望ましむ', '吾人に其の気を望まる', '吾人を令して其の気を望む', '吾其の気を望む人を令す'],
+    '「令」は「使」と同じく使役。「人をして〜しむ」。范増は人に雲気を観測させた。',
+    ['受身ではなく使役です。', '「令」は助字で、「しむ」と読みます。', '語順が崩れています。「人」が使役の対象です。']);
+  q('f18', 4, '禁止', '急撃勿失', '書き下しとして適切なのはどれか。',
+    ['急ぎ撃ちて失ふこと勿かれ', '急ぎ撃ちて失ふこと勿し', '急ぎ撃つも失はず', '急ぎ撃たば失はざらん'],
+    '「勿」は禁止「〜（する）こと勿かれ」。急いで撃ち、この機会を逃してはならない。',
+    ['「勿し」では禁止になりません。', '「勿」を単なる打消にしています。', '仮定の字はありません。']);
+  q('f18', 5, '訓読', '吾令人望其気、皆為龍虎、成五采、此天子気也', '范増が「天子の気」と言った根拠として、本文に合うのはどれか。',
+    ['沛公の陣の雲気が龍や虎の形で、五色をなしていた', '沛公が自ら天子だと名乗った', '沛公の兵が四十万に増えた', '項羽の陣に天子の気が見えた'],
+    '観測させた沛公の陣の雲気が「龍虎を為し、五采を成す」。これを天子となる者の気とした。',
+    ['沛公が名乗ったとは書かれていません。', '四十万は項羽の兵の数です。', '「其の気」の「其」は沛公を指します。']);
+  q('f18', 6, '訓読', '沛公居山東時、貪於財貨、好美姫', '范増がこの沛公の過去を持ち出した理由として適切なのはどれか。',
+    ['関に入ってからの慎みと比べ、志の大きさを示すため', '沛公が今も財貨をむさぼっていると示すため', '沛公をほめて、項羽と和解させるため', '山東の地を攻めるよう勧めるため'],
+    '昔は財貨・美女を好んだのに、今は何も取らない。その変化こそ「志小に在らず」の証拠だという論法。',
+    ['「今」は財物を取っていないと述べています。', '范増は沛公を「急ぎ撃て」と言っています。', '山東は沛公が以前いた土地で、攻める先ではありません。']);
+
+  /* ---- 項伯：夜馳す・取りなし ---- */
+  q('f19', 1, '重要語', '楚左尹項伯者、項羽季父也', '「季父」の意味として適切なのはどれか。',
+    ['父の末の弟（叔父）', '父の兄（伯父）', '末の息子', '母の父'],
+    '「伯・仲・叔・季」は兄弟の順。「季父」は父の末の弟で、項伯は項羽の叔父。',
+    ['父の兄は「伯父」です。', '「父」とあるので、子ではありません。', '母方の祖父ではありません。']);
+  q('f19', 2, '重要語', '素善留侯張良', '「素」の読みと意味として適切なのはどれか。',
+    ['「もとヨリ」——以前から', '「しろシ」——白い', '「すなほニ」——ありのままに', '「まれニ」——たまに'],
+    '「素より留侯張良に善し」。項伯は以前から張良と親しかった。',
+    ['色の意味ではありません。', 'ここでは副詞で「以前から」です。', '「まれに」の意味はありません。']);
+  q('f19', 3, '識別', '項伯乃夜馳之沛公軍、私見張良', 'この「之」の働きとして適切なのはどれか。',
+    ['「ゆク」と読む動詞', '「の」と読む助詞', '「これ」と読む代名詞', '読まない置き字'],
+    '「夜馳せて沛公の軍に之く」。後ろに行き先が続くので、動詞「ゆく」。',
+    ['名詞と名詞をつないでいるのではありません。', '後ろの「沛公軍」は行き先で、指示する対象ではありません。', '「之」は置き字ではなく、ここでは読む字です。']);
+  q('f19', 4, '禁止', '毋従倶死也', '意味として適切なのはどれか。',
+    ['（沛公に）従っていっしょに死んではならない', '従う者は誰も死なない', 'いっしょに死なせてやろう', '従わなければ死ぬことになる'],
+    '「毋」は禁止「〜こと毋かれ」。項伯は張良を連れ出そうとした。',
+    ['「毋」は禁止で、事実の否定ではありません。', '使役の字はありません。', '仮定の内容は述べていません。']);
+  q('f19', 5, '二重否定', '旦日不可不蚤自来謝項王', '意味として適切なのはどれか。',
+    ['明朝、早く自ら来て項王に謝罪しなければならない', '明朝、早く来て謝罪してはならない', '明朝は来なくてもよい', '明朝、早く来て謝罪できるはずがない'],
+    '「不可不〜」は二重否定「〜せざるべからず」で、強い当然・義務。',
+    ['否定が二つ重なり、強い肯定になっています。', '「不可不」は「〜しなくてよい」ではありません。', '反語ではなく、なすべきことを述べています。']);
+  q('f19', 6, '反語', '沛公不先破関中、公豈敢入乎', '項伯が項王に言ったこの言葉の意味として適切なのはどれか。',
+    ['沛公が先に関中を破らなければ、あなたはどうして入れたでしょうか', '沛公は関中を破らなかったので、あなたはきっと入れる', '沛公が関中を破ったのに、あなたは入ろうとしない', 'あなたが沛公より先に関中を破った'],
+    '「豈に敢へて入らんや」は反語。沛公の功績があったから項王も入関できたと、恩を説く。',
+    ['「豈〜乎」は反語で、入れなかったという意味です。', '入ろうとしないという話ではありません。', '先に破ったのは沛公です。']);
+
+  /* ---- 張良：沛公に告ぐ・兄として事へん ---- */
+  q('f20', 1, '二重否定', '沛公今事有急、亡去不義、不可不語', '「不可不語」の意味として適切なのはどれか。',
+    ['告げないわけにはいかない', '告げてはならない', '告げることはできない', '告げる必要はない'],
+    '「語げざるべからず」。逃げるのは不義なので、沛公に知らせないわけにはいかない。',
+    ['否定が二つ重なっています。禁止ではありません。', '「不可不」は不可能ではなく、強い当然です。', '必要を打ち消してはいません。']);
+  q('f20', 2, '疑問', '沛公大驚曰、為之奈何', '「為之奈何」の意味として適切なのはどれか。',
+    ['どうしたらよいか', 'なぜこうなったのか', 'これをどうして許せようか', 'これは何のためか'],
+    '「之を為すこと奈何」。「奈何」は方法を問う疑問で「どうしたらよいか」。',
+    ['理由を問う「何故」とは違います。', '反語ではなく、方法を尋ねています。', '「為」はここでは「する」で、目的を問う文ではありません。']);
+  q('f20', 3, '疑問', '料大王士卒足以当項王乎', '張良の問いの意味として適切なのはどれか。',
+    ['大王の兵卒を見積もって、項王に対抗するのに十分ですか', '大王の兵卒は、項王より多いに違いない', '項王の兵卒を数えてみよう', '大王の兵卒を項王に引き渡しますか'],
+    '「料る」は見積もる。「以つて項王に当たるに足るか」。対抗できるかを問う。',
+    ['文末の「乎」は疑問で、断定ではありません。', '見積もるのは「大王の士卒」です。', '「当たる」は対抗する意味です。']);
+  q('f20', 4, '比較', '沛公黙然曰、固不如也', '沛公の答え「固不如也」の意味として適切なのはどれか。',
+    ['もとより及ばない', 'かたくなに従わない', 'はじめから同じである', 'まったく似ていない'],
+    '「固より如かざるなり」。「不如」は「及ばない」。兵力では項王にかなわないと認めた。',
+    ['「固」は「もとより」で、かたくなの意味ではありません。', '「不如」は同じではなく、劣ることを表します。', '似ているかどうかを述べているのではありません。']);
+  q('f20', 5, '比較', '孰与君少長', '沛公の問いの意味として適切なのはどれか。',
+    ['（項伯は）あなたと比べて、年は若いか上か', '誰があなたを年長者にしたのか', '若い者と年長者のどちらを連れて来るか', 'あなたは誰と親しいのか'],
+    '「君と孰与れか少長なる」。「孰与」は比べて問う形。張良は「臣より長ぜり」と答える。',
+    ['「孰」は比べる問いで、行為者を問うていません。', '連れて来る相手を選ぶ文ではありません。', '親しさではなく年齢を比べています。']);
+  q('f20', 6, '訓読', '君為我呼入、吾得兄事之', '「吾得兄事之」の意味として適切なのはどれか。',
+    ['私は彼に兄として仕えよう', '私は彼の兄になろう', '私は兄に彼を仕えさせよう', '私は兄のことで彼に仕える'],
+    '「吾之に兄事するを得ん」。「兄事」は兄として仕えること。年長の項伯を兄として遇する。',
+    ['兄になるのではなく、兄として仕えるのです。', '使役の字はありません。', '「兄事」は兄として仕える意味の一語です。']);
+
+  /* ---- 項荘：剣舞 ---- */
+  q('f21', 1, '重要語', '君王為人不忍', '「為人」の読みと意味として適切なのはどれか。',
+    ['「ひとトなり」——人柄', '「ひとノためニ」——人のために', '「ひとトなル」——人になる', '「ひとヲつくル」——人を育てる'],
+    '「君王人と為り忍びず」。范増は、項王は人柄として非情になれないと見ていた。',
+    ['ここは目的の「ために」ではありません。', '主語は君王で、人になるわけではありません。', '「為」をつくる意味に読むのは文脈に合いません。']);
+  q('f21', 2, '仮定', '不者、若属皆且為所虜', '「不者」の読みと意味として適切なのはどれか。',
+    ['「しからずンバ」——そうしなければ', '「しからバ」——そうであるならば', '「ものならず」——人ではない', '「ふしゃ」——役に立たない者'],
+    '「不者んば」は「しからずんば」。沛公を殺さなければ、という仮定。',
+    ['否定の「不」を落としています。', '「者」はここでは仮定の条件を示す読みです。', '音読みの熟語ではありません。']);
+  q('f21', 3, '再読文字', '若属皆且為所虜', 'この「且」の読みとして適切なのはどれか。',
+    ['「まさニ〜ントす」——今にも〜しそうだ', '「かツ」——その上', '「しばらク」——少しの間', '「なホ」——まだ'],
+    '「若が属皆且に虜とする所と為らんとす」。再読文字の「且」で、今にもそうなろうとしている。',
+    ['ここでは累加ではなく、差し迫った事態を表します。', '時間の短さを表す読みではありません。', '「猶」と取り違えています。']);
+  q('f21', 4, '受身', '若属皆且為所虜', '意味として適切なのはどれか。',
+    ['お前たちはみな、やがて捕虜にされるだろう', 'お前たちはみな、捕虜を取るだろう', 'お前たちが捕虜にしたのだ', 'お前たちはみな、捕虜になってはならない'],
+    '「為所〜」は受身「〜する所と為る」。沛公に天下を取られ、捕虜にされる。',
+    ['受身を能動に取り違えています。', '過去の事実ではなく、これからのことです。', '禁止の字はありません。']);
+  q('f21', 5, '訓読', '寿畢、請以剣舞、因撃沛公於坐殺之', '范増が項荘に命じた内容として適切なのはどれか。',
+    ['剣舞にかこつけて、座席の沛公を撃ち殺せ', '剣舞を見せて、沛公の機嫌を取れ', '沛公に剣舞を舞わせよ', '剣舞のあとで沛公を逃がせ'],
+    '「因りて沛公を坐に撃ちて之を殺せ」。剣舞を口実に暗殺する計略。',
+    ['もてなすための舞ではありません。', '舞うのは項荘です。', '殺すよう命じています。']);
+  q('f21', 6, '訓読', '項伯亦抜剣起舞、常以身翼蔽沛公', '項伯の行動として適切なのはどれか。',
+    ['いつも自分の体で、鳥が翼で覆うように沛公をかばった', '沛公に剣を渡して舞わせた', '項荘とともに沛公を撃とうとした', '翼の飾りを付けて舞った'],
+    '「常に身を以つて沛公を翼蔽す」。項伯が盾となり、項荘は撃てなかった。',
+    ['剣を抜いたのは項伯自身です。', '項伯は沛公をかばっています。', '「翼蔽」は比喩で、飾りのことではありません。']);
+
+  /* ---- 樊噲：帷を披く・樊噲の弁 ---- */
+  q('f22', 1, '抑揚', '臣死且不避、卮酒安足辞', 'この文の句法と意味として適切なのはどれか。',
+    ['抑揚：死さえ避けないのに、まして大杯の酒をどうして辞退しようか', '仮定：もし死を避けないなら、酒は辞退する', '比較：死を避けるより、酒を辞退するほうがよい', '並列：死も酒も、どちらも避けたい'],
+    '「A且B、C安D」は抑揚。重いことを先に言い、軽いことはなおさらだと述べる。',
+    ['仮定の字はありません。', '比べて選ぶ文ではありません。', '樊噲は死も避けないと言っています。']);
+  q('f22', 2, '反語', '卮酒安足辞', '「卮酒安足辞」の書き下しとして適切なのはどれか。',
+    ['卮酒安くんぞ辞するに足らん', '卮酒安んじて辞するに足る', '卮酒安くにか辞するに足る', '卮酒を辞するに足りて安し'],
+    '「安くんぞ〜ん」は反語。辞退するほどのことがあろうか、いや無い。',
+    ['「安」はここでは「やすんじて」ではありません。', '場所を問う読みではありません。', '語順と句法が崩れています。']);
+  q('f22', 3, '訓読', '噲遂入、披帷西嚮立、瞋目視項王、頭髪上指、目眥尽裂', '樊噲の様子として適切なのはどれか。',
+    ['激しい怒りで髪が逆立ち、まなじりが裂けんばかりだった', '恐ろしさに髪が乱れ、涙があふれた', '喜びで顔を上げ、目を細めた', '酔って髪が乱れ、目が赤くなった'],
+    '「瞋目」は目をいからせること。「頭髪上指し、目眥尽く裂く」は怒りの極み。',
+    ['恐れているのではなく、怒っています。', '「瞋目」は目をいからせることです。', '酒を飲むのはこの後です。']);
+  q('f22', 4, '識別', '先破秦入咸陽者王之', 'この「王之」の意味として適切なのはどれか。',
+    ['その者を王にする', 'その者の王', 'その者が王のもとへ行く', '王がその者を破る'],
+    '「先に秦を破りて咸陽に入る者は之に王とせん」。懐王の約束。',
+    ['ここの「王」は動詞で、「の」でつなぐ名詞ではありません。', '「之」は移動の動詞ではなく、約束の対象を指します。', '破るのは秦で、主語は先に入った者です。']);
+  q('f22', 5, '訓読', '労苦而功高如此、未有封侯之賞', '樊噲が訴えていることとして適切なのはどれか。',
+    ['これほど苦労して功績が高いのに、まだ領地を与える恩賞がない', '苦労したので、もう恩賞はいらない', '功績が低いので、恩賞がないのは当然だ', '恩賞をもらったので、苦労は報われた'],
+    '「未だ封侯の賞有らず」。功ある者を討とうとする不当さを責める。',
+    ['恩賞を辞退しているのではありません。', '功は「高い」と言っています。', '「未」はまだない、という意味です。']);
+  q('f22', 6, '反語', '如今人方為刀俎、我為魚肉、何辞為', '「何辞為」の意味として適切なのはどれか。',
+    ['どうして（別れの）挨拶などする必要があろうか', 'なぜ辞退したのか', '何と言って挨拶すればよいか', '何をやめるのか'],
+    '「何ぞ辞するを為さんや」は反語。今は殺される側だ、挨拶など無用と沛公を促す。',
+    ['過去の理由を問う文ではありません。', '方法を尋ねる疑問ではありません。', '「辞」は別れの挨拶をすることです。']);
+
+  /* ---- 沛公：鴻門に謝す・間行 ---- */
+  q('f23', 1, '識別', '臣与将軍戮力而攻秦', 'この「与」の意味として適切なのはどれか。',
+    ['〜と（いっしょに）', '〜に与える', '〜よりも', '〜か（疑問）'],
+    '「臣将軍と力を戮はせて秦を攻む」。「与」は共同の相手を示す。',
+    ['授与の動詞ではありません。', '比較の基準を示す字ではありません。', '文末の「与（か）」とは位置も働きも違います。']);
+  q('f23', 2, '訓読', '然不自意能先入関破秦、得復見将軍於此', '意味として適切なのはどれか。',
+    ['自分でも思いがけず先に関中に入り秦を破り、再びここで将軍にお会いできた', '自分の考えで関に入り、将軍と戦うつもりだった', '関に入れず、将軍にも会えなかった', '将軍が先に関に入ったので、ここで会えた'],
+    '「自ら意はざりき」は思いもしなかった。謙遜して、先に入関したのは偶然だと弁明する。',
+    ['「不自意」は意図していなかったことを表します。', '「得復見」は、また会えたという意味です。', '先に関に入ったのは沛公です。']);
+  q('f23', 3, '使役', '今者有小人之言、令将軍与臣有郤', '「令将軍与臣有郤」の意味として適切なのはどれか。',
+    ['将軍と私との間に仲たがいを生じさせている', '将軍に私と仲直りするよう命じる', '将軍と私が仲たがいしないようにする', '将軍が私に命令を下す'],
+    '「将軍をして臣と郤有らしむ」。小人のざん言が二人を不和にしていると訴える。',
+    ['「郤」はすき間・不和で、仲直りではありません。', '否定の字はありません。', '「令」は使役で、命令を下す文ではありません。']);
+  q('f23', 4, '再読文字', '今者出、未辞也、為之奈何', '「未辞也」の意味として適切なのはどれか。',
+    ['まだ別れの挨拶をしていない', '挨拶をしてはならない', '挨拶は必要ない', '一度も辞退したことがない'],
+    '「未だ辞せざるなり」。宴を抜け出したが、項王に挨拶をしていないと気にしている。',
+    ['禁止ではありません。', '必要の有無を述べていません。', '「辞」はここでは別れの挨拶です。']);
+  q('f23', 5, '限定', '従此道至吾軍、不過二十里耳', '意味として適切なのはどれか。',
+    ['この道から我が軍まで、二十里にすぎない', '二十里を越えてはならない', '二十里しか進めなかった', 'この道は二十里以上ある'],
+    '「二十里に過ぎざるのみ」。「耳」は限定「のみ」。近道で軍へ帰る。',
+    ['禁止ではありません。', '進めた距離ではなく、道のりを言っています。', '「不過」は「〜を越えない」です。']);
+  q('f23', 6, '訓読', '沛公則置車騎、脱身独騎', '沛公の行動として適切なのはどれか。',
+    ['車や騎兵を残し、ひとり馬に乗って抜け出した', '車騎を率いて正面から帰った', '車に乗り、騎兵に守らせた', '項王に車騎を献上した'],
+    '「車騎を置き、身を脱して独り騎す」。目立たぬよう従者を残して間道を逃れた。',
+    ['車騎は置いていきました。', '馬に乗ったのは沛公ひとりです。', '献上したのは白璧と玉斗です。']);
+
+  /* ---- 項王：鴻門・垓下・烏江 ---- */
+  q('f24', 1, '反語', '此沛公左司馬曹無傷言之、不然、籍何以至此', '「籍何以至此」の意味として適切なのはどれか。',
+    ['そうでなければ、私がどうしてこんなことをしようか', '私はどの道を通ってここに来たのか', '私は何を持ってここに来たのか', '私はきっとここに来るだろう'],
+    '「籍何を以つてか此に至らん」は反語。項王はうっかり密告者の名を明かしてしまう。',
+    ['道を尋ねる疑問ではありません。', '持ち物を問う文ではありません。', '推量ではなく反語です。']);
+  q('f24', 2, '詠嘆', '漢皆已得楚乎、是何楚人之多也', '項王の言葉に表れた気持ちとして適切なのはどれか。',
+    ['漢がもう楚を手に入れたのかと驚き、楚人の多さを嘆いている', '楚人が多いことを喜んでいる', '漢軍に楚を取るよう命じている', '楚人の数を数えさせている'],
+    '「是れ何ぞ楚人の多きや」は詠嘆。四面の楚歌に、故郷が奪われたと思い込む。',
+    ['驚きと嘆きの言葉です。', '命令の文ではありません。', '使役の字はありません。']);
+  q('f24', 3, '訓読', '力抜山兮気蓋世', '意味として適切なのはどれか。',
+    ['力は山を引き抜き、気力は世をおおうほどだ', '力で山を越え、世を去る', '山の力を抜き、気を世に配る', '山より力が弱く、世に勝てない'],
+    '「力は山を抜き気は世を蓋ふ」。かつての自分の力と意気を歌う。「兮」は調子を整える字。',
+    ['「抜」は引き抜く、「蓋」はおおう意味です。', '「力」が主語で、山の力ではありません。', '力の強さを誇る句です。']);
+  q('f24', 4, '疑問', '騅不逝兮可奈何、虞兮虞兮奈若何', '「奈若何」の意味として適切なのはどれか。',
+    ['お前をどうしたらよいのか', 'お前は何をしているのか', 'お前はどこへ行くのか', 'お前のようになりたい'],
+    '「若を奈何せん」。「若」は二人称「なんぢ」。虞美人の行く末を案じる。',
+    ['相手の行動を問う文ではありません。', '場所を問う字はありません。', '「若」はここでは「ごとし」ではありません。']);
+  q('f24', 5, '反語', '項王笑曰、天之亡我、我何渡為', '「我何渡為」の意味として適切なのはどれか。',
+    ['天が私を滅ぼすのだ、どうして渡ろうか（渡らない）', '天に見捨てられたので、急いで渡ろう', '天は私を滅ぼさないので、渡ることにする', 'なぜ私が渡るのかと天に尋ねる'],
+    '「我何ぞ渡るを為さんや」は反語。烏江の亭長の勧めを断る。',
+    ['「何〜為」は反語で、渡らないという意味です。', '天は私を滅ぼすと言っています。', '天に問うているのではありません。']);
+  q('f24', 6, '仮定', '縦江東父兄憐而王我、我何面目見之', '意味として適切なのはどれか。',
+    ['たとえ江東の父兄が哀れんで私を王としても、何の面目があって彼らに会えようか', '江東の父兄が私を王としたので、面目を保てた', '江東の父兄は私を憐れまず、王としなかった', '江東の父兄に会うために、面目を整えよう'],
+    '「縦ひ〜とも」は仮定（譲歩）。八千人の子弟を一人も連れ帰れなかった恥を述べる。',
+    ['「縦」は仮定で、事実を述べてはいません。', '父兄が憐れむ場合を仮に想定しています。', '「何の面目ありて」は反語です。']);
+})();
+
+</script>
+<script>
 /* 進捗の保存・段位・実績・弱点管理 */
 (function () {
   'use strict';
@@ -3312,6 +3607,8 @@ window.LESSONS = [
     { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
     { id: 'a10', ico: '伝', t: '免許皆伝',   d: '第一巻の八関門を突破', test: function (s) { return ['f1','f2','f3','f4','f5','f6','f7','f8'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a14', ico: '極', t: '古典探究', d: '第二巻の八関門を突破', test: function (s) { return ['f9','f10','f11','f12','f13','f14','f15','f16'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
+    { id: 'a15', ico: '鴻', t: '鴻門脱出', d: '特別編・楚漢の章で沛公の関門（鴻門の会）を突破', test: function (s) { return s.foesCleared.indexOf('f23') !== -1; } },
+    { id: 'a16', ico: '傑', t: '人傑の宴', d: '特別編・楚漢の章の八関門をすべて突破', test: function (s) { return ['f17','f18','f19','f20','f21','f22','f23','f24'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } },
     { id: 'a12', ico: '墨', t: '千字文',     d: '漢文を通算1000字読んだ',          test: function (s) { return (s.chars || 0) >= 1000; } },
     { id: 'a13', ico: '万', t: '万巻の書',   d: '漢文を通算10000字読んだ',         test: function (s) { return (s.chars || 0) >= 10000; } }
@@ -4279,18 +4576,46 @@ window.LESSONS = [
       '<button class="btn ghost" data-act="related" data-key="' + esc(q.key || '') + '" data-cat="' + esc(q.cat) + '">類題3問へ切替</button></div>';
   }
 
+  /* 道場破りのコース。本編（第一巻・第二巻）は順に開き、特別編（楚漢の章）は本編と関係なく、特別編の中で順に開く */
+  function courseOf(sp) {
+    var out = [];
+    window.FOES.forEach(function (f, i) { if (!!f.special === !!sp) out.push(i); });
+    return out;
+  }
+  function foeOpen(i) {
+    var f = window.FOES[i], c = courseOf(f.special), cleared = window.Store.state.foesCleared || [];
+    return c.slice(0, c.indexOf(i)).every(function (j) { return cleared.indexOf(window.FOES[j].id) !== -1; });
+  }
+  /** そのコースで次に挑む関門（全突破なら先頭に戻る） */
+  function nextOpenFoe(sp) {
+    var c = courseOf(sp), cleared = window.Store.state.foesCleared || [];
+    for (var k = 0; k < c.length; k++) if (cleared.indexOf(window.FOES[c[k]].id) === -1) return c[k];
+    return c[0];
+  }
+  function courseDone(sp) {
+    var cleared = window.Store.state.foesCleared || [];
+    return courseOf(sp).every(function (j) { return cleared.indexOf(window.FOES[j].id) !== -1; });
+  }
+  /** 関門の番号（コースの中で何番目か）と、見出し */
+  function gateNo(i) { var f = window.FOES[i]; return courseOf(f.special).indexOf(i) + 1; }
+  function gateLabel(i) { return (window.FOES[i].special ? '特別編 第' : '第') + gateNo(i) + '関門'; }
+  function chapterName(f) { return f.special ? '特別編 · 楚漢の章（史記）' : f.chapter === 2 ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門'; }
+
   function screenJourney() {
     stopTick(); G = null;
     var cleared = window.Store.state.foesCleared;
+    var groups = [
+      { list: courseOf(false).slice(0, 8), t: '第一巻 · 八つの関門', d: '基本の型を八つの関門で確かめます。' },
+      { list: courseOf(false).slice(8), t: '第二巻 · 諸子と詩人の試練', d: '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' },
+      { list: courseOf(true), t: '特別編 · 楚漢の章（史記）', d: '鴻門の会・垓下・烏江の人物が、その場面の本文から出題します。第一巻・第二巻を突破していなくても挑めます。一問45秒。' }
+    ];
     render('<div class="sec-h"><h2>道場破り・関門一覧</h2><div class="rule"></div><button class="btn ghost" data-act="go" data-to="home">ホームへ</button></div>' +
-      [0, 8].map(function (start) {
-        return '<h3>' + (start ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</h3>' +
-          '<p class="muted">' + (start ? '文脈を読む新作24問と応用問題。一問40秒で読み解きます。' : '基本の型を八つの関門で確かめます。') + '</p>' +
-          '<div class="journey-grid">' + window.FOES.slice(start, start + 8).map(function (f, j) {
-            var i = start + j, open = i === 0 || window.FOES.slice(0, i).every(function (p) { return cleared.indexOf(p.id) !== -1; });
-            var done = cleared.indexOf(f.id) !== -1;
+      groups.map(function (g) {
+        return '<h3>' + g.t + '</h3><p class="muted">' + g.d + '</p>' +
+          '<div class="journey-grid">' + g.list.map(function (i) {
+            var f = window.FOES[i], open = foeOpen(i), done = cleared.indexOf(f.id) !== -1;
             return '<button class="journey-stage' + (done ? ' cleared' : '') + '" data-act="stage" data-i="' + i + '"' + (!open ? ' disabled' : '') + '>' +
-              foeArt(f, 'mini') + '<span><small>第' + (i + 1) + '関門 · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
+              foeArt(f, 'mini') + '<span><small>' + gateLabel(i) + ' · ' + (done ? '突破済み' : open ? '挑戦可能' : '未解放') + '</small><b>' + esc(f.name) + '</b></span></button>';
           }).join('') + '</div>';
       }).join(''));
   }
@@ -4299,11 +4624,9 @@ window.LESSONS = [
 
   /** 道場破りだけは、次に立ちはだかる相手の顔を見せて別格に扱う */
   function battleHero(s) {
-    var cleared = s.foesCleared || [];
-    var idx = 0;
-    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
-    var all = idx >= window.FOES.length;
-    var f = window.FOES[all ? window.FOES.length - 1 : idx];
+    var main = courseOf(false), cleared = (s.foesCleared || []).filter(function (id) { return main.some(function (j) { return window.FOES[j].id === id; }); });
+    var all = courseDone(false), idx = all ? main[main.length - 1] : nextOpenFoe(false);
+    var f = window.FOES[idx];
     return '<button class="mode battle-hero" data-act="play" data-id="battle" style="--accent:var(--shu)">' +
       '<span class="m-tag">対戦</span>' +
       foeArt(f, 'hero-foe' + (all ? ' beaten' : ''), all ? '破' : '') +
@@ -4313,10 +4636,21 @@ window.LESSONS = [
           ? '十六の関門を突破。関門一覧から好きな相手に再挑戦できます。'
           : '次に待つのは<b>' + esc(f.name) + '</b>。' +
             esc(f.cats ? f.cats.join('・') : '全分野') + 'から、正解 ' + f.ki + ' 回で突破。') + '</span>' +
-        gateRoad(all ? window.FOES.length - 1 : idx, true) +
-        '<span class="bh-n">突破 ' + cleared.length + ' / ' + window.FOES.length + ' 関門</span>' +
+        gateRoad(idx, true) +
+        '<span class="bh-n">突破 ' + cleared.length + ' / ' + main.length + ' 関門</span>' +
       '</span>' +
       '</button>';
+  }
+
+  /** 楚漢の章（鴻門の会の物語）は別のリポジトリへ移した。ホームからはリンクで開く */
+  var KOUMON_URL = 'https://sakadosoutan-boop.github.io/-koumonnokai-/';
+  function koumonHero() {
+    return '<a class="koumon-hero" href="' + KOUMON_URL + '" target="_blank" rel="noopener">' +
+      '<span class="kh-tag">物語</span>' +
+      '<span class="kh-t">楚漢の章<small>鴻門を生き延びよ</small></span>' +
+      '<span class="kh-d">史記・鴻門の会。沛公となって、四十万の待つ宴へ。句法を読み違えれば命はない。</span>' +
+      '<span class="kh-go">別のページで開く ↗</span>' +
+      '</a>';
   }
 
   function screenHome() {
@@ -4372,7 +4706,9 @@ window.LESSONS = [
       homeLearningHTML() +
       '<div class="sec-h"><h2>けいこ</h2><div class="rule"></div></div>' +
       battleHero(s) +
-      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button></div>' +
+      koumonHero() +
+      '<div class="btn-row mt"><button class="btn ghost" data-act="journey">関門一覧・再挑戦</button>' +
+        '<button class="btn ghost" data-act="special">特別編・楚漢の章（史記）</button></div>' +
       groupHTML +
       '<div class="sec-h"><h2>まなび</h2><div class="rule"></div></div>' +
       '<div class="modes">' +
@@ -4695,7 +5031,7 @@ window.LESSONS = [
 
     var foeHTML = window.FOES.map(function (f, i) {
       var got = (s.foesCleared || []).indexOf(f.id) !== -1;
-      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="第' + (i + 1) + '関門　' +
+      return '<div class="foe-slot' + (got ? ' got' : '') + '" title="' + gateLabel(i) + '　' +
           esc(got ? f.name : '未踏') + '">' +
         foeArt(f, got ? 'mini' : 'mini unknown', got ? '破' : '') +
         '<small>' + esc(got ? f.name : '？？？') + '</small></div>';
@@ -5125,12 +5461,9 @@ window.LESSONS = [
   }
 
   function startBattle(mode, selected) {
-    var cleared = window.Store.state.foesCleared || [];
-    var idx = 0;
-    while (idx < window.FOES.length && cleared.indexOf(window.FOES[idx].id) !== -1) idx++;
-    if (idx >= window.FOES.length) idx = 0;      // 全突破後はもう一巡できる
+    var idx = nextOpenFoe(false);                 // 全突破後は先頭からもう一巡できる
     if (selected !== undefined) {
-      if (!window.FOES[selected] || !window.FOES.slice(0, selected).every(function (f) { return cleared.indexOf(f.id) !== -1; })) return screenJourney();
+      if (!window.FOES[selected] || !foeOpen(selected)) return screenJourney();
       idx = selected;
     }
     G = {
@@ -5145,16 +5478,17 @@ window.LESSONS = [
   /** 第一関門から第八関門までの道のり。inline は入れ子のボタン内に置く用 */
   function gateRoad(cur, inline) {
     var cleared = window.Store.state.foesCleared || [];
+    var c = courseOf(window.FOES[cur].special), k = c.indexOf(cur);
+    var list = window.FOES[cur].special ? c : c.slice(k >= 8 ? 8 : 0, k >= 8 ? 16 : 8);
     var s = '';
-    var start = cur >= 8 ? 8 : 0;
-    for (var i = start; i < Math.min(start + 8, window.FOES.length); i++) {
-      if (i > start) s += '<span></span>';
+    list.forEach(function (i, n) {
+      if (n) s += '<span></span>';
       var st = i === cur ? 'now' : cleared.indexOf(window.FOES[i].id) !== -1 ? 'done' : '';
       s += '<i class="' + st + '"></i>';
-    }
+    });
     var tag = inline ? 'span' : 'div';
-    return '<' + tag + ' class="gate-road" role="img" aria-label="第' + (cur + 1) + '関門 / ' +
-      window.FOES.length + '">' + s + '</' + tag + '>';
+    return '<' + tag + ' class="gate-road" role="img" aria-label="' + gateLabel(cur) + ' / ' +
+      c.length + '">' + s + '</' + tag + '>';
   }
 
   function screenFoeIntro() {
@@ -5162,10 +5496,10 @@ window.LESSONS = [
     var f = window.FOES[G.foeIdx];
     var cleared = (window.Store.state.foesCleared || []).indexOf(f.id) !== -1;
     render(
-      '<div class="sec-h"><h2>第' + (G.foeIdx + 1) + '関門 / ' + window.FOES.length + '</h2><div class="rule"></div>' +
+      '<div class="sec-h"><h2>' + gateLabel(G.foeIdx) + ' / ' + courseOf(f.special).length + '</h2><div class="rule"></div>' +
         '<button class="btn ghost" data-act="go" data-to="home">やめる</button></div>' +
       gateRoad(G.foeIdx) +
-      '<p class="chapter-label">' + (f.chapter === 2 ? '第二巻 · 諸子と詩人の試練' : '第一巻 · 八つの関門') + '</p>' +
+      '<p class="chapter-label">' + chapterName(f) + '</p>' +
       '<div class="card foe-card">' +
         foeArt(f, 'big') +
         '<div class="foe-name">' + esc(f.name) +
@@ -5174,7 +5508,7 @@ window.LESSONS = [
         '<p class="q-src">' + esc(f.qyomi) + '　— ' + esc(f.src) + '</p>' +
         '<p class="foe-taunt">「' + esc(f.taunt) + '」</p>' +
         '<div class="foe-facts">' +
-          '<b>' + esc(f.cats ? f.cats.join('・') : '全分野') + '</b>' +
+          '<b>' + esc(f.special ? '史記の本文から' : f.cats ? f.cats.join('・') : '全分野') + '</b>' +
           '<b class="shu">正解 ' + f.ki + ' 回で突破</b>' +
           '<b>体力 ' + G.maxHearts + '</b>' +
           '<b>一問 ' + (f.time || BATTLE_TIME) + ' 秒</b>' +
@@ -5208,19 +5542,19 @@ window.LESSONS = [
     if (!restoring) { G.gates++; G.score += 300; }
     window.Store.checkAchievements();
     checkpoint();
-    var last = G.foeIdx >= window.FOES.length - 1;
+    var course = courseOf(f.special), last = G.foeIdx === course[course.length - 1];
     render(
       '<div class="card result">' +
         gateRoad(G.foeIdx) +
         foeArt(f, 'big beaten', '破') +
-        '<div class="gate-clear">第' + (G.foeIdx + 1) + '関門　突破</div>' +
+        '<div class="gate-clear">' + gateLabel(G.foeIdx) + '　突破</div>' +
         '<p class="foe-taunt">「' + esc(f.beaten) + '」</p>' +
         '<div class="r-grid">' +
           '<div class="stat"><b>' + G.score + '</b><span>得点</span></div>' +
           '<div class="stat"><b>' + G.maxCombo + '</b><span>最大連鎖</span></div>' +
           '<div class="stat"><b>' + G.hearts + '</b><span>残り体力</span></div>' +
         '</div>' +
-        '<p class="muted mt">' + (last ? '第二巻まで踏破しました。' : G.foeIdx === 7 ? '第一巻を踏破。第二巻「諸子と詩人の試練」が開きました。' : '体力を回復して次へ進みます。') + '</p>' +
+        '<p class="muted mt">' + (last ? (f.special ? '特別編「楚漢の章」を踏破しました。' : '第二巻まで踏破しました。') : !f.special && gateNo(G.foeIdx) === 8 ? '第一巻を踏破。第二巻「諸子と詩人の試練」が開きました。' : '体力を回復して次へ進みます。') + '</p>' +
         '<div class="btn-row mt" style="justify-content:center">' +
           (last
             ? '<button class="btn shu" data-act="bend">結果を見る</button>'
@@ -5234,16 +5568,18 @@ window.LESSONS = [
   }
 
   function nextFoe() {
-    G.foeIdx++;
-    if (G.foeIdx >= window.FOES.length) return screenBattleEnd(true);
+    var c = courseOf(window.FOES[G.foeIdx].special), k = c.indexOf(G.foeIdx);
+    if (k >= c.length - 1) return screenBattleEnd(true);
+    G.foeIdx = c[k + 1];
     screenFoeIntro();
   }
 
   function screenBattleEnd(win) {
     stopTick();
     var gates = G.gates, score = G.score, combo = G.maxCombo, wrong = G.wrong;
-    var reached = G.foeIdx + 1;
-    var allDone = (window.Store.state.foesCleared || []).length >= window.FOES.length;
+    var sp = !!window.FOES[G.foeIdx].special, reachedLabel = gateLabel(G.foeIdx);
+    var allDone = courseDone(sp), course = courseOf(sp);
+    var nCleared = course.filter(function (j) { return (window.Store.state.foesCleared || []).indexOf(window.FOES[j].id) !== -1; }).length;
     var m = G.mode;
     G = null;
 
@@ -5263,21 +5599,22 @@ window.LESSONS = [
 
     render(
       '<div class="card result mt">' +
-        '<div class="r-rank">' + (win || allDone ? '皆伝' : '第' + reached + '関門') + '</div>' +
+        '<div class="r-rank">' + (win || allDone ? (sp ? '踏破' : '皆伝') : reachedLabel) + '</div>' +
         '<div class="r-sub">' + (win || allDone
-          ? '第一巻・第二巻の十六関門をすべて突破しました。'
-          : 'この回で突破した関門：' + gates + '　／　到達：第' + reached + '関門') + '</div>' +
+          ? (sp ? '特別編「楚漢の章」の八関門をすべて突破しました。' : '第一巻・第二巻の十六関門をすべて突破しました。')
+          : 'この回で突破した関門：' + gates + '　／　到達：' + reachedLabel) + '</div>' +
         '<p class="r-msg">' + (win || allDone
           ? '次は間隔をあけて復習し、別の文章でも読める力を確かめましょう。'
           : gates > 0 ? '突破した関門は記録されています。次は続きから始まります。'
+                      : sp ? '原文と書き下し文を読み直して、句法の根拠を確かめてから、もう一度。'
                       : 'まずは基礎講座と再読文字ドリルで足場を作ってから、もう一度。') + '</p>' +
         '<div class="r-grid">' +
           '<div class="stat"><b>' + score + '</b><span>得点</span></div>' +
           '<div class="stat"><b>' + combo + '</b><span>最大連鎖</span></div>' +
-          '<div class="stat"><b>' + (window.Store.state.foesCleared || []).length + ' / ' + window.FOES.length + '</b><span>突破した関門</span></div>' +
+          '<div class="stat"><b>' + nCleared + ' / ' + course.length + '</b><span>突破した関門</span></div>' +
         '</div>' +
         '<div class="btn-row mt-l" style="justify-content:center">' +
-          '<button class="btn shu" data-act="play" data-id="battle">もう一度</button>' +
+          (sp ? '<button class="btn shu" data-act="special">もう一度</button>' : '<button class="btn shu" data-act="play" data-id="battle">もう一度</button>') +
           '<button class="btn ghost" data-act="go" data-to="home">ホームへ</button>' +
         '</div>' +
       '</div>' +
@@ -5579,6 +5916,7 @@ window.LESSONS = [
         window.Store.save(); screenHome(); break;
       case 'journey': checkpoint(); screenJourney(); break;
       case 'stage': window.Store.mark(); startBattle(modeById('battle'), Number(t.getAttribute('data-i'))); break;
+      case 'special': window.Store.mark(); startBattle(modeById('battle'), nextOpenFoe(true)); break;
       case 'learn':
         checkpoint(); stopTick(); G = null;
         screenLesson(window.Learning.guide(t.getAttribute('data-cat'))[0]); break;

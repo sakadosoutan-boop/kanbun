@@ -11,7 +11,7 @@ function boot(initial) {
   class Clock extends Date { constructor(...a) { super(...(a.length ? a : [now])); } static now() { return now; } }
   const ctx = { window: {}, Date: Clock, localStorage: { getItem: k => storage.get(k), setItem: (k,v) => storage.set(k,v) } };
   vm.createContext(ctx);
-  for (const f of ['kuho','mondai','misyomi','kaeriten','okiji','narabekae','kanshi','koji','kanji','lessons','foes','foe-art','journey'])
+  for (const f of ['kuho','mondai','misyomi','kaeriten','okiji','narabekae','kanshi','koji','kanji','lessons','foes','foe-art','journey','soukan-foes'])
     vm.runInContext(fs.readFileSync(path.join(root, 'src/data', f + '.js'), 'utf8'), ctx);
   for (const f of ['store','quizgen','learning']) vm.runInContext(fs.readFileSync(path.join(root, 'src/js', f + '.js'), 'utf8'), ctx);
   const w = ctx.window; w.Store.load();
@@ -91,11 +91,26 @@ test('kaeriten anchor is the kanji, never the okurigana', () => {
 });
 test('all eight new gates have art, three contextual questions and valid explanations', () => {
   const {w}=boot();
-  assert.equal(w.FOES.length,16);
-  for(const f of w.FOES.slice(8)) {
+  assert.equal(w.FOES.length,24);
+  for(const f of w.FOES.slice(8,16)) {
     assert.equal(f.chapter,2); assert.ok(w.FOE_ART[f.id].startsWith('<svg'));
     const qs=w.QuizGen.build('mogi').filter(q=>q.stage===f.id);
     assert.equal(qs.length,3);
     for(const q of qs) { assert.equal(q.reasons[q.a],''); q.reasons.forEach((r,i)=>{if(i!==q.a)assert.ok(r.length>5);}); }
   }
+});
+test('special course: eight Shiji gates, six text questions each, titles a15/a16 kept', () => {
+  const {w}=boot();
+  const sp=w.FOES.filter(f=>f.special);
+  assert.deepEqual([...sp.map(f=>f.id)],['f17','f18','f19','f20','f21','f22','f23','f24']);
+  for(const f of sp) {
+    assert.equal(f.chapter,3); assert.ok(w.FOE_ART[f.id].startsWith('<svg'));
+    const qs=w.QuizGen.build('mogi').filter(q=>q.stage===f.id);
+    assert.equal(qs.length,6); assert.ok(qs.length>=f.ki+2);
+    for(const q of qs) { assert.ok(q.stem.length>0); assert.equal(q.reasons[q.a],''); q.reasons.forEach((r,i)=>{if(i!==q.a)assert.ok(r.length>5);}); }
+  }
+  const ids=w.Store.ACHIEVEMENTS.map(a=>a.id);
+  assert.ok(ids.includes('a15')&&ids.includes('a16'));
+  w.Store.state.foesCleared=['f23']; w.Store.checkAchievements();
+  assert.ok(w.Store.state.ach.includes('a15')); assert.ok(!w.Store.state.ach.includes('a16'));
 });

@@ -55,6 +55,8 @@
     { id: 'a9',  ico: '関', t: '関門突破',   d: '道場破りで3つの関門を突破',      test: function (s) { return (s.foesCleared || []).length >= 3; } },
     { id: 'a10', ico: '伝', t: '免許皆伝',   d: '第一巻の八関門を突破', test: function (s) { return ['f1','f2','f3','f4','f5','f6','f7','f8'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a14', ico: '極', t: '古典探究', d: '第二巻の八関門を突破', test: function (s) { return ['f9','f10','f11','f12','f13','f14','f15','f16'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
+    { id: 'a15', ico: '鴻', t: '鴻門脱出', d: '特別編・楚漢の章で沛公の関門（鴻門の会）を突破', test: function (s) { return s.foesCleared.indexOf('f23') !== -1; } },
+    { id: 'a16', ico: '傑', t: '人傑の宴', d: '特別編・楚漢の章の八関門をすべて突破', test: function (s) { return ['f17','f18','f19','f20','f21','f22','f23','f24'].every(function (id) { return s.foesCleared.indexOf(id) !== -1; }); } },
     { id: 'a11', ico: '試', t: '好成績',     d: '実力テストで90点以上',           test: function (s) { return (s.best.mogi || 0) >= 90; } },
     { id: 'a12', ico: '墨', t: '千字文',     d: '漢文を通算1000字読んだ',          test: function (s) { return (s.chars || 0) >= 1000; } },
     { id: 'a13', ico: '万', t: '万巻の書',   d: '漢文を通算10000字読んだ',         test: function (s) { return (s.chars || 0) >= 10000; } }
